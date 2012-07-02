@@ -3,12 +3,25 @@ d34raphael
 
 d3 support for raphael.
 
-This is a project to demonstrate and discuss this proposed Raphael support
-in d3.
+Developers
+----------
+### D3 ###
+D3 is included in this project as as submodule. To pull down D3 for a build run:
 
-## Try it
+```
+$ git submodule init
+$ git submodule update
+```
 
-See it in action: http://webmonarch.github.com/d34raphael/
+### Build Commands ###
+We have included a makefile to build a custom version of D3 packaged with d34raphael. 
 
-See the code: https://github.com/webmonarch/d3/tree/raphael-compat
++ **dependencies**
+Our makefile depends on you having recess, uglify.js. To install, just run the following command in npm:
 
+```
+$ npm install uglify-js -g
+```
+
++ **build** - `make`
+Runs the  makefile to concatenate and minify d34raphael.js
