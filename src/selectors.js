@@ -1,13 +1,20 @@
-function d3_raphael_type_selector(type, d3_paper, first) {
-    var found = [];
+function d3_raphael_type_selector(selector, d3_paper, first) {
+    var typeMatch = /^[a-zA-Z]+/,
+        type = typeMatch.exec(selector),
+        found = [];
+    
+    selector = selector.replace(typeMatch, '');
 
     d3_paper.forEach(function(el) {
-        if(el.type === type) {
+        if(!type || el.type === type) {
+          if (selector === '') {
             found.push(el);
-
-            return !first; // break forEach for first only requests
+          } else if (Sizzle.matchesSelector(el.node, selector)) {
+            found.push(el);
+          }
+          return !first; // break forEach for first only requests
         }
-    })
+    });
 
     return found;
-};
+}

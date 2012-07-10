@@ -4635,6 +4635,8 @@ var d3_svg_brushResizes = [
   ["n", "s"],
   []
 ];
+/*! @source http://purl.eligrey.com/github/classList.js/blob/master/classList.js*/
+if(typeof document!=="undefined"&&!("classList" in document.createElement("a"))){(function(j){var a="classList",f="prototype",m=(j.HTMLElement||j.Element)[f],b=Object,k=String[f].trim||function(){return this.replace(/^\s+|\s+$/g,"")},c=Array[f].indexOf||function(q){var p=0,o=this.length;for(;p<o;p++){if(p in this&&this[p]===q){return p}}return -1},n=function(o,p){this.name=o;this.code=DOMException[o];this.message=p},g=function(p,o){if(o===""){throw new n("SYNTAX_ERR","An invalid or illegal string was specified")}if(/\s/.test(o)){throw new n("INVALID_CHARACTER_ERR","String contains an invalid character")}return c.call(p,o)},d=function(s){var r=k.call(s.className),q=r?r.split(/\s+/):[],p=0,o=q.length;for(;p<o;p++){this.push(q[p])}this._updateClassName=function(){s.className=this.toString()}},e=d[f]=[],i=function(){return new d(this)};n[f]=Error[f];e.item=function(o){return this[o]||null};e.contains=function(o){o+="";return g(this,o)!==-1};e.add=function(o){o+="";if(g(this,o)===-1){this.push(o);this._updateClassName()}};e.remove=function(p){p+="";var o=g(this,p);if(o!==-1){this.splice(o,1);this._updateClassName()}};e.toggle=function(o){o+="";if(g(this,o)===-1){this.add(o)}else{this.remove(o)}};e.toString=function(){return this.join(" ")};if(b.defineProperty){var l={get:i,enumerable:true,configurable:true};try{b.defineProperty(m,a,l)}catch(h){if(h.number===-2146823252){l.enumerable=false;b.defineProperty(m,a,l)}}}else{if(b[f].__defineGetter__){m.__defineGetter__(a,i)}}}(self))};
 /**
  * Initializes and creates the root {@link D3RaphaelSelection} for the specified
  * Raphael Paper.
@@ -4718,56 +4720,83 @@ if(typeof Raphael !== "undefined") {
         return false;                                                   // we found NOTHING!
     }                                                                   // end getCSSRule
 
-    function d3_raphael_getCSSAttributes(selector) {
-        var rules = d3_raphael_getCSSRule(selector),
-            attributes = {};
-        if (!rules) return false;
-        rules = rules.style.cssText.split(';');
-        for (var i = 0; i < rules.length; i++) {
-            var rule = rules[i].split(':');
-            if (rule[0] !== undefined && rule[1] !== undefined)
-                var key = rule[0].replace(' ',''),
-                    value = rule[1].replace(' ','');
-            attributes[key] = value;
+
+    (function() {
+
+        function d3_collapse(s) {
+          return s.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
         }
-        return attributes;
-    }
 
 
-    Raphael.st.addClass = function(addClass, parentSelector) {
-        //Simple set Attribute class if SVG
-        if (Raphael.svg) {
-            for (var i = 0; i < this.length; i++) {
-                this[i].addClass(addClass)
-            };
+        function classedAdd(node, name) {
+          var re = new RegExp("(^|\\s+)" + d3.requote(name) + "(\\s+|$)", "g");
+          if (c = node.classList) return c.add(name);
+            var c = node.className || '',
+                cb = c.baseVal != null,
+                cv = cb ? c.baseVal : c;
+            re.lastIndex = 0;
+          if (!re.test(cv)) {
+            cv = d3_collapse(cv + " " + name);
+            if (cb) c.baseVal = cv;
+            else node.setAttribute('class', cv);
+          }
         }
-        //For IE
-        else {
-            var sel = '.' + addClass;
-            sel = parentSelector ? parentSelector + ' ' + sel : sel;
-            var attributes = d3_raphael_getCSSAttributes(sel);
-            for (var i = 0; i < this.length; i++) {
-                this[i].attr(attributes);
+
+
+
+        function d3_raphael_getCSSAttributes(selector) {
+            var rules = d3_raphael_getCSSRule(selector),
+                attributes = {};
+            if (!rules) return false;
+            rules = rules.style.cssText.split(';');
+            for (var i = 0; i < rules.length; i++) {
+                var rule = rules[i].split(':');
+                if (rule[0] !== undefined && rule[1] !== undefined)
+                    var key = rule[0].replace(' ',''),
+                        value = rule[1].replace(' ','');
+                attributes[key] = value;
             }
+            return attributes;
         }
-    }
 
-    Raphael.el.addClass = function(addClass, parentSelector) {
-        //easily add class
-        if (Raphael.svg) {
-            var cssClass = this.node.getAttribute('class') !== null ? this.node.getAttribute('class') + ' ' + addClass : addClass;
-            this.node.setAttribute('class', cssClass);
-        }
-        //must extract CSS requirements
-        else {
-            var sel = '.' + addClass;
-            sel = parentSelector ? parentSelector + ' ' + sel : sel;
 
-            var attributes = d3_raphael_getCSSAttributes(sel);
-            this.attr(attributes);
-        }
-    }
-}if(typeof Raphael !== "undefined") {
+        Raphael.st.addClass = function(addClass, parentSelector) {
+            //Simple set Attribute class if SVG
+            if (Raphael.svg) {
+                for (var i = 0; i < this.length; i++) {
+                    this[i].addClass(addClass);
+                }
+            }
+            //For IE
+            else {
+                var sel = '.' + addClass;
+                sel = parentSelector ? parentSelector + ' ' + sel : sel;
+                var attributes = d3_raphael_getCSSAttributes(sel);
+                for (var i = 0; i < this.length; i++) {
+                    classedAdd(this[i].node, addClass);
+                    this[i].attr(attributes);
+                }
+            }
+        };
+
+        Raphael.el.addClass = function(addClass, parentSelector) {
+            classedAdd(this.node, addClass);
+
+            //must extract CSS requirements
+            if (Raphael.vml) {
+                var sel = '.' + addClass;
+                sel = parentSelector ? parentSelector + ' ' + sel : sel;
+
+                var attributes = d3_raphael_getCSSAttributes(sel);
+                this.attr(attributes);
+            }
+        };
+    }());
+
+
+
+}
+if(typeof Raphael !== "undefined") {
     // adds a Raphael custom attribute "d" which maps to "path"
     // in d3/svg, the definition of a path is specified via attribute "d",
     // in raphael, it's specified via attribute "path".
@@ -4782,19 +4811,33 @@ if(typeof Raphael !== "undefined") {
     // adds selection.attr("class",...) support
     // see raphaelselection.attr
 }
-function d3_raphael_type_selector(type, d3_paper, first) {
-    var found = [];
+function d3_raphael_type_selector(selector, d3_paper, first) {
+    var typeMatch = /^[a-zA-Z]+/,
+        type = typeMatch.exec(selector),
+        found = [];
+    
+    selector = selector.replace(typeMatch, '');
 
     d3_paper.forEach(function(el) {
-        if(el.type === type) {
+        if(!type || el.type === type) {
+          if (selector === '') {
             found.push(el);
-
-            return !first; // break forEach for first only requests
+          } else if (Sizzle.matchesSelector(el.node, selector)) {
+            found.push(el);
+          }
+          return !first; // break forEach for first only requests
         }
-    })
+    });
 
     return found;
-};/**
+}
+// if jQuery is present, setup Sizzle
+if (typeof jQuery != 'undefined') {
+  window.Sizzle = jQuery.find;
+}
+
+
+/**
  * A d3 container for the Raphael paper, with delegate helpers to Raphael and select/selectAll functionality.
  *
  * @param paper
@@ -4862,7 +4905,8 @@ for(var i = 0; i < d3_raphael_paperDelegateMethods.length; i++) {
     var method_name = d3_raphael_paperDelegateMethods[i];
 
     D3RaphaelRoot.prototype[method_name] = d3_raphael_rootToPaperDelegate(method_name);
-};var d3_raphael_selection = function(groups, d3_raphael_root) {
+};
+var d3_raphael_selection = function(groups, d3_raphael_root) {
     d3_arraySubclass(groups, d3_raphael_selectionPrototype);
     groups.root = d3_raphael_root;
 
@@ -4871,160 +4915,7 @@ for(var i = 0; i < d3_raphael_paperDelegateMethods.length; i++) {
 
 var d3_raphael_selectionPrototype = [];
 
-// todo: see if it is possible to generalize this method from the almost identical one in d3
 
-/**
- * Binds the provided data to the selected Raphael element(s). <br />
- * <br />
- * IMPLEMENTATION NOTE: Usage identical to the native d3 version, except internally, instead of binding the data to the DOM objects (like d3 does),
- * the data is bound to the Raphael wrapper element(s) of the DOM.
- *
- * @see <a href="https://github.com/mbostock/d3/wiki/Selections#wiki-data">d3.selection.data()</a>
- * @param value
- * @param {function} key_function
- * @return {D3RaphaelUpdateSelection}
- *
- * @function
- * @name D3RaphaelSelection#data
- */
-d3_raphael_selectionPrototype.data = function(value, key_function) {
-    var i = -1,
-        n = this.length,
-        group,
-        node;
-
-    // If no value is specified, return the first value.
-    if (!arguments.length) {
-        value = new Array(n = (group = this[0]).length);
-        while (++i < n) {
-            if (node = group[i]) {
-                value[i] = node.__data__;
-            }
-        }
-        return value;
-    }
-
-    function bind(group, groupData) {
-        var i,
-            n = group.length,
-            m = groupData.length,
-            n0 = Math.min(n, m),
-            n1 = Math.max(n, m),
-            updateNodes = [],
-            enterNodes = [],
-            exitNodes = [],
-            node,
-            nodeData;
-
-        if (key_function) {
-            var nodeByKeyValue = new d3_Map,
-                keyValues = [],
-                keyValue,
-                j = groupData.length;
-
-            for (i = -1; ++i < n;) {
-                keyValue = key_function.call(node = group[i], node.__data__, i);
-                if (nodeByKeyValue.has(keyValue)) {
-                    exitNodes[j++] = node; // duplicate key
-                } else {
-                    nodeByKeyValue.set(keyValue, node);
-                }
-                keyValues.push(keyValue);
-            }
-
-            for (i = -1; ++i < m;) {
-                keyValue = key_function.call(groupData, nodeData = groupData[i], i)
-                if (nodeByKeyValue.has(keyValue)) {
-                    updateNodes[i] = node = nodeByKeyValue.get(keyValue);
-                    node.__data__ = nodeData;
-                    enterNodes[i] = exitNodes[i] = null;
-                } else {
-                    enterNodes[i] = d3_selection_dataNode(nodeData);
-                    updateNodes[i] = exitNodes[i] = null;
-                }
-                nodeByKeyValue.remove(keyValue);
-            }
-
-            for (i = -1; ++i < n;) {
-                if (nodeByKeyValue.has(keyValues[i])) {
-                    exitNodes[i] = group[i];
-                }
-            }
-        } else {
-            for (i = -1; ++i < n0;) {
-                node = group[i];
-                nodeData = groupData[i];
-                if (node) {
-                    node.__data__ = nodeData;
-                    updateNodes[i] = node;
-                    enterNodes[i] = exitNodes[i] = null;
-                } else {
-                    enterNodes[i] = d3_selection_dataNode(nodeData);
-                    updateNodes[i] = exitNodes[i] = null;
-                }
-            }
-            for (; i < m; ++i) {
-                enterNodes[i] = d3_selection_dataNode(groupData[i]);
-                updateNodes[i] = exitNodes[i] = null;
-            }
-            for (; i < n1; ++i) {
-                exitNodes[i] = group[i];
-                enterNodes[i] = updateNodes[i] = null;
-            }
-        }
-
-        enterNodes.update
-            = updateNodes;
-
-        enterNodes.parentNode
-            = updateNodes.parentNode
-            = exitNodes.parentNode
-            = group.parentNode;
-
-        enter.push(enterNodes);
-        update.push(updateNodes);
-        exit.push(exitNodes);
-    }
-
-    var enter = d3_raphael_enterSelection([], this.root),
-        update = d3_raphael_selection([], this.root),
-        exit = d3_raphael_selection([], this.root);
-
-    if (typeof value === "function") {
-        while (++i < n) {
-            bind(group = this[i], value.call(group, group.parentNode.__data__, i));
-        }
-    } else {
-        while (++i < n) {
-            bind(group = this[i], value);
-        }
-    }
-
-    /**
-     * Returns the entering selection: placeholder nodes for each data element for which no corresponding existing DOM element was found in the current selection.
-     *
-     * @return {D3RaphaelEnterSelection}
-     *
-     * @see <code><a href="https://github.com/mbostock/d3/wiki/Selections#wiki-enter">d3.selection.enter()</a></code>
-     *
-     * @function
-     * @name D3RaphaelUpdateSelection#enter
-     */
-    update.enter = function() { return enter; };
-
-    /**
-     * Returns the exiting selection: existing DOM elements in the current selection for which no new data element was found.
-     *
-     * @return {D3RaphaelSelection}
-     *
-     * @see <code><a href="https://github.com/mbostock/d3/wiki/Selections#wiki-exit">d3.selection.exit()</a></code>
-     *
-     * @function
-     * @name D3RaphaelUpdateSelection#exit
-     */
-    update.exit = function() { return exit; };
-    return update;
-};
 
 /**
  * Appends an element of the specified primitive type for each of the
@@ -5299,6 +5190,165 @@ d3_raphael_selectionPrototype.sort = throw_raphael_not_supported;
 d3_raphael_selectionPrototype.order = throw_raphael_not_supported;
 d3_raphael_selectionPrototype.on = throw_raphael_not_supported;
 d3_raphael_selectionPrototype.transition = throw_raphael_not_supported;
+d3_raphael_selectionPrototype.remove = function() {
+  return this.each(function() {
+    this.remove();
+  });
+};
+// todo: see if it is possible to generalize this method from the almost identical one in d3
+
+/**
+ * Binds the provided data to the selected Raphael element(s). <br />
+ * <br />
+ * IMPLEMENTATION NOTE: Usage identical to the native d3 version, except internally, instead of binding the data to the DOM objects (like d3 does),
+ * the data is bound to the Raphael wrapper element(s) of the DOM.
+ *
+ * @see <a href="https://github.com/mbostock/d3/wiki/Selections#wiki-data">d3.selection.data()</a>
+ * @param value
+ * @param {function} key_function
+ * @return {D3RaphaelUpdateSelection}
+ *
+ * @function
+ * @name D3RaphaelSelection#data
+ */
+d3_raphael_selectionPrototype.data = function(value, key_function) {
+    var i = -1,
+        n = this.length,
+        group,
+        node;
+
+    // If no value is specified, return the first value.
+    if (!arguments.length) {
+        value = new Array(n = (group = this[0]).length);
+        while (++i < n) {
+            if (node = group[i]) {
+                value[i] = node.__data__;
+            }
+        }
+        return value;
+    }
+
+    function bind(group, groupData) {
+        var i,
+            n = group.length,
+            m = groupData.length,
+            n0 = Math.min(n, m),
+            n1 = Math.max(n, m),
+            updateNodes = [],
+            enterNodes = [],
+            exitNodes = [],
+            node,
+            nodeData;
+
+        if (key_function) {
+            var nodeByKeyValue = new d3_Map,
+                keyValues = [],
+                keyValue,
+                j = groupData.length;
+
+            for (i = -1; ++i < n;) {
+                keyValue = key_function.call(node = group[i], node.__data__, i);
+                if (nodeByKeyValue.has(keyValue)) {
+                    exitNodes[j++] = node; // duplicate key
+                } else {
+                    nodeByKeyValue.set(keyValue, node);
+                }
+                keyValues.push(keyValue);
+            }
+
+            for (i = -1; ++i < m;) {
+                keyValue = key_function.call(groupData, nodeData = groupData[i], i)
+                if (nodeByKeyValue.has(keyValue)) {
+                    updateNodes[i] = node = nodeByKeyValue.get(keyValue);
+                    node.__data__ = nodeData;
+                    enterNodes[i] = exitNodes[i] = null;
+                } else {
+                    enterNodes[i] = d3_selection_dataNode(nodeData);
+                    updateNodes[i] = exitNodes[i] = null;
+                }
+                nodeByKeyValue.remove(keyValue);
+            }
+
+            for (i = -1; ++i < n;) {
+                if (nodeByKeyValue.has(keyValues[i])) {
+                    exitNodes[i] = group[i];
+                }
+            }
+        } else {
+            for (i = -1; ++i < n0;) {
+                node = group[i];
+                nodeData = groupData[i];
+                if (node) {
+                    node.__data__ = nodeData;
+                    updateNodes[i] = node;
+                    enterNodes[i] = exitNodes[i] = null;
+                } else {
+                    enterNodes[i] = d3_selection_dataNode(nodeData);
+                    updateNodes[i] = exitNodes[i] = null;
+                }
+            }
+            for (; i < m; ++i) {
+                enterNodes[i] = d3_selection_dataNode(groupData[i]);
+                updateNodes[i] = exitNodes[i] = null;
+            }
+            for (; i < n1; ++i) {
+                exitNodes[i] = group[i];
+                enterNodes[i] = updateNodes[i] = null;
+            }
+        }
+
+        enterNodes.update
+            = updateNodes;
+
+        enterNodes.parentNode
+            = updateNodes.parentNode
+            = exitNodes.parentNode
+            = group.parentNode;
+
+        enter.push(enterNodes);
+        update.push(updateNodes);
+        exit.push(exitNodes);
+    }
+
+    var enter = d3_raphael_enterSelection([], this.root),
+        update = d3_raphael_selection([], this.root),
+        exit = d3_raphael_selection([], this.root);
+
+    if (typeof value === "function") {
+        while (++i < n) {
+            bind(group = this[i], value.call(group, group.parentNode.__data__, i));
+        }
+    } else {
+        while (++i < n) {
+            bind(group = this[i], value);
+        }
+    }
+
+    /**
+     * Returns the entering selection: placeholder nodes for each data element for which no corresponding existing DOM element was found in the current selection.
+     *
+     * @return {D3RaphaelEnterSelection}
+     *
+     * @see <code><a href="https://github.com/mbostock/d3/wiki/Selections#wiki-enter">d3.selection.enter()</a></code>
+     *
+     * @function
+     * @name D3RaphaelUpdateSelection#enter
+     */
+    update.enter = function() { return enter; };
+
+    /**
+     * Returns the exiting selection: existing DOM elements in the current selection for which no new data element was found.
+     *
+     * @return {D3RaphaelSelection}
+     *
+     * @see <code><a href="https://github.com/mbostock/d3/wiki/Selections#wiki-exit">d3.selection.exit()</a></code>
+     *
+     * @function
+     * @name D3RaphaelUpdateSelection#exit
+     */
+    update.exit = function() { return exit; };
+    return update;
+};
 function d3_raphael_enterSelection(groups, d3_raphael_root) {
     d3_arraySubclass(groups, d3_raphael_enterSelectionPrototype);
     groups.root = d3_raphael_root;

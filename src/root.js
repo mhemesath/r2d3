@@ -1,3 +1,9 @@
+// if jQuery is present, setup Sizzle
+if (typeof jQuery != 'undefined') {
+  window.Sizzle = jQuery.find;
+}
+
+
 /**
  * A d3 container for the Raphael paper, with delegate helpers to Raphael and select/selectAll functionality.
  *

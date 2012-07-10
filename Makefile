@@ -150,13 +150,15 @@ d3.svg.js: \
 	lib/d3/src/svg/brush.js
 
 d3.raphael.js: \
-	src/raphael.js \
-	src/raphael-utils.js \
-	src/raphael-addclass.js \
-	src/raphael-customattributes.js \
+	src/raphael/raphael.js \
+	src/raphael/utils.js \
+	src/raphael/addclass.js \
+	src/raphael/customattributes.js \
   src/selectors.js \
 	src/root.js \
 	src/selection.js \
+	src/selection-remove.js \
+	src/selection-data.js \
 	src/selection-enter.js \
 	src/axis.js
 

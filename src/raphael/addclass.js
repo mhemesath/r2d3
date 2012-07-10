@@ -36,53 +36,79 @@ if(typeof Raphael !== "undefined") {
         return false;                                                   // we found NOTHING!
     }                                                                   // end getCSSRule
 
-    function d3_raphael_getCSSAttributes(selector) {
-        var rules = d3_raphael_getCSSRule(selector),
-            attributes = {};
-        if (!rules) return false;
-        rules = rules.style.cssText.split(';');
-        for (var i = 0; i < rules.length; i++) {
-            var rule = rules[i].split(':');
-            if (rule[0] !== undefined && rule[1] !== undefined)
-                var key = rule[0].replace(' ',''),
-                    value = rule[1].replace(' ','');
-            attributes[key] = value;
+
+    (function() {
+
+        function d3_collapse(s) {
+          return s.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
         }
-        return attributes;
-    }
 
 
-    Raphael.st.addClass = function(addClass, parentSelector) {
-        //Simple set Attribute class if SVG
-        if (Raphael.svg) {
-            for (var i = 0; i < this.length; i++) {
-                this[i].addClass(addClass)
-            };
+        function classedAdd(node, name) {
+          var re = new RegExp("(^|\\s+)" + d3.requote(name) + "(\\s+|$)", "g");
+          if (c = node.classList) return c.add(name);
+            var c = node.className || '',
+                cb = c.baseVal != null,
+                cv = cb ? c.baseVal : c;
+            re.lastIndex = 0;
+          if (!re.test(cv)) {
+            cv = d3_collapse(cv + " " + name);
+            if (cb) c.baseVal = cv;
+            else node.setAttribute('class', cv);
+          }
         }
-        //For IE
-        else {
-            var sel = '.' + addClass;
-            sel = parentSelector ? parentSelector + ' ' + sel : sel;
-            var attributes = d3_raphael_getCSSAttributes(sel);
-            for (var i = 0; i < this.length; i++) {
-                this[i].attr(attributes);
+
+
+
+        function d3_raphael_getCSSAttributes(selector) {
+            var rules = d3_raphael_getCSSRule(selector),
+                attributes = {};
+            if (!rules) return false;
+            rules = rules.style.cssText.split(';');
+            for (var i = 0; i < rules.length; i++) {
+                var rule = rules[i].split(':');
+                if (rule[0] !== undefined && rule[1] !== undefined)
+                    var key = rule[0].replace(' ',''),
+                        value = rule[1].replace(' ','');
+                attributes[key] = value;
             }
+            return attributes;
         }
-    }
 
-    Raphael.el.addClass = function(addClass, parentSelector) {
-        //easily add class
-        if (Raphael.svg) {
-            var cssClass = this.node.getAttribute('class') !== null ? this.node.getAttribute('class') + ' ' + addClass : addClass;
-            this.node.setAttribute('class', cssClass);
-        }
-        //must extract CSS requirements
-        else {
-            var sel = '.' + addClass;
-            sel = parentSelector ? parentSelector + ' ' + sel : sel;
 
-            var attributes = d3_raphael_getCSSAttributes(sel);
-            this.attr(attributes);
-        }
-    }
+        Raphael.st.addClass = function(addClass, parentSelector) {
+            //Simple set Attribute class if SVG
+            if (Raphael.svg) {
+                for (var i = 0; i < this.length; i++) {
+                    this[i].addClass(addClass);
+                }
+            }
+            //For IE
+            else {
+                var sel = '.' + addClass;
+                sel = parentSelector ? parentSelector + ' ' + sel : sel;
+                var attributes = d3_raphael_getCSSAttributes(sel);
+                for (var i = 0; i < this.length; i++) {
+                    classedAdd(this[i].node, addClass);
+                    this[i].attr(attributes);
+                }
+            }
+        };
+
+        Raphael.el.addClass = function(addClass, parentSelector) {
+            classedAdd(this.node, addClass);
+
+            //must extract CSS requirements
+            if (Raphael.vml) {
+                var sel = '.' + addClass;
+                sel = parentSelector ? parentSelector + ' ' + sel : sel;
+
+                var attributes = d3_raphael_getCSSAttributes(sel);
+                this.attr(attributes);
+            }
+        };
+    }());
+
+
+
 }
