@@ -4635,8 +4635,6 @@ var d3_svg_brushResizes = [
   ["n", "s"],
   []
 ];
-/*! @source http://purl.eligrey.com/github/classList.js/blob/master/classList.js*/
-if(typeof document!=="undefined"&&!("classList" in document.createElement("a"))){(function(j){var a="classList",f="prototype",m=(j.HTMLElement||j.Element)[f],b=Object,k=String[f].trim||function(){return this.replace(/^\s+|\s+$/g,"")},c=Array[f].indexOf||function(q){var p=0,o=this.length;for(;p<o;p++){if(p in this&&this[p]===q){return p}}return -1},n=function(o,p){this.name=o;this.code=DOMException[o];this.message=p},g=function(p,o){if(o===""){throw new n("SYNTAX_ERR","An invalid or illegal string was specified")}if(/\s/.test(o)){throw new n("INVALID_CHARACTER_ERR","String contains an invalid character")}return c.call(p,o)},d=function(s){var r=k.call(s.className),q=r?r.split(/\s+/):[],p=0,o=q.length;for(;p<o;p++){this.push(q[p])}this._updateClassName=function(){s.className=this.toString()}},e=d[f]=[],i=function(){return new d(this)};n[f]=Error[f];e.item=function(o){return this[o]||null};e.contains=function(o){o+="";return g(this,o)!==-1};e.add=function(o){o+="";if(g(this,o)===-1){this.push(o);this._updateClassName()}};e.remove=function(p){p+="";var o=g(this,p);if(o!==-1){this.splice(o,1);this._updateClassName()}};e.toggle=function(o){o+="";if(g(this,o)===-1){this.add(o)}else{this.remove(o)}};e.toString=function(){return this.join(" ")};if(b.defineProperty){var l={get:i,enumerable:true,configurable:true};try{b.defineProperty(m,a,l)}catch(h){if(h.number===-2146823252){l.enumerable=false;b.defineProperty(m,a,l)}}}else{if(b[f].__defineGetter__){m.__defineGetter__(a,i)}}}(self))};
 /**
  * Initializes and creates the root {@link D3RaphaelSelection} for the specified
  * Raphael Paper.
@@ -4796,7 +4794,7 @@ if(typeof Raphael !== "undefined") {
 
 
 }
-if(typeof Raphael !== "undefined") {
+if (typeof Raphael !== "undefined") {
     // adds a Raphael custom attribute "d" which maps to "path"
     // in d3/svg, the definition of a path is specified via attribute "d",
     // in raphael, it's specified via attribute "path".
@@ -4805,11 +4803,36 @@ if(typeof Raphael !== "undefined") {
     function d3_raphael_addCustomAttributes(paper) {
         paper.ca.d = function(path) {
             return {path: path};
-        }
+        };
     }
 
     // adds selection.attr("class",...) support
-    // see raphaelselection.attr
+    // see raphaelselction.attr
+
+    Raphael.el.setAttribute = function(name, value) {
+      this.attr(name, value);
+    };
+
+
+    Raphael.el.setAttributeNS = function(namespace, name, value) {
+      this.attr(name, value);
+    };
+
+    Raphael.el.removeAttribute = function(name) {
+      this.attr(name, '');
+    };
+
+    Raphael.el.removeAttributeNS = function(namespace, name) {
+      this.attr(name, '');
+    };
+
+    Raphael.el.getAttribute = function(name) {
+      return this.attr(name);
+    };
+
+    Raphael.el.getAttributeNS = function(namespace, name) {
+      return this.attr(name);
+    };
 }
 function d3_raphael_type_selector(selector, d3_paper, first) {
     var typeMatch = /^[a-zA-Z]+/,
@@ -5188,8 +5211,7 @@ d3_raphael_selectionPrototype.insert = throw_raphael_not_supported;
 d3_raphael_selectionPrototype.filter = throw_raphael_not_supported;
 d3_raphael_selectionPrototype.sort = throw_raphael_not_supported;
 d3_raphael_selectionPrototype.order = throw_raphael_not_supported;
-d3_raphael_selectionPrototype.on = throw_raphael_not_supported;
-d3_raphael_selectionPrototype.transition = throw_raphael_not_supported;
+d3_raphael_selectionPrototype.transition = d3_selectionPrototype.transition;
 d3_raphael_selectionPrototype.remove = function() {
   return this.each(function() {
     this.remove();
@@ -5348,6 +5370,39 @@ d3_raphael_selectionPrototype.data = function(value, key_function) {
      */
     update.exit = function() { return exit; };
     return update;
+};
+d3_raphael_selectionPrototype.toFront = function() {
+  return this.each(function() {
+    this.toFront();
+  });
+};
+// type can be namespaced, e.g., "click.foo"
+// listener can be null for removal
+d3_raphael_selectionPrototype.on = function(type, listener, capture) {
+  if (arguments.length < 3) capture = false;
+
+  // remove the old event listener, and add the new event listener
+  return this.each(function(d, i) {
+    var node = this;
+
+    node[type](l);
+
+    // wrapped event listener that preserves i
+    function l(e) {
+      var o = d3.event; // Events can be reentrant (e.g., focus).
+      d3.event = e;
+      try {
+        listener.call(node, node.__data__, i);
+      } finally {
+        d3.event = o;
+      }
+    }
+  });
+};
+d3_raphael_selectionPrototype.toBack = function() {
+  return this.each(function() {
+    this.toBack();
+  });
 };
 function d3_raphael_enterSelection(groups, d3_raphael_root) {
     d3_arraySubclass(groups, d3_raphael_enterSelectionPrototype);

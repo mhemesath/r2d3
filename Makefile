@@ -159,6 +159,9 @@ d3.raphael.js: \
 	src/selection.js \
 	src/selection-remove.js \
 	src/selection-data.js \
+	src/selection-front.js \
+	src/selection-on.js \
+	src/selection-back.js \
 	src/selection-enter.js \
 	src/axis.js
 
