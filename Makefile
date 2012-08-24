@@ -1,4 +1,5 @@
 # See the README for installation instructions.
+LOCALE ?= en_US
 
 
 all: \
@@ -15,7 +16,7 @@ all: \
 	d3.raphael.js \
 	d3.behavior.js \
 	d3.layout.js \
-	d3.csv.js \
+	d3.dsv.js \
 	d3.geo.js \
 	d3.geom.js \
 	d3.time.js \
@@ -75,6 +76,9 @@ d3.core.js: \
 	lib/d3/src/core/uninterpolate.js \
 	lib/d3/src/core/rgb.js \
 	lib/d3/src/core/hsl.js \
+	lib/d3/src/core/hcl.js \
+	lib/d3/src/core/lab.js \
+	lib/d3/src/core/xyz.js \
 	lib/d3/src/core/selection.js \
 	lib/d3/src/core/selection-select.js \
 	lib/d3/src/core/selection-selectAll.js \
@@ -104,6 +108,7 @@ d3.core.js: \
 	lib/d3/src/core/transition.js \
 	lib/d3/src/core/transition-select.js \
 	lib/d3/src/core/transition-selectAll.js \
+	lib/d3/src/core/transition-filter.js \
 	lib/d3/src/core/transition-attr.js \
 	lib/d3/src/core/transition-style.js \
 	lib/d3/src/core/transition-text.js \
@@ -112,6 +117,7 @@ d3.core.js: \
 	lib/d3/src/core/transition-duration.js \
 	lib/d3/src/core/transition-each.js \
 	lib/d3/src/core/transition-transition.js \
+	lib/d3/src/core/tween.js \
 	lib/d3/src/core/timer.js \
 	lib/d3/src/core/transform.js \
 	lib/d3/src/core/mouse.js \
@@ -131,6 +137,7 @@ d3.scale.js: \
 	lib/d3/src/scale/category.js \
 	lib/d3/src/scale/quantile.js \
 	lib/d3/src/scale/quantize.js \
+	lib/d3/src/scale/threshold.js \
 	lib/d3/src/scale/identity.js
 
 d3.svg.js: \
@@ -199,13 +206,14 @@ d3.geo.js: \
 	lib/d3/src/geo/greatArc.js \
 	lib/d3/src/geo/greatCircle.js
 
-d3.csv.js: \
-	lib/d3/src/csv/csv.js \
-	lib/d3/src/csv/parse.js \
-	lib/d3/src/csv/format.js
+d3.dsv.js: \
+	lib/d3/src/dsv/csv.js \
+	lib/d3/src/dsv/dsv.js \
+	lib/d3/src/dsv/tsv.js
 
 d3.time.js: \
 	lib/d3/src/time/time.js \
+	lib/d3/src/time/format-$(LOCALE).js \
 	lib/d3/src/time/format.js \
 	lib/d3/src/time/format-utc.js \
 	lib/d3/src/time/format-iso.js \
@@ -238,6 +246,14 @@ d3%.js: Makefile
 	@rm -f $@
 	cat $(filter %.js,$^) > $@
 	@chmod a-w $@
+
+test:
+
+	@mkdir -p tmp/
+	@(cd lib/d3 && git archive --format=tar  --prefix=d3/ HEAD) | (cd /tmp/ && tar xf -)
+	@cp d34raphael.v2.js lib/d3/d3.v2.js
+	@(cd lib/d3 && npm test)
+	@rm -rf tmp
 
 clean:
 	rm -f d3*.js
