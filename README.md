@@ -1,3 +1,6 @@
+[![build status](https://secure.travis-ci.org/mhemesath/d34raphael.png)](http://travis-ci.org/mhemesath/d34raphael)
+
+
 d34raphael
 ==========
 
