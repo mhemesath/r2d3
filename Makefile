@@ -252,7 +252,7 @@ test:
 	@mkdir -p tmp/
 	@(cd lib/d3 && git archive --format=tar  --prefix=d3/ HEAD) | (cd /tmp/ && tar xf -)
 	@cp d34raphael.v2.js lib/d3/d3.v2.js
-	@(cd lib/d3 && npm test)
+	@(cd lib/d3 && npm install && npm test)
 	@rm -rf tmp
 
 clean:
