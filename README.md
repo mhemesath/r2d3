@@ -1,7 +1,7 @@
 [![build status](https://secure.travis-ci.org/mhemesath/d34raphael.png)](http://travis-ci.org/mhemesath/d34raphael)
 
 
-d34raphael
+r2d3
 ==========
 
 R2D3 is a customized build of D3 powered by [RaphaelJS](http://raphaeljs.com/).  The combination of D3 and Raphael enable developers to easily
