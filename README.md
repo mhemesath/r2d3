@@ -4,7 +4,35 @@
 d34raphael
 ==========
 
-d3 support for raphael.
+R2D3 is a customized build of D3 powered by [RaphaelJS](http://raphaeljs.com/).  The combination of D3 and Raphael enable developers to easily
+data visualizations that work IE7+ and all modern browsers.
+
+This project is based off of Eric Webb's [d34raphael](http://webmonarch.github.com/d34raphael/)
+
+
+Getting Started
+---------------
+
+To get started using R2D3, just include r2d3 and the necessary shims.
+Sizzle and Compat need to be incldued for IE8. If you are using jQuery,
+R2D3 will use the bundled sizzle.
+
+```html
+<html>
+  <head>
+    <title>R2D3 101</title>
+  </head>
+  <body>
+    <h1>Hello, world!</h1>
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="js/sizzle.js"></script>
+    <script type="text/javascript" src="js/compat.js"></script>
+    <![endif]-->
+    <script src="js/r2d3.min.js"></script>
+  </body>
+</html>
+```
+
 
 Developers
 ----------

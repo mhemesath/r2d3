@@ -3,26 +3,26 @@ LOCALE ?= en_US
 
 
 all: \
-	d34raphael.v2.js \
-	d34raphael.v2.min.js \
+	r2d3.v2.js \
+	r2d3.v2.min.js \
 
 # Modify this rule to build your own custom release.
 
-.INTERMEDIATE d34raphael.v2.js: \
+.INTERMEDIATE r2d3.v2.js: \
 	lib/d3/src/start.js \
-	d3.core.js \
-	d3.scale.js \
-	d3.svg.js \
-	d3.raphael.js \
-	d3.behavior.js \
-	d3.layout.js \
-	d3.dsv.js \
-	d3.geo.js \
-	d3.geom.js \
-	d3.time.js \
+	r2d3.core.js \
+	r2d3.scale.js \
+	r2d3.svg.js \
+	r2d3.raphael.js \
+	r2d3.behavior.js \
+	r2d3.layout.js \
+	r2d3.dsv.js \
+	r2d3.geo.js \
+	r2d3.geom.js \
+	r2d3.time.js \
 	lib/d3/src/end.js
 
-d3.core.js: \
+r2d3.core.js: \
 	lib/d3/src/compat/date.js \
 	lib/d3/src/compat/style.js \
 	lib/d3/src/core/core.js \
@@ -88,7 +88,6 @@ d3.core.js: \
 	lib/d3/src/core/selection-property.js \
 	lib/d3/src/core/selection-text.js \
 	lib/d3/src/core/selection-html.js \
-	lib/d3/src/core/selection-append.js \
 	lib/d3/src/core/selection-insert.js \
 	lib/d3/src/core/selection-remove.js \
 	lib/d3/src/core/selection-data.js \
@@ -124,7 +123,7 @@ d3.core.js: \
 	lib/d3/src/core/touches.js \
 	lib/d3/src/core/noop.js
 
-d3.scale.js: \
+r2d3.scale.js: \
 	lib/d3/src/scale/scale.js \
 	lib/d3/src/scale/nice.js \
 	lib/d3/src/scale/linear.js \
@@ -140,7 +139,7 @@ d3.scale.js: \
 	lib/d3/src/scale/threshold.js \
 	lib/d3/src/scale/identity.js
 
-d3.svg.js: \
+r2d3.svg.js: \
 	lib/d3/src/svg/svg.js \
 	lib/d3/src/svg/arc.js \
 	lib/d3/src/svg/line.js \
@@ -156,28 +155,16 @@ d3.svg.js: \
 	lib/d3/src/svg/axis.js \
 	lib/d3/src/svg/brush.js
 
-d3.raphael.js: \
+r2d3.raphael.js: \
 	src/raphael/raphael.js \
-	src/raphael/utils.js \
-	src/raphael/addclass.js \
-	src/raphael/customattributes.js \
-  src/selectors.js \
-	src/root.js \
-	src/selection.js \
-	src/selection-remove.js \
-	src/selection-data.js \
-	src/selection-front.js \
-	src/selection-on.js \
-	src/selection-back.js \
-	src/selection-enter.js \
-	src/axis.js
+	src/core/selection-append.js
 
-d3.behavior.js: \
+r2d3.behavior.js: \
 	lib/d3/src/behavior/behavior.js \
 	lib/d3/src/behavior/drag.js \
 	lib/d3/src/behavior/zoom.js
 
-d3.layout.js: \
+r2d3.layout.js: \
 	lib/d3/src/layout/layout.js \
 	lib/d3/src/layout/bundle.js \
 	lib/d3/src/layout/chord.js \
@@ -192,7 +179,7 @@ d3.layout.js: \
 	lib/d3/src/layout/tree.js \
 	lib/d3/src/layout/treemap.js
 
-d3.geo.js: \
+r2d3.geo.js: \
 	lib/d3/src/geo/geo.js \
 	lib/d3/src/geo/azimuthal.js \
 	lib/d3/src/geo/albers.js \
@@ -206,12 +193,12 @@ d3.geo.js: \
 	lib/d3/src/geo/greatArc.js \
 	lib/d3/src/geo/greatCircle.js
 
-d3.dsv.js: \
+r2d3.dsv.js: \
 	lib/d3/src/dsv/csv.js \
 	lib/d3/src/dsv/dsv.js \
 	lib/d3/src/dsv/tsv.js
 
-d3.time.js: \
+r2d3.time.js: \
 	lib/d3/src/time/time.js \
 	lib/d3/src/time/format-$(LOCALE).js \
 	lib/d3/src/time/format.js \
@@ -228,7 +215,7 @@ d3.time.js: \
 	lib/d3/src/time/scale.js \
 	lib/d3/src/time/scale-utc.js
 
-d3.geom.js: \
+r2d3.geom.js: \
 	lib/d3/src/geom/geom.js \
 	lib/d3/src/geom/contour.js \
 	lib/d3/src/geom/hull.js \
@@ -242,7 +229,7 @@ d3.geom.js: \
 	@rm -f $@
 	uglifyjs < $< > $@
 
-d3%.js: Makefile
+r2d3%.js: Makefile
 	@rm -f $@
 	cat $(filter %.js,$^) > $@
 	@chmod a-w $@
@@ -257,3 +244,4 @@ test:
 
 clean:
 	rm -f d3*.js
+	rm -f r2d3*.js

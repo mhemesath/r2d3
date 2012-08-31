@@ -1,23 +1,80 @@
-/**
- * Initializes and creates the root {@link D3RaphaelSelection} for the specified
- * Raphael Paper.
- *
- * @example
- * var paper = new Raphael(document.body, 300, 200);
- * var d3_raphael_selection = d3.raphael(paper);
- *
- * @see <a href="http://raphaeljs.com/reference.html#Raphael">Raphael</a>
- * @see <a href="http://raphaeljs.com/reference.html#Paper">Raphael.Paper</a>
- *
- * @param {Raphael.Paper} paper
- * @return {D3RaphaelSelection} a selection of the root Raphael.Paper element
- *
- * @function
- * @namespace
- */
-d3.raphael = function(paper) {
-    var root = new D3RaphaelRoot(paper);
+d3_selectionPrototype.raphael = function(width, height) {
 
-    return d3_raphael_selection([[root.paper]], root)
+  function paper() {
+    var paper =  Raphael(this, width, height);
+
+    paper.ca.d = function(path) {
+      return { path: path };
+    };
+
+		// Fool sizzle into thinking the paper is an element
+    paper.nodeType = 1;
+
+    return paper;
+  }
+
+  return this.select(paper);
 };
 
+(function() {
+
+  Raphael.fn.querySelectorAll = function(selector) {
+    var typeMatch = /^[a-zA-Z]+/,
+        type = typeMatch.exec(selector),
+        found = [];
+
+    selector = selector.replace(typeMatch, '');
+
+    this.forEach(function(el) {
+        if(!type || el.type == type) {
+          if (selector === '') {
+            found.push(el);
+          } else if (Sizzle.matchesSelector(el.node, selector)) {
+            found.push(el);
+          }
+        }
+    });
+
+    return found;
+  };
+
+
+	Raphael.fn.getElementsByClassName = function(selector) {
+		var matches = [];
+		this.forEach(function(el) {
+		  if (Sizzle.matchesSelector(el.node, selector)) matches.push(el); 
+    });
+		return matches;
+	};
+
+
+	Raphael.fn.getElementsByTagName = function(tag) {
+		var matches = []
+		this.forEach(function(el) {
+			if (el.type == tag) matches.push(el);
+		});
+		return matches;
+	};
+
+
+
+	Raphael.el.setAttribute = function(name, value) {
+
+		if (name == 'class') {
+			this.node.className = value;
+		}
+
+		this.attr(name, value);
+		return this;
+	};
+
+	Raphael.el.removeAttribute = function(name) {
+		this.attr(name, '');
+		return this;
+	};
+
+	Raphael.el.getAttribute = function(name) {
+		return this.attr(name);
+	};
+
+}());
