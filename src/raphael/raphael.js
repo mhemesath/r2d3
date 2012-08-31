@@ -7,8 +7,9 @@ d3_selectionPrototype.raphael = function(width, height) {
       return { path: path };
     };
 
-		// Fool sizzle into thinking the paper is an element
+    // Fool sizzle into thinking the paper is an element
     paper.nodeType = 1;
+    paper.nodeName = 'object';
 
     return paper;
   }
@@ -18,63 +19,63 @@ d3_selectionPrototype.raphael = function(width, height) {
 
 (function() {
 
-  Raphael.fn.querySelectorAll = function(selector) {
-    var typeMatch = /^[a-zA-Z]+/,
-        type = typeMatch.exec(selector),
-        found = [];
 
-    selector = selector.replace(typeMatch, '');
-
-    this.forEach(function(el) {
-        if(!type || el.type == type) {
-          if (selector === '') {
-            found.push(el);
-          } else if (Sizzle.matchesSelector(el.node, selector)) {
-            found.push(el);
+  function classedAdd(node, name) {
+          var re = new RegExp("(^|\\s+)" + d3.requote(name) + "(\\s+|$)", "g");
+          if (c = node.classList) return c.add(name);
+            var c = node.className || '',
+                cb = c.baseVal != null,
+                cv = cb ? c.baseVal : c;
+            re.lastIndex = 0;
+          if (!re.test(cv)) {
+            cv = d3_collapse(cv + " " + name);
+            if (cb) c.baseVal = cv;
+            else node.setAttribute('class', cv);
           }
         }
-    });
 
-    return found;
+
+
+
+
+  Raphael.fn.getElementsByClassName = function(selector) {
+    var matches = [];
+    selector = '.' + selector;
+
+    this.forEach(function(el) {
+      if (Sizzle.matchesSelector(el.node, selector)) matches.push(el); 
+    });
+    return matches;
   };
 
 
-	Raphael.fn.getElementsByClassName = function(selector) {
-		var matches = [];
-		this.forEach(function(el) {
-		  if (Sizzle.matchesSelector(el.node, selector)) matches.push(el); 
+  Raphael.fn.getElementsByTagName = function(tag) {
+    var matches = [];
+    this.forEach(function(el) {
+      if (el.type == tag) matches.push(el);
     });
-		return matches;
-	};
-
-
-	Raphael.fn.getElementsByTagName = function(tag) {
-		var matches = []
-		this.forEach(function(el) {
-			if (el.type == tag) matches.push(el);
-		});
-		return matches;
-	};
+    return matches;
+  };
 
 
 
-	Raphael.el.setAttribute = function(name, value) {
+  Raphael.el.setAttribute = function(name, value) {
 
-		if (name == 'class') {
-			this.node.className = value;
-		}
+    if (name == 'class') {
+      classedAdd(this.node, value);
+    }
 
-		this.attr(name, value);
-		return this;
-	};
+    this.attr(name, value);
+    return this;
+  };
 
-	Raphael.el.removeAttribute = function(name) {
-		this.attr(name, '');
-		return this;
-	};
+  Raphael.el.removeAttribute = function(name) {
+    this.attr(name, '');
+    return this;
+  };
 
-	Raphael.el.getAttribute = function(name) {
-		return this.attr(name);
-	};
+  Raphael.el.getAttribute = function(name) {
+    return this.attr(name);
+  };
 
 }());

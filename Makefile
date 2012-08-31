@@ -88,6 +88,7 @@ r2d3.core.js: \
 	lib/d3/src/core/selection-property.js \
 	lib/d3/src/core/selection-text.js \
 	lib/d3/src/core/selection-html.js \
+	src/core/selection-append.js \
 	lib/d3/src/core/selection-insert.js \
 	lib/d3/src/core/selection-remove.js \
 	lib/d3/src/core/selection-data.js \
@@ -156,8 +157,7 @@ r2d3.svg.js: \
 	lib/d3/src/svg/brush.js
 
 r2d3.raphael.js: \
-	src/raphael/raphael.js \
-	src/core/selection-append.js
+	src/raphael/raphael.js
 
 r2d3.behavior.js: \
 	lib/d3/src/behavior/behavior.js \

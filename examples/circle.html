@@ -14,13 +14,13 @@
 		<div></div>
 		<script>
 			var paper = d3.select('div').raphael(200, 200);
-			paper.append('circle')
-				.attr('class', '.foo')
+			paper.selectAll('circle').data([0,1,2]).enter().append('circle')
+				.attr('class', 'foo')
 				.attr('cx', 50)
 				.attr('cy', 50)
 				.attr('r', 20);
 
-			paper.selectAll('.foo').attr('fill', 'blue');
+        paper.selectAll('.foo').transition().duration(1000).attr('fill', 'blue');
 		</script>
   </body>
 </html>
