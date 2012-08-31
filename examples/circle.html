@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Circle Example</title>
+    <script type="text/javascript" src="../lib/d3/lib/sizzle/sizzle.js"></script>
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="../lib/compat/compat.js"></script>
+		<![endif]-->
+		<script src="../lib/raphael/raphael.js"></script>
+    <script src="../r2d3.v2.js"></script>
+  </head>
+  <body>
+		<div></div>
+		<div></div>
+		<script>
+			var paper = d3.select('div').raphael(200, 200);
+			paper.append('circle')
+				.attr('class', '.foo')
+				.attr('cx', 50)
+				.attr('cy', 50)
+				.attr('r', 20);
+
+			paper.selectAll('.foo').attr('fill', 'blue');
+		</script>
+  </body>
+</html>
