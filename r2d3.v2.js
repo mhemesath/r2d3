@@ -2003,11 +2003,15 @@ d3_selectionPrototype.append = function(name) {
   function append() {
     // Append called from raphael element
     if (this.paper) {
-      return this.paper[name]();
+      var el = this.paper[name]();
+      el.parentNode = this.paper;
+      return el;
 
     // Append called from raphael apper
     } else if (this.raphael) {
-      return this[name]();
+      var el =  this[name]();
+      el.parentNode = this;
+      return el;
     }
 
     return this.appendChild(document.createElementNS(this.namespaceURI, name));
@@ -5035,7 +5039,9 @@ d3_selectionPrototype.raphael = function(width, height) {
         }
 
 
-
+  Raphael.fn.removeChild = function(el) {
+    el.remove();
+  };
 
 
   Raphael.fn.getElementsByClassName = function(selector) {
@@ -5057,6 +5063,13 @@ d3_selectionPrototype.raphael = function(width, height) {
     return matches;
   };
 
+  Raphael.el.addEventListener = function(type, listener) {
+    this[type](listener);
+  };
+
+  Raphael.el.removeEventListener = function(type, listener) {
+    this['un'+ type](listener);
+  };
 
 
   Raphael.el.setAttribute = function(name, value) {

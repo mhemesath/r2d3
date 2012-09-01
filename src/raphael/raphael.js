@@ -35,7 +35,9 @@ d3_selectionPrototype.raphael = function(width, height) {
         }
 
 
-
+  Raphael.fn.removeChild = function(el) {
+    el.remove();
+  };
 
 
   Raphael.fn.getElementsByClassName = function(selector) {
@@ -57,6 +59,13 @@ d3_selectionPrototype.raphael = function(width, height) {
     return matches;
   };
 
+  Raphael.el.addEventListener = function(type, listener) {
+    this[type](listener);
+  };
+
+  Raphael.el.removeEventListener = function(type, listener) {
+    this['un'+ type](listener);
+  };
 
 
   Raphael.el.setAttribute = function(name, value) {

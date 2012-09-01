@@ -6,11 +6,15 @@ d3_selectionPrototype.append = function(name) {
   function append() {
     // Append called from raphael element
     if (this.paper) {
-      return this.paper[name]();
+      var el = this.paper[name]();
+      el.parentNode = this.paper;
+      return el;
 
     // Append called from raphael apper
     } else if (this.raphael) {
-      return this[name]();
+      var el =  this[name]();
+      el.parentNode = this;
+      return el;
     }
 
     return this.appendChild(document.createElementNS(this.namespaceURI, name));
