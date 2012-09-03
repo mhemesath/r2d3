@@ -5,16 +5,8 @@ d3_selectionPrototype.append = function(name) {
 
   function append() {
     // Append called from raphael element
-    if (this.paper) {
-      var el = this.paper[name]();
-      el.parentNode = this.paper;
-      return el;
-
-    // Append called from raphael apper
-    } else if (this.raphael) {
-      var el =  this[name]();
-      el.parentNode = this;
-      return el;
+    if (this.paper || this.raphael) {
+      return appendRaphael(this.paper || this, this);
     }
 
     return this.appendChild(document.createElementNS(this.namespaceURI, name));
@@ -22,6 +14,20 @@ d3_selectionPrototype.append = function(name) {
 
   function appendNS() {
     return this.appendChild(document.createElementNS(name.space, name.local));
+  }
+
+  function appendRaphael(paper, parent) {
+
+    var el = paper[name]();
+    // Ensure that sets have a paper reference
+    el.parentNode = el.paper = paper;
+
+    // If the parent is a Raphael Set, add the element to it
+    if (parent.type && parent.type === 'set') {
+      parent.push(el);
+    }
+
+    return el;
   }
 
   return this.select(name.local ? appendNS : append);

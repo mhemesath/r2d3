@@ -40,18 +40,17 @@ d3_selectionPrototype.raphael = function(width, height) {
   };
 
 
-  Raphael.fn.getElementsByClassName = function(selector) {
+  Raphael.st.getElementsByClassName  = Raphael.fn.getElementsByClassName = function(selector) {
     var matches = [];
     selector = '.' + selector;
 
     this.forEach(function(el) {
-      if (Sizzle.matchesSelector(el.node, selector)) matches.push(el); 
+      if (Sizzle.matchesSelector(el.node, selector)) matches.push(el);
     });
     return matches;
   };
 
-
-  Raphael.fn.getElementsByTagName = function(tag) {
+  Raphael.st.getElementsByTagName = Raphael.fn.getElementsByTagName = function(tag) {
     var matches = [];
     this.forEach(function(el) {
       if (el.type == tag) matches.push(el);
@@ -59,12 +58,25 @@ d3_selectionPrototype.raphael = function(width, height) {
     return matches;
   };
 
+
   Raphael.el.addEventListener = function(type, listener) {
     this[type](listener);
   };
 
+  Raphael.st.addEventListener = function(type, listener) {
+    this.forEach(function(el) {
+      el.addEventListener(type, listener);
+    });
+  };
+
   Raphael.el.removeEventListener = function(type, listener) {
     this['un'+ type](listener);
+  };
+
+  Raphael.st.removeEventListener = function(type, listener) {
+    this.forEach(function(el) {
+      el.removeEventListener(type, listener);
+    });
   };
 
 
@@ -78,9 +90,21 @@ d3_selectionPrototype.raphael = function(width, height) {
     return this;
   };
 
+  Raphael.st.setAttribute = function(name, value) {
+    this.forEach(function(el) {
+      el.setAttribute(name, value);
+    });
+  }
+
   Raphael.el.removeAttribute = function(name) {
     this.attr(name, '');
     return this;
+  };
+
+  Raphael.st.removeAttribute = function(name) {
+    this.forEach(function(el) {
+      el.removeAttribute(name);
+    });
   };
 
   Raphael.el.getAttribute = function(name) {
