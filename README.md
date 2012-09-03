@@ -70,7 +70,7 @@ set.append('circle')
 set.append('rect')
   .attr({ width: 100, height: 75, x: 0, y: 0 });
 
-// Set the ```rect``` and ```circle``` fill to ```#ff0000```.
+// Set the rect and circle fill to #ff0000.
 set.attr({fill: '#ff0000'});
 ```
 
