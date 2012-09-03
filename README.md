@@ -1,4 +1,4 @@
-[![build status](https://secure.travis-ci.org/mhemesath/d34raphael.png)](http://travis-ci.org/mhemesath/d34raphael)
+[![build status](https://secure.travis-ci.org/mhemesath/r2d3.png)](http://travis-ci.org/mhemesath/r2d3)
 
 
 r2d3
@@ -57,11 +57,38 @@ paper.select('circle')
   .attr('fill', '#ff0000');
 ```
 
+Raphael sets can also be used to group elements together.
+
+```javascript
+var set = paper.append('set')
+
+// Add a circle to the set
+set.append('circle')
+  .attr({ cx: 50, cy: 50, r: 10 });
+
+// Add a rectangle to the set
+set.append('rect')
+  .attr({ width: 100, height: 75, x: 0, y: 0 });
+
+// Set the ```rect``` and ```circle``` fill to ```#ff0000```.
+set.attr({fill: '#ff0000'});
+```
+
 Events can also be bound to Raphael elements using D3 syntax:
 ```javascript
 paper.select('circle')
   .on('click', function() { alert('hi'); });
 ```
+
+
+
+
+Limitations
+-----------
+
+ * All elements are children of the Raphael paper.
+ * Group elements are not supported, but '''set''' can be used in some cases.
+ * IE < 9 does not support styling rendered R2D3 elements with CSS.
 
 
 

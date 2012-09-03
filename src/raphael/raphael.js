@@ -1,23 +1,26 @@
-d3_selectionPrototype.raphael = function(width, height) {
-
-  function paper() {
-    var paper =  Raphael(this, width, height);
-
-    paper.ca.d = function(path) {
-      return { path: path };
-    };
-
-    // Fool sizzle into thinking the paper is an element
-    paper.nodeType = 1;
-    paper.nodeName = 'object';
-
-    return paper;
-  }
-
-  return this.select(paper);
-};
-
 (function() {
+
+  if (typeof Raphael === 'undefined') return;
+
+  d3_selectionPrototype.raphael = function(width, height) {
+
+    function paper() {
+      var paper =  Raphael(this, width, height);
+
+      paper.ca.d = function(path) {
+        return { path: path };
+      };
+
+      // Fool sizzle into thinking the paper is an element
+      paper.nodeType = 1;
+      paper.nodeName = 'object';
+
+      return paper;
+    }
+
+    return this.select(paper);
+  };
+
 
 
   function classedAdd(node, name) {
