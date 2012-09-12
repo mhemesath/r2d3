@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Text Example</title>
+    <script type="text/javascript" src="../lib/d3/lib/sizzle/sizzle.js"></script>
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="../lib/compat/compat.js"></script>
+		<![endif]-->
+		<script src="../lib/raphael/raphael.js"></script>
+    <script src="../r2d3.v2.js"></script>
+  </head>
+  <body>
+		<div></div>
+		<div></div>
+		<script>
+      var svg = d3.select('div').raphael(200, 200);
+      svg.append('text')
+        .attr('x', 100)
+        .attr('y', 100)
+        .attr('font-size', 72);
+
+      var count = 0;
+
+			function drawText() {
+        svg.selectAll('text').text(count);
+        d3.select('title').text(svg.selectAll('text').text());
+        setTimeout(drawText, 1000);
+        count++;
+			}
+
+			drawText();
+		</script>
+  </body>
+</html>
