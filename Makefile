@@ -86,7 +86,7 @@ r2d3.core.js: \
 	lib/d3/src/core/selection-classed.js \
 	lib/d3/src/core/selection-style.js \
 	lib/d3/src/core/selection-property.js \
-	lib/d3/src/core/selection-text.js \
+	src/core/selection-text.js \
 	lib/d3/src/core/selection-html.js \
 	src/core/selection-append.js \
 	lib/d3/src/core/selection-insert.js \
