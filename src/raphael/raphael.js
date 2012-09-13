@@ -54,8 +54,12 @@
         return attrs[name];
       }
 
-      attrs[name] = value;
-      this.attr('path', 'M' + attrs.x1 + ' ' + attrs.y1 + 'L' + attrs.x2 + ' ' + attrs.y2 + 'Z');
+      attrs[name] = parseInt(value, 10);
+      if (!isNaN(attrs.x1) && !isNaN(attrs.y1) && !isNaN(attrs.x2) && !isNaN(attrs.y2)) {
+        this.attr('path', 'M' + attrs.x1 + ' ' + attrs.y1 + 'L' + attrs.x2 + ' ' + attrs.y2 + 'Z');
+      } else {
+        this.attr('path', null);
+      }
     };
   }
 
@@ -65,8 +69,8 @@
   };
 
   Raphael.fn.line = function () {
-    var line =  this.path('M0 0L0 0Z');
-    line.data('lineAttrs', { x1: 0, y1: 0, x2: 0, y2: 0 });
+    var line =  this.path();
+    line.data('lineAttrs', { });
     return line;
   };
 
@@ -85,10 +89,7 @@
   Raphael.st.getElementsByTagName = Raphael.fn.getElementsByTagName = function(tag) {
     var matches = [];
     this.forEach(function(el) {
-
       var type = el.data('lineAttrs') ? 'line' : el.type;
-
-
       if (type === tag) matches.push(el);
     });
     return matches;
