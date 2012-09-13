@@ -5032,6 +5032,12 @@ var d3_svg_brushResizes = [
         return { path: path };
       };
 
+      paper.ca.x1 = lineAttribute('x1');
+      paper.ca.x2 = lineAttribute('x2');
+      paper.ca.y1 = lineAttribute('y1');
+      paper.ca.y2 = lineAttribute('y2');
+
+
       // Fool sizzle into thinking the paper is an element
       paper.nodeType = 1;
       paper.nodeName = 'object';
@@ -5042,7 +5048,7 @@ var d3_svg_brushResizes = [
     return this.select(paper);
   };
 
-
+  
 
   function classedAdd(node, name) {
           var re = new RegExp("(^|\\s+)" + d3.requote(name) + "(\\s+|$)", "g");
@@ -5058,10 +5064,33 @@ var d3_svg_brushResizes = [
           }
         }
 
+  function lineAttribute(name) {
+    return function(value) {
+      var attrs = this.data('lineAttrs');
+
+      // Isn't a line, return;
+      if (!attrs) return;
+
+      if (arguments.length < 1) {
+        return attrs[name];
+      }
+
+      attrs[name] = value;
+      this.attr('path', 'M' + attrs.x1 + ' ' + attrs.y1 + 'L' + attrs.x2 + ' ' + attrs.y2 + 'Z');
+    };
+  }
+
 
   Raphael.fn.removeChild = function(el) {
     el.remove();
   };
+
+  Raphael.fn.line = function () {
+    var line =  this.path('M0 0L0 0Z');
+    line.data('lineAttrs', { x1: 0, y1: 0, x2: 0, y2: 0 });
+    return line;
+  };
+
 
 
   Raphael.st.getElementsByClassName  = Raphael.fn.getElementsByClassName = function(selector) {
@@ -5077,7 +5106,7 @@ var d3_svg_brushResizes = [
   Raphael.st.getElementsByTagName = Raphael.fn.getElementsByTagName = function(tag) {
     var matches = [];
     this.forEach(function(el) {
-      if (el.type == tag) matches.push(el);
+      if (el.type == tag || ('line' == tag && el.data('lineAttrs'))) matches.push(el);
     });
     return matches;
   };
@@ -5109,6 +5138,12 @@ var d3_svg_brushResizes = [
     if (name == 'class') {
       classedAdd(this.node, value);
     }
+
+    // line attribute: x1, x2, y1, y2
+    if (/^[x-y][1-2]$/.test(name)) {
+      
+    }
+
 
     this.attr(name, value);
     return this;
