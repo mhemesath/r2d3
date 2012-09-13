@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Line Example</title>
+    <script type="text/javascript" src="../lib/d3/lib/sizzle/sizzle.js"></script>
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="../lib/compat/compat.js"></script>
+		<![endif]-->
+		<script src="../lib/raphael/raphael.js"></script>
+    <script src="../r2d3.v2.js"></script>
+  </head>
+  <body>
+		<div></div>
+		<div></div>
+		<script>
+      var svg = d3.select('div').raphael(200, 200);
+      svg.append('line')
+        .attr({ x0: 0, x1: 200 });
+
+      var count = 0;
+
+			function drawLine() {
+        svg.selectAll('line')
+          .attr('y1', count % 200)
+          .attr('y2', count % 200);
+
+        setTimeout(drawLine, 100);
+        count++;
+			}
+
+			drawLine();
+		</script>
+  </body>
+</html>
+
