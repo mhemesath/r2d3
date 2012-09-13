@@ -5106,7 +5106,11 @@ var d3_svg_brushResizes = [
   Raphael.st.getElementsByTagName = Raphael.fn.getElementsByTagName = function(tag) {
     var matches = [];
     this.forEach(function(el) {
-      if (el.type == tag || ('line' == tag && el.data('lineAttrs'))) matches.push(el);
+
+      var type = el.data('lineAttrs') ? 'line' : el.type;
+
+
+      if (type === tag) matches.push(el);
     });
     return matches;
   };
