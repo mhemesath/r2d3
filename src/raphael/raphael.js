@@ -11,6 +11,12 @@
         return { path: path };
       };
 
+      paper.ca.x1 = lineAttribute('x1');
+      paper.ca.x2 = lineAttribute('x2');
+      paper.ca.y1 = lineAttribute('y1');
+      paper.ca.y2 = lineAttribute('y2');
+
+
       // Fool sizzle into thinking the paper is an element
       paper.nodeType = 1;
       paper.nodeName = 'object';
@@ -21,7 +27,7 @@
     return this.select(paper);
   };
 
-
+  
 
   function classedAdd(node, name) {
           var re = new RegExp("(^|\\s+)" + d3.requote(name) + "(\\s+|$)", "g");
@@ -37,10 +43,37 @@
           }
         }
 
+  function lineAttribute(name) {
+    return function(value) {
+      var attrs = this.data('lineAttrs');
+
+      // Isn't a line, return;
+      if (!attrs) return;
+
+      if (arguments.length < 1) {
+        return attrs[name];
+      }
+
+      attrs[name] = parseInt(value, 10);
+      if (!isNaN(attrs.x1) && !isNaN(attrs.y1) && !isNaN(attrs.x2) && !isNaN(attrs.y2)) {
+        this.attr('path', 'M' + attrs.x1 + ' ' + attrs.y1 + 'L' + attrs.x2 + ' ' + attrs.y2 + 'Z');
+      } else {
+        this.attr('path', null);
+      }
+    };
+  }
+
 
   Raphael.fn.removeChild = function(el) {
     el.remove();
   };
+
+  Raphael.fn.line = function () {
+    var line =  this.path();
+    line.data('lineAttrs', { });
+    return line;
+  };
+
 
 
   Raphael.st.getElementsByClassName  = Raphael.fn.getElementsByClassName = function(selector) {
@@ -56,7 +89,8 @@
   Raphael.st.getElementsByTagName = Raphael.fn.getElementsByTagName = function(tag) {
     var matches = [];
     this.forEach(function(el) {
-      if (el.type == tag) matches.push(el);
+      var type = el.data('lineAttrs') ? 'line' : el.type;
+      if (type === tag) matches.push(el);
     });
     return matches;
   };
