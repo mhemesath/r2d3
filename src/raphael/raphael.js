@@ -118,12 +118,6 @@
       classedAdd(this.node, value);
     }
 
-    // line attribute: x1, x2, y1, y2
-    if (/^[x-y][1-2]$/.test(name)) {
-      
-    }
-
-
     this.attr(name, value);
     return this;
   };
