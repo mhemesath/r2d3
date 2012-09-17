@@ -13,7 +13,9 @@
 		<div></div>
 		<div></div>
 		<script>
-      var svg = d3.select('div').raphael(200, 200);
+      var svg = d3.select('div').append('svg')
+                  .attr('height', 200)
+                  .attr('width', 200);
       svg.append('text')
         .attr('x', 100)
         .attr('y', 100)
