@@ -9,6 +9,7 @@ all: \
 # Modify this rule to build your own custom release.
 
 .INTERMEDIATE r2d3.v2.js: \
+	lib/raphael/raphael.js \
 	lib/d3/src/start.js \
 	r2d3.core.js \
 	r2d3.scale.js \
