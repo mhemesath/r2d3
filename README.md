@@ -26,7 +26,6 @@ R2D3 will use the bundled sizzle.
     <script type="text/javascript" src="js/compat.js"></script>
     <![endif]-->
     <script src="js/sizzle.js"></script>
-    <script src="js/raphael.js"></script>
     <script src="js/r2d3.min.js"></script>
   </body>
 </html>
