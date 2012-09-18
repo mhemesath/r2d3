@@ -32,11 +32,13 @@ R2D3 will use the bundled sizzle.
 </html>
 ```
 
-R2D3 extends the default behavior of D3. To use Raphael, instead of SVG
-create a selection around a raphael paper.
+R2D3 uses Raphael under the covers for rendering SVG and VML when
+necessary.  Creating a SVG element in R2D3 is the same as D3:
 
 ```javascript
-var paper = d3.select('div').raphael(200,200);
+var paper = d3.select('div').append('svg')
+            .attr('width', 200)
+            .attr('height', 200);
 ```
 
 Using the paper selection,  Raphael elements can be created and
@@ -86,7 +88,9 @@ paper.select('circle')
 Limitations
 -----------
 
- * All elements are children of the Raphael paper.
+See the issues page for a listing of known issues. In summary this
+includes:
+
  * Group elements are not supported, but '''set''' can be used in some cases.
  * IE < 9 does not support styling rendered R2D3 elements with CSS.
 
