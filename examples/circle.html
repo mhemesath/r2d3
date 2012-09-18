@@ -13,7 +13,9 @@
 		<div></div>
 		<div></div>
 		<script>
-			var svg = d3.select('div').raphael(200, 200),
+      var svg = d3.select('div').append('svg')
+                  .attr('height', 200)
+                  .attr('width', 200),
 					data = d3.random.normal(50, 10),
 					fill = d3.scale.linear().domain([40,50,60]).range(['#ff0000', '#00ff00', '#0000ff']);
 
