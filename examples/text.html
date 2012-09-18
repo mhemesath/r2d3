@@ -6,22 +6,22 @@
     <!--[if lte IE 8]>
     <script type="text/javascript" src="../lib/compat/compat.js"></script>
 		<![endif]-->
-		<script src="../lib/raphael/raphael.js"></script>
     <script src="../r2d3.v2.js"></script>
   </head>
   <body>
 		<div></div>
 		<div></div>
 		<script>
-      var svg = d3.select('div').append('svg')
+      var count = 0,
+          svg = d3.select('div').append('svg')
                   .attr('height', 200)
                   .attr('width', 200);
       svg.append('text')
         .attr('x', 100)
         .attr('y', 100)
-        .attr('font-size', 72);
+        .attr('font-size', 72)
+        .text(count);
 
-      var count = 0;
 
 			function drawText() {
         svg.selectAll('text').text(count);
