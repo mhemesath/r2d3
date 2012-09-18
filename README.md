@@ -1,5 +1,3 @@
-[![build status](https://secure.travis-ci.org/mhemesath/r2d3.png)](http://travis-ci.org/mhemesath/r2d3)
-
 
 r2d3
 ==========
