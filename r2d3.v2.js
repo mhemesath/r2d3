@@ -2059,7 +2059,6 @@ d3_selectionPrototype.append = function(name) {
   }
 
   function appendRaphael(parent) {
-    return null;
     var paper =  Raphael(parent, 0, 0);
 
     paper.__attrs = { width: 0, height: 0 };
