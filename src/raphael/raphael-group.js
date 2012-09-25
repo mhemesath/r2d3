@@ -1,5 +1,9 @@
-Raphael.fn.group = function() {
+Raphael._engine.g = function() {
 
+	console.log(arguments);
+
+};
+/**
     var r = this,
         cfg = (arguments[0] instanceof Array) ? {} : arguments[0],
         items = (arguments[0] instanceof Array) ? arguments[0] : arguments[1];
@@ -73,4 +77,4 @@ Raphael.fn.group = function() {
     return Group(cfg, items);
 
 };
-
+*/
