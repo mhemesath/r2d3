@@ -44,6 +44,7 @@ function appendRaphael(parent) {
   var paper =  Raphael(parent, 0, 0);
 
   paper.__attrs = { width: 0, height: 0 };
+  paper.groups = [];
 
   paper.ca.d = function(path) {
     return { path: path };
@@ -54,9 +55,11 @@ function appendRaphael(parent) {
   paper.ca.y1 = lineAttribute('y1');
   paper.ca.y2 = lineAttribute('y2');
 
+
   // Fool sizzle into thinking the paper is an element
   paper.nodeType = 1;
   paper.nodeName = 'object';
+  paper.node = parent;
 
   return paper;
 }
@@ -103,6 +106,11 @@ Raphael.fn.getElementsByClassName = function(selector) {
 
 
 Raphael.fn.getElementsByTagName = function(tag) {
+
+  if (tag === 'g') {
+    return this.groups;
+  }
+
   var matches = [];
   this.forEach(function(el) {
     var type = el.data('lineAttrs') ? 'line' : el.type;
@@ -114,13 +122,13 @@ Raphael.fn.getElementsByTagName = function(tag) {
 
 Raphael.fn.appendChild = function(childNode) {
   var type = childNode && childNode.nodeName,
-      node =  type ? this[type.toLowerCase()]() : null;
+      el =  type ? this[type.toLowerCase()]() : null;
 
   // Ensure Paper can be referenced from sets
-  if (node) {
-    node.paper = this;
+  if (el) {
+    el.paper = this;
   }
-  return node;
+  return el;
 };
 
 

@@ -10864,6 +10864,7 @@ function appendRaphael(parent) {
   var paper =  Raphael(parent, 0, 0);
 
   paper.__attrs = { width: 0, height: 0 };
+  paper.groups = [];
 
   paper.ca.d = function(path) {
     return { path: path };
@@ -10874,9 +10875,11 @@ function appendRaphael(parent) {
   paper.ca.y1 = lineAttribute('y1');
   paper.ca.y2 = lineAttribute('y2');
 
+
   // Fool sizzle into thinking the paper is an element
   paper.nodeType = 1;
   paper.nodeName = 'object';
+  paper.node = parent;
 
   return paper;
 }
@@ -10923,6 +10926,11 @@ Raphael.fn.getElementsByClassName = function(selector) {
 
 
 Raphael.fn.getElementsByTagName = function(tag) {
+
+  if (tag === 'g') {
+    return this.groups;
+  }
+
   var matches = [];
   this.forEach(function(el) {
     var type = el.data('lineAttrs') ? 'line' : el.type;
@@ -10934,13 +10942,13 @@ Raphael.fn.getElementsByTagName = function(tag) {
 
 Raphael.fn.appendChild = function(childNode) {
   var type = childNode && childNode.nodeName,
-      node =  type ? this[type.toLowerCase()]() : null;
+      el =  type ? this[type.toLowerCase()]() : null;
 
   // Ensure Paper can be referenced from sets
-  if (node) {
-    node.paper = this;
+  if (el) {
+    el.paper = this;
   }
-  return node;
+  return el;
 };
 
 
@@ -11028,8 +11036,68 @@ Raphael.st.removeAttribute = function(name) {
   });
 };
 
-Raphael.fn.g = function() {
+function Group(paper) {
+  this.paper = paper;
+  this.attrs = {};
+  this.className = '';
+  this.node = Raphael.vml ?
+    document.createElement('<rvml:group class="rvml">') :
+    document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  this.paper.canvas.appendChild(this.node);
 
+  this.paper.groups.push(this);
+}
+
+Group.prototype.node = function() {
+  return this.node;
+};
+
+Group.prototype.remove = function() {
+  this.set.clear();
+  this.paper.canvas.removeChild(this.node);
+  this.paper.groups.splice(this.paper.groups.indexOf(this), 1);
+};
+
+Group.prototype.getElementsByTagName = function(tag) {
+  return this.set.getElementsByTagName(tag);
+};
+
+Group.prototype.setAttribute = function(name, value) {
+  this.attrs[name] = value;
+  if (name === 'className') {
+    this.className = value;
+    paperClassedAdd(this.node, value);
+  }
+};
+
+Group.prototype.getAttribute = function(name) {
+  return this.attrs[name] || '';
+};
+
+Group.prototype.removeAttribute = function(name) {
+  delete this.attrs[name];
+};
+
+
+Group.prototype.tagName = Raphael.vml ? 'rvml:group' : 'g';
+
+Group.prototype.type = 'g';
+
+Group.prototype.appendChild = function(node) {
+  // Give the node to raphael to render
+  var el = this.paper.appendChild(node);
+  this.node.appendChild(Raphael.vml ? el.node : el.node);
+  return el;
+};
+
+Raphael.fn.g = function() {
+  return new Group(this);
+};
+
+
+
+
+/**
     var r = this,
         cfg = (arguments[0] instanceof Array) ? {} : arguments[0],
         items = (arguments[0] instanceof Array) ? arguments[0] : arguments[1];
@@ -11103,7 +11171,7 @@ Raphael.fn.g = function() {
     return Group(cfg, items);
 
 };
-
+*/
 d3.behavior = {};
 d3.behavior.drag = function() {
   var event = d3_eventDispatch(drag, "drag", "dragstart", "dragend"),
