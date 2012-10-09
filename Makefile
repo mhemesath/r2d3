@@ -158,7 +158,8 @@ r2d3.svg.js: \
 	lib/d3/src/svg/brush.js
 
 r2d3.raphael.js: \
-	src/raphael/raphael.js
+	src/raphael/raphael.js \
+	src/raphael/raphael-parseTransformString.js
 
 r2d3.behavior.js: \
 	lib/d3/src/behavior/behavior.js \
