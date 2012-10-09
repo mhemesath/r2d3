@@ -5824,7 +5824,7 @@ try {
     d3_style_setProperty.call(this, name, value + "", priority);
   };
 }
-d3 = {version: "2.10.0"}; // semver
+d3 = {version: "2.10.1"}; // semver
 function d3_class(ctor, properties) {
   try {
     for (var key in properties) {
@@ -6173,8 +6173,8 @@ d3.nest = function() {
       }
     }
 
-    valuesByKey.forEach(function(keyValue) {
-      o[keyValue] = map(valuesByKey.get(keyValue), depth);
+    valuesByKey.forEach(function(keyValue, values) {
+      o[keyValue] = map(values, depth);
     });
 
     return o;
@@ -6486,7 +6486,7 @@ d3.format = function(specifier) {
     if (integer && (value % 1)) return "";
 
     // Convert negative to positive, and record the sign prefix.
-    var negative = (value < 0) && (value = -value) ? "-" : sign;
+    var negative = value < 0 && (value = -value) ? "-" : sign;
 
     // Apply the scale, computing it from the value's exponent for si format.
     if (scale < 0) {
@@ -7002,7 +7002,7 @@ function d3_interpolateByName(name) {
 
 d3.interpolators = [
   d3.interpolateObject,
-  function(a, b) { return (b instanceof Array) && d3.interpolateArray(a, b); },
+  function(a, b) { return b instanceof Array && d3.interpolateArray(a, b); },
   function(a, b) { return (typeof a === "string" || typeof b === "string") && d3.interpolateString(a + "", b + ""); },
   function(a, b) { return (typeof b === "string" ? d3_rgb_names.has(b) || /^(#|rgb\(|hsl\()/.test(b) : b instanceof d3_Rgb || b instanceof d3_Hsl) && d3.interpolateRgb(a, b); },
   function(a, b) { return !isNaN(a = +a) && !isNaN(b = +b) && d3.interpolateNumber(a, b); }
@@ -7839,7 +7839,6 @@ d3_selectionPrototype.append = function(name) {
 
   return this.select(name.local ? appendNS : append);
 };
-
 // TODO insert(node, function)?
 // TODO insert(function, string)?
 // TODO insert(function, function)?
@@ -8693,7 +8692,7 @@ function d3_mousePoint(container, e) {
   var svg = container.ownerSVGElement || container;
   if (svg.createSVGPoint) {
     var point = svg.createSVGPoint();
-    if ((d3_mouse_bug44083 < 0) && (window.scrollX || window.scrollY)) {
+    if (d3_mouse_bug44083 < 0 && (window.scrollX || window.scrollY)) {
       svg = d3.select(document.body)
         .append("svg")
           .style("position", "absolute")
@@ -9077,7 +9076,7 @@ function d3_scale_ordinal(domain, ranger) {
     if (arguments.length < 2) padding = 0;
     var start = x[0],
         stop = x[1],
-        step = (stop - start) / (domain.length - 1 + padding);
+        step = (stop - start) / (Math.max(1, domain.length - 1) + padding);
     range = steps(domain.length < 2 ? (start + stop) / 2 : start + step * padding / 2, step);
     rangeBand = 0;
     ranger = {t: "rangePoints", a: arguments};
@@ -10881,7 +10880,6 @@ function appendRaphael(parent) {
   return paper;
 }
 
-
 //========================================
 // Paper Extensions
 
@@ -11028,9 +11026,23 @@ Raphael.st.removeAttribute = function(name) {
   });
 };
 
-d3.behavior = {};
-// TODO Track touch points by identifier.
+//========================================
+// Parse Transform String
+// Converts transform functions to raphael transform strings, ie translate(x,y) => tx,y
 
+var rParseTransformString = Raphael.parseTransformString;
+Raphael.parseTransformString = function(TString) {
+if(/translate|rotate|scale/i.test(TString)) TString = toRTransformString(TString);
+return rParseTransformString(TString);
+};
+
+function toRTransformString(TString) {
+return TString.replace(/translate\(/gi, "t")
+              .replace(/rotate\(/gi, "r")
+              .replace(/scale\(/gi, "s")
+              .replace(/[)]/g, "");
+};
+d3.behavior = {};
 d3.behavior.drag = function() {
   var event = d3_eventDispatch(drag, "drag", "dragstart", "dragend"),
       origin = null;
@@ -11044,15 +11056,14 @@ d3.behavior.drag = function() {
     var target = this,
         event_ = event.of(target, arguments),
         eventTarget = d3.event.target,
+        touchId = d3.event.touches && d3.event.changedTouches[0].identifier,
         offset,
         origin_ = point(),
         moved = 0;
 
     var w = d3.select(window)
-        .on("mousemove.drag", dragmove)
-        .on("touchmove.drag", dragmove)
-        .on("mouseup.drag", dragend, true)
-        .on("touchend.drag", dragend, true);
+        .on(touchId ? "touchmove.drag-" + touchId : "mousemove.drag", dragmove)
+        .on(touchId ? "touchend.drag-" + touchId : "mouseup.drag", dragend, true);
 
     if (origin) {
       offset = origin.apply(target, arguments);
@@ -11061,13 +11072,15 @@ d3.behavior.drag = function() {
       offset = [0, 0];
     }
 
-    d3_eventCancel();
+    // Only cancel mousedown; touchstart is needed for draggable links.
+    if (!touchId) d3_eventCancel();
     event_({type: "dragstart"});
 
     function point() {
-      var p = target.parentNode,
-          t = d3.event.changedTouches;
-      return t ? d3.touches(p, t)[0] : d3.mouse(p);
+      var p = target.parentNode;
+      return touchId
+          ? d3.touches(p).filter(function(p) { return p.identifier === touchId; })[0]
+          : d3.mouse(p);
     }
 
     function dragmove() {
@@ -11093,10 +11106,8 @@ d3.behavior.drag = function() {
         if (d3.event.target === eventTarget) w.on("click.drag", click, true);
       }
 
-      w .on("mousemove.drag", null)
-        .on("touchmove.drag", null)
-        .on("mouseup.drag", null)
-        .on("touchend.drag", null);
+      w .on(touchId ? "touchmove.drag-" + touchId : "mousemove.drag", null)
+        .on(touchId ? "touchend.drag-" + touchId : "mouseup.drag", null);
     }
 
     // prevent the subsequent click from propagating (e.g., for anchors)
@@ -11799,43 +11810,44 @@ d3.layout.force = function() {
   force.drag = function() {
     if (!drag) drag = d3.behavior.drag()
         .origin(d3_identity)
-        .on("dragstart", dragstart)
-        .on("drag", d3_layout_forceDrag)
-        .on("dragend", d3_layout_forceDragEnd);
+        .on("dragstart", d3_layout_forceDragstart)
+        .on("drag", dragmove)
+        .on("dragend", d3_layout_forceDragend);
 
-    this.on("mouseover.force", d3_layout_forceDragOver)
-        .on("mouseout.force", d3_layout_forceDragOut)
+    this.on("mouseover.force", d3_layout_forceMouseover)
+        .on("mouseout.force", d3_layout_forceMouseout)
         .call(drag);
   };
 
-  function dragstart(d) {
-    d3_layout_forceDragOver(d3_layout_forceDragNode = d);
-    d3_layout_forceDragForce = force;
+  function dragmove(d) {
+    d.px = d3.event.x;
+    d.py = d3.event.y;
+    force.resume(); // restart annealing
   }
 
   return d3.rebind(force, event, "on");
 };
 
-var d3_layout_forceDragForce,
-    d3_layout_forceDragNode;
+// The fixed property has three bits:
+// Bit 1 can be set externally (e.g., d.fixed = true) and show persist.
+// Bit 2 stores the dragging state, from mousedown to mouseup.
+// Bit 3 stores the hover state, from mouseover to mouseout.
+// Dragend is a special case: it also clears the hover state.
 
-function d3_layout_forceDragOver(d) {
-  d.fixed |= 2;
+function d3_layout_forceDragstart(d) {
+  d.fixed |= 2; // set bit 2
 }
 
-function d3_layout_forceDragOut(d) {
-  if (d !== d3_layout_forceDragNode) d.fixed &= 1;
+function d3_layout_forceDragend(d) {
+  d.fixed &= 1; // unset bits 2 and 3
 }
 
-function d3_layout_forceDragEnd() {
-  d3_layout_forceDragNode.fixed &= 1;
-  d3_layout_forceDragForce = d3_layout_forceDragNode = null;
+function d3_layout_forceMouseover(d) {
+  d.fixed |= 4; // set bit 3
 }
 
-function d3_layout_forceDrag() {
-  d3_layout_forceDragNode.px = d3.event.x;
-  d3_layout_forceDragNode.py = d3.event.y;
-  d3_layout_forceDragForce.resume(); // restart annealing
+function d3_layout_forceMouseout(d) {
+  d.fixed &= 3; // unset bit 3
 }
 
 function d3_layout_forceAccumulate(quad, alpha, charges) {
@@ -12290,7 +12302,7 @@ d3.layout.histogram = function() {
     if (m > 0) {
       i = -1; while(++i < n) {
         x = values[i];
-        if ((x >= range[0]) && (x <= range[1])) {
+        if (x >= range[0] && x <= range[1]) {
           bin = bins[d3.bisect(thresholds, x, 1, m) - 1];
           bin.y += k;
           bin.push(data[i]);
@@ -13297,7 +13309,7 @@ function d3_dsv(delimiter, mimeType) {
 
     while ((t = token()) !== EOF) {
       var a = [];
-      while ((t !== EOL) && (t !== EOF)) {
+      while (t !== EOL && t !== EOF) {
         a.push(t);
         t = token();
       }
@@ -15550,8 +15562,8 @@ d3.time.hour = d3_time_interval(function(date) {
 d3.time.hours = d3.time.hour.range;
 d3.time.hours.utc = d3.time.hour.utc.range;
 d3.time.day = d3_time_interval(function(date) {
-  var day = new d3_time(0, date.getMonth(), date.getDate());
-  day.setFullYear(date.getFullYear());
+  var day = new d3_time(1970, 0);
+  day.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
   return day;
 }, function(date, offset) {
   date.setDate(date.getDate() + offset);
