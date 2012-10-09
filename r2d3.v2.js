@@ -7839,10 +7839,6 @@ d3_selectionPrototype.append = function(name) {
 
   return this.select(name.local ? appendNS : append);
 };
-
-var d3_selectAll = function(s, n) { 
-	if (n.querySelector === void 0) return n.node.querySelectorAll(s); 
-return n.querySelectorAll(s); }
 // TODO insert(node, function)?
 // TODO insert(function, string)?
 // TODO insert(function, function)?
