@@ -9,8 +9,8 @@ all: \
 # Modify this rule to build your own custom release.
 
 .INTERMEDIATE r2d3.v2.js: \
-	lib/raphael/raphael.js \
 	lib/d3/src/start.js \
+	lib/raphael/raphael.js \
 	r2d3.core.js \
 	r2d3.scale.js \
 	r2d3.svg.js \
@@ -158,7 +158,8 @@ r2d3.svg.js: \
 	lib/d3/src/svg/brush.js
 
 r2d3.raphael.js: \
-	src/raphael/raphael.js
+	src/raphael/raphael.js \
+	src/raphael/raphael-group.js
 
 r2d3.behavior.js: \
 	lib/d3/src/behavior/behavior.js \
