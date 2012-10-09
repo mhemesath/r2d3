@@ -66,6 +66,26 @@ function appendRaphael(parent) {
 
 
 //========================================
+//) Helper function Extensions
+var rParseTransformString = Raphael.parseTransformString;
+Raphael.parseTransformString = function(TString) {
+	if (TString.indexOf("translate") != -1 ||
+			TString.indexOf("rotate") != -1 ||
+			TString.indexOf("scale") != -1) {
+		TString = toRTransformString(TString);
+	}
+	return rParseTransformString(TString);
+};
+
+function toRTransformString(TString) {
+	TString = TString.replace(/[)]/g, "");
+	TString = TString.replace(/translate\(/gi, "t");
+	TString = TString.replace(/rotate\(/gi, "r");
+	TString = TString.replace(/scale\(/gi, "s");
+	return TString;
+};
+
+//========================================
 // Paper Extensions
 
 Raphael.fn.removeChild = function(el) {

@@ -7840,6 +7840,9 @@ d3_selectionPrototype.append = function(name) {
   return this.select(name.local ? appendNS : append);
 };
 
+var d3_selectAll = function(s, n) { 
+	if (n.querySelector === void 0) return n.node.querySelectorAll(s); 
+return n.querySelectorAll(s); }
 // TODO insert(node, function)?
 // TODO insert(function, string)?
 // TODO insert(function, function)?
@@ -10884,6 +10887,26 @@ function appendRaphael(parent) {
   return paper;
 }
 
+
+//========================================
+//) Helper function Extensions
+var rParseTransformString = Raphael.parseTransformString;
+Raphael.parseTransformString = function(TString) {
+	if (TString.indexOf("translate") != -1 ||
+			TString.indexOf("rotate") != -1 ||
+			TString.indexOf("scale") != -1) {
+		TString = toRTransformString(TString);
+	}
+	return rParseTransformString(TString);
+};
+
+function toRTransformString(TString) {
+	TString = TString.replace(/[)]/g, "");
+	TString = TString.replace(/translate\(/gi, "t");
+	TString = TString.replace(/rotate\(/gi, "r");
+	TString = TString.replace(/scale\(/gi, "s");
+	return TString;
+};
 
 //========================================
 // Paper Extensions
