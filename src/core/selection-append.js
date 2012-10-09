@@ -17,4 +17,3 @@ d3_selectionPrototype.append = function(name) {
 
   return this.select(name.local ? appendNS : append);
 };
-
