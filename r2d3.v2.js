@@ -7839,7 +7839,6 @@ d3_selectionPrototype.append = function(name) {
 
   return this.select(name.local ? appendNS : append);
 };
-
 // TODO insert(node, function)?
 // TODO insert(function, string)?
 // TODO insert(function, function)?
@@ -10884,7 +10883,6 @@ function appendRaphael(parent) {
   return paper;
 }
 
-
 //========================================
 // Paper Extensions
 
@@ -11062,11 +11060,35 @@ Group.prototype.getElementsByTagName = function(tag) {
   return this.set.getElementsByTagName(tag);
 };
 
+
 Group.prototype.setAttribute = function(name, value) {
   this.attrs[name] = value;
   if (name === 'className') {
     this.className = value;
     paperClassedAdd(this.node, value);
+  } else if (name === 'transform') {
+    // Build a transform matrix
+    if (true || Raphael.vml) {
+      var transforms = Raphael.parseTransformString(value),
+          matrix = Raphael.matrix();
+      for (var i=0; i< transforms.length; i++) {
+        switch(transforms[i][0]) {
+          case "t":
+            matrix.translate.apply(matrix, transforms[i].slice(1));
+            break;
+          case "r":
+            matrix.rotate.apply(matrix, transforms[i].slice(1));
+            break;
+          case "s":
+            matrix.scale.apply(matrix, transforms[i].slice(1));
+            break;
+        }
+      }
+      this.node.coordorigin = matrix.x(0, 0) + " " + matrix.y(0, 0);
+    // Let SVG Handle the transform
+    } else {
+      this.node.setAttribute(name, value);
+    }
   }
 };
 
@@ -11092,86 +11114,22 @@ Group.prototype.appendChild = function(node) {
 
 Raphael.fn.g = function() {
   return new Group(this);
+};//========================================
+// Parse Transform String
+// Converts transform functions to raphael transform strings, ie translate(x,y) => tx,y
+
+var rParseTransformString = Raphael.parseTransformString;
+Raphael.parseTransformString = function(TString) {
+if(/translate|rotate|scale/i.test(TString)) TString = toRTransformString(TString);
+return rParseTransformString(TString);
 };
 
-
-
-
-/**
-    var r = this,
-        cfg = (arguments[0] instanceof Array) ? {} : arguments[0],
-        items = (arguments[0] instanceof Array) ? arguments[0] : arguments[1];
-    
-    function Group(cfg, items) {
-        var inst,
-            set = r.set(items),
-            group = r.raphael.vml ? 
-                document.createElement("group") : 
-                document.createElementNS("http://www.w3.org/2000/svg", "g");
-        
-        r.canvas.appendChild(group);
-        
-        function updateScale(transform, scale) {
-            var scaleString = 'scale(' + scale + ')';
-            if (!transform) {
-                return scaleString;
-            }
-            if (transform.indexOf('scale(') < 0) {
-                return transform + ' ' + scaleString;
-            }
-            return transform.replace(/scale\(-?[0-9]+(\.[0-9][0-9]*)?\)/, scaleString);
-        }
-        
-        function updateRotation(transform, rotation) {
-            var rotateString = 'rotate(' + rotation + ')';
-            if (!transform) {
-                return rotateString;
-            }
-            if (transform.indexOf('rotate(') < 0) {
-                return transform + ' ' + rotateString;
-            }
-            return transform.replace(/rotate\(-?[0-9]+(\.[0-9][0-9]*)?\)/, rotateString);
-        }
-        
-        inst = {
-            scale: function (newScale) {
-                var transform = group.getAttribute('transform');
-                group.setAttribute('transform', updateScale(transform, newScale));
-                return this;
-            },
-            rotate: function(deg) {
-                var transform = group.getAttribute('transform');
-                group.setAttribute('transform', updateRotation(transform, deg));
-            },
-            push: function(item) {
-                function pushOneRaphaelVector(it){
-                    var i;
-                    if (it.type === 'set') {
-                        for (i=0; i< it.length; i++) {
-                            pushOneRaphaelVector(it[i]);
-                        }
-                    } else {
-                        group.appendChild(r.raphael.vml? it.node.parentNode : it.node);
-                        set.push(it);
-                    }
-                }
-                pushOneRaphaelVector(item);
-                return this;
-            },
-            getBBox: function() {
-                return set.getBBox();
-            },
-            type: 'group',
-            node: group
-        };
-                
-        return inst;
-    }
-    
-    return Group(cfg, items);
-
+function toRTransformString(TString) {
+return TString.replace(/translate\(/gi, "t")
+              .replace(/rotate\(/gi, "r")
+              .replace(/scale\(/gi, "s")
+              .replace(/[)]/g, "");
 };
-*/
 d3.behavior = {};
 d3.behavior.drag = function() {
   var event = d3_eventDispatch(drag, "drag", "dragstart", "dragend"),

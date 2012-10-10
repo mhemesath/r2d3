@@ -64,7 +64,6 @@ function appendRaphael(parent) {
   return paper;
 }
 
-
 //========================================
 // Paper Extensions
 
