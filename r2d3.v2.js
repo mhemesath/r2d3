@@ -10838,6 +10838,7 @@ function paperClassedAdd(node, name) {
 }
 
 
+
 function lineAttribute(name) {
   return function(value) {
     var attrs = this.data('lineAttrs');
@@ -10944,8 +10945,46 @@ Raphael.fn.appendChild = function(childNode) {
 
 
 
+
 //========================================
 // Element Extensions
+
+/**
+ * Updates the style for a given property honoring style
+ */
+Raphael.el.updateStyle = function(name) {
+	var attributes = this.data('attributes') || {},
+			style = this.data('style') || {},
+			css = this.data('css') || {};
+			
+	
+	this.attr(name, (style[name] || css[name] || attributes[name]));
+};
+
+
+function _elementSetProperty(level) {
+	return function(name, value) {
+			var style = this.data(level) || {};
+			
+			if (value === '' || value === null || value === undefined) {
+				delete style[name];
+			} else {
+				style[name] = value;
+			}
+			
+			this.data(level, style);
+			this.updateStyle(name);
+	}
+}
+
+function _elementRemoveProperty(level) {
+	return function(name) {
+			var style = this.data(level) || {};
+			delete style[name];
+			this.data(level, style);
+			this.updateStyle(name);
+		}
+}
 
 Raphael.el.addEventListener = function(type, listener) {
   this[type](listener);
@@ -10958,28 +10997,33 @@ Raphael.el.removeEventListener = function(type, listener) {
 
 
 Raphael.el.setAttribute = function(name, value) {
-
   if (name == 'class' || name == 'className') {
     paperClassedAdd(this.node, value);
   }
-
-  this.attr(name, value);
+	
+	_elementSetProperty('attributes').apply(this, [name, value]);
   return this;
 };
 
 
-Raphael.el.removeAttribute = function(name) {
-  this.attr(name, '');
-  return this;
-};
-
+Raphael.el.removeAttribute = _elementRemoveProperty('attributes');
 
 Raphael.el.getAttribute = function(name) {
-  return this.attr(name);
+	return this.data('attributes')[name];
 };
 
 
 
+Raphael.el.style = {
+	
+	setProperty: _elementSetProperty('style'),
+	
+	removeProperty: _elementRemoveProperty('style'),
+	
+	getPropertyValue: function(name) {
+		return (this.data('style') || {})[name];
+	}
+};
 
 
 

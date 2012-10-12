@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Circle Example</title>
+    <script type="text/javascript" src="../lib/sizzle/sizzle.js"></script>
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="../lib/compat/compat.js"></script>
+		<![endif]-->
+    <script src="../r2d3.v2.js"></script>
+  </head>
+  <body>
+		<div></div>
+		<div></div>
+		<script>
+      var svg = d3.select('div').append('svg')
+      	.attr('height', 200)
+        .attr('width', 200);
+
+			svg.append('circle')
+				.attr('cx', 100)
+				.attr('cy', 100)
+				.attr('r', 100)
+				.attr('stroke', 'none')
+				.attr('fill', '#FF0000')
+				.on('click', function() { 
+					if (d3.select(this).style('fill')) {
+						d3.select(this).style('fill', null);
+					} else {
+						d3.select(this).style('fill', '#0000FF');
+					}
+				});
+		</script>
+  </body>
+</html>
