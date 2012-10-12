@@ -1,3 +1,22 @@
+
+var getComputedStyle = window.getComputedStyle;
+window.getComputedStyle = function(node) {
+	
+	// Override for Raphael
+	if (node && node.paper) {
+		return {
+			getPropertyValue: function(name) {
+				return node.attr(name);
+			}
+		};
+	}
+	
+	// Default window.getComputedStyle
+	return getComputedStyle.apply(window, arguments);
+};
+
+
+
 function paperClassedAdd(node, name) {
   var re = new RegExp("(^|\\s+)" + d3.requote(name) + "(\\s+|$)", "g");
 
@@ -119,6 +138,7 @@ Raphael.fn.appendChild = function(childNode) {
   // Ensure Paper can be referenced from sets
   if (node) {
     node.paper = this;
+		node.style = new ElementStyle(node);
   }
   return node;
 };
@@ -135,7 +155,7 @@ Raphael.fn.appendChild = function(childNode) {
  */
 Raphael.el.updateStyle = function(name) {
 	var attributes = this.data('attributes') || {},
-			style = this.data('style') || {},
+			style = this.style.props,
 			css = this.data('css') || {};
 			
 	
@@ -160,6 +180,7 @@ function _elementSetProperty(level) {
 
 function _elementRemoveProperty(level) {
 	return function(name) {
+		console.log(this);
 			var style = this.data(level) || {};
 			delete style[name];
 			this.data(level, style);
@@ -193,17 +214,28 @@ Raphael.el.getAttribute = function(name) {
 	return this.data('attributes')[name];
 };
 
+function ElementStyle(element) {
+	this.element = element;
+	this.props = {};
+}
 
-
-Raphael.el.style = {
-	
-	setProperty: _elementSetProperty('style'),
-	
-	removeProperty: _elementRemoveProperty('style'),
-	
-	getPropertyValue: function(name) {
-		return (this.data('style') || {})[name];
+ElementStyle.prototype.setProperty = function(name, value) {
+	if (value === '' || value === null || value === undefined) {
+		delete this.props[name];
+	} else {
+		this.props[name] = value;
 	}
+			
+	this.element.updateStyle(name);
+};
+
+ElementStyle.prototype.removeProperty = function(name) {
+	delete this.props[name];
+	this.element.updateStyle(name);
+};
+
+ElementStyle.prototype.getPropertyValue = function(name) {
+	return this.props[name];
 };
 
 
