@@ -1,20 +1,29 @@
 
-var getComputedStyle = window.getComputedStyle;
-window.getComputedStyle = function(node) {
-	
-	// Override for Raphael
-	if (node && node.paper) {
-		return {
-			getPropertyValue: function(name) {
-				return node.attr(name);
-			}
-		};
-	}
-	
-	// Default window.getComputedStyle
-	return getComputedStyle.apply(window, arguments);
+(function(getComputedStyle) {
+  window.getComputedStyle = function(node) {
+	  // Override for Raphael
+	  if (node && node.paper) {
+		  return {
+			  getPropertyValue: function(name) {
+				  return node.attr(name);
+			  }
+		  };
+	  }
+	  // Default window.getComputedStyle
+	  return getComputedStyle.apply(window, arguments);
 };
+}(window.getComputedStyle));
 
+// Register SVG elements with IE so they can be styled
+(function() {
+  var svgElements = 'circle ellipse line polygon polyline rect g svg image path text'.split(' '); 
+    
+  if (Raphael.svg) return;
+
+  for (var i=0; i< svgElements.length; i++) {
+    document.createElement(svgElements[i]);
+  }
+})();
 
 
 function paperClassedAdd(node, name) {
@@ -64,6 +73,12 @@ function appendRaphael(parent) {
   var paper =  Raphael(parent, 0, 0);
 
   paper.__attrs = { width: 0, height: 0 };
+  
+  if (Raphael.vml) {
+    paper.shadowDom = document.createElement('svg');
+    paper.shadowDom.style.display = 'none';
+    parent.appendChild(paper.shadowDom);
+  }
 
   paper.ca.d = function(path) {
     return { path: path };
@@ -85,6 +100,9 @@ function appendRaphael(parent) {
 // Paper Extensions
 
 Raphael.fn.removeChild = function(el) {
+  if (Raphael.vml) {
+    this.shadowDom.removeChild(el.shadowDom);
+  }
   el.remove();
 };
 
@@ -134,11 +152,16 @@ Raphael.fn.getElementsByTagName = function(tag) {
 Raphael.fn.appendChild = function(childNode) {
   var type = childNode && childNode.nodeName,
       node =  type ? this[type.toLowerCase()]() : null;
-
+      
   // Ensure Paper can be referenced from sets
   if (node) {
     node.paper = this;
 		node.style = new ElementStyle(node);
+    if (Raphael.vml) {
+      node.shadowDom = childNode;
+      this.shadowDom.appendChild(childNode);
+      node.updateStyle(); //  Apply CSS styles
+    }
   }
   return node;
 };
@@ -156,10 +179,15 @@ Raphael.fn.appendChild = function(childNode) {
 Raphael.el.updateStyle = function(name) {
 	var attributes = this.data('attributes') || {},
 			style = this.style.props,
-			css = this.data('css') || {};
-			
+      css = Raphael.vml ? this.shadowDom.currentStyle : {};
+
+      if (arguments.length < 1) {
+        var props = 'arrow-end cursor fill fill-opacity font font-family font-size font-weight opacity r rx ry stroke stroke-dasharay stroke-linecap stroke-linejoin stroke-miterlimit stroke-opacity stroke-width text-anchor'.split(' ');
+        for (var i=0; i < props.length; i++) this.updateStyle(props[i]);
+      }
 	
 	this.attr(name, (style[name] || css[name] || attributes[name]));
+  return true;
 };
 
 
@@ -200,6 +228,10 @@ Raphael.el.removeEventListener = function(type, listener) {
 Raphael.el.setAttribute = function(name, value) {
   if (name == 'class' || name == 'className') {
     paperClassedAdd(this.node, value);
+    if (Raphael.vml) {
+      this.shadowDom.className = value;
+      this.updateStyle();
+    }
   }
 	
 	_elementSetProperty('attributes').apply(this, [name, value]);
