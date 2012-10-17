@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Circle Example</title>
+    <script type="text/javascript" src="../lib/sizzle/sizzle.js"></script>
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="../lib/compat/compat.js"></script>
+		<![endif]-->
+    <script src="../r2d3.v2.js"></script>
+    <style>
+    .foo { fill: blue; }
+    .bar { fill: red; }
+    circle { stroke-width: 10px; stroke: black; fill-opacity: .5;}
+    </style>
+  </head>
+  <body>
+		<div>
+			<p>Demo styling elements using a style block.</p>
+		</div>
+		<script>
+      var svg = d3.select('div').append('svg')
+      	.attr('height', 200)
+        .attr('width', 200);
+
+			svg.append('circle')
+				.attr('cx', 75)
+				.attr('cy', 100)
+				.attr('r', 50)
+				.attr('className', 'foo')
+  		svg.append('circle')
+  			.attr('cx', 125)
+  			.attr('cy', 100)
+  			.attr('r', 50)
+  			.attr('className', 'bar')
+		</script>
+  </body>
+</html>
