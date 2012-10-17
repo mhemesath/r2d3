@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Circle Example</title>
+    <script type="text/javascript" src="../lib/sizzle/sizzle.js"></script>
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="../lib/compat/compat.js"></script>
+		<![endif]-->
+    <script src="../r2d3.v2.js"></script>
+  </head>
+  <body>
+		<div>
+			<p>Demo using the blue fill style to override the red fill attribute. Clicking toggles the blue style property on and off.</p>
+		</div>
+		<script>
+      var svg = d3.select('div').append('svg')
+      	.attr('height', 200)
+        .attr('width', 200);
+
+			svg.append('circle')
+				.attr('cx', 100)
+				.attr('cy', 100)
+				.attr('r', 100)
+				.attr('stroke', 'none')
+				.attr('fill', '#FF0000')
+				.on('click', function() { 
+					var self = d3.select(this);
+					if (self.style('fill') === '#0000FF') {
+						self.style('fill', null);
+					} else {
+						self.style('fill', '#0000FF');
+					}
+				});
+		</script>
+  </body>
+</html>
