@@ -10999,7 +10999,6 @@ function _elementSetProperty(level) {
 
 function _elementRemoveProperty(level) {
 	return function(name) {
-		console.log(this);
 			var style = this.data(level) || {};
 			delete style[name];
 			this.data(level, style);
