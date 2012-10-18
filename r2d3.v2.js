@@ -11141,8 +11141,9 @@ Raphael.st.removeAttribute = function(name) {
   });
 };
 
+/* Raphael Duplication begin */
 var createNode = function(tagName) {
-	var doc = Raphael._g.win;
+	var doc = Raphael._g.win.document;
 	try {
   	!doc.namespaces.rvml && doc.namespaces.add("rvml", "urn:schemas-microsoft-com:vml");
 		return doc.createElement('<rvml:' + tagName + ' class="rvml">');
@@ -11168,10 +11169,16 @@ var $ = function (el, attr) {
 	}
 	return el;
 };
+/* Raphael Duplication end */
+
 Raphael._engine.group = function(paper) {
 	if (Raphael.vml) {
 		var el = createNode("group"),
 		p = new Raphael.el.constructor(el, paper);
+		var skew = createNode("skew");
+    skew.on = true;
+    el.appendChild(skew);
+    p.skew = skew;
 		paper.canvas.appendChild(el);
 		return p; 
 	}
