@@ -11141,87 +11141,59 @@ Raphael.st.removeAttribute = function(name) {
   });
 };
 
-function Group(paper) {
-  this.paper = paper;
-  this.attrs = {};
-  this.className = '';
-  this.node = Raphael.vml ?
-    document.createElement('<rvml:group class="rvml">') :
-    document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  this.paper.canvas.appendChild(this.node);
-
-  this.paper.groups.push(this);
-}
-
-Group.prototype.node = function() {
-  return this.node;
-};
-
-Group.prototype.remove = function() {
-  this.set.clear();
-  this.paper.canvas.removeChild(this.node);
-  this.paper.groups.splice(this.paper.groups.indexOf(this), 1);
-};
-
-Group.prototype.getElementsByTagName = function(tag) {
-  return this.set.getElementsByTagName(tag);
-};
-
-
-Group.prototype.setAttribute = function(name, value) {
-  this.attrs[name] = value;
-  if (name === 'className') {
-    this.className = value;
-    paperClassedAdd(this.node, value);
-  } else if (name === 'transform') {
-    // Build a transform matrix
-    if (true || Raphael.vml) {
-      var transforms = Raphael.parseTransformString(value),
-          matrix = Raphael.matrix();
-      for (var i=0; i< transforms.length; i++) {
-        switch(transforms[i][0]) {
-          case "t":
-            matrix.translate.apply(matrix, transforms[i].slice(1));
-            break;
-          case "r":
-            matrix.rotate.apply(matrix, transforms[i].slice(1));
-            break;
-          case "s":
-            matrix.scale.apply(matrix, transforms[i].slice(1));
-            break;
-        }
-      }
-      this.node.coordorigin = matrix.x(0, 0) + " " + matrix.y(0, 0);
-    // Let SVG Handle the transform
-    } else {
-      this.node.setAttribute(name, value);
-    }
+var createNode = function(tagName) {
+	var doc = Raphael._g.win;
+	try {
+  	!doc.namespaces.rvml && doc.namespaces.add("rvml", "urn:schemas-microsoft-com:vml");
+		return doc.createElement('<rvml:' + tagName + ' class="rvml">');
+	} catch (e) {
+		return doc.createElement('<' + tagName + ' xmlns="urn:schemas-microsoft.com:vml" class="rvml">');
   }
 };
-
-Group.prototype.getAttribute = function(name) {
-  return this.attrs[name] || '';
+var $ = function (el, attr) {
+	if (attr) {
+			if (typeof el == "string") {
+					el = $(el);
+			}
+			for (var key in attr) if (attr[has](key)) {
+					if (key.substring(0, 6) == "xlink:") {
+							el.setAttributeNS(xlink, key.substring(6), Str(attr[key]));
+					} else {
+							el.setAttribute(key, Str(attr[key]));
+					}
+			}
+	} else {
+			el = Raphael._g.doc.createElementNS("http://www.w3.org/2000/svg", el);
+			el.style && (el.style.webkitTapHighlightColor = "rgba(0,0,0,0)");
+	}
+	return el;
 };
-
-Group.prototype.removeAttribute = function(name) {
-  delete this.attrs[name];
+Raphael._engine.group = function(paper) {
+	if (Raphael.vml) {
+		var el = createNode("group"),
+		p = new Raphael.el.constructor(el, paper);
+		paper.canvas.appendChild(el);
+		return p; 
+	}
+	var el = $("g");
+	paper.canvas && paper.canvas.appendChild(el);
+	var res = new Raphael.el.constructor(el, paper);
+	res.attrs = {};
+	res.type = "group";
+	$(el, res.attrs);
+	return res;
 };
-
-
-Group.prototype.tagName = Raphael.vml ? 'rvml:group' : 'g';
-
-Group.prototype.type = 'g';
-
-Group.prototype.appendChild = function(node) {
-  // Give the node to raphael to render
-  var el = this.paper.appendChild(node);
-  this.node.appendChild(Raphael.vml ? el.node : el.node);
-  return el;
+Raphael.fn.g = Raphael.fn.group = function() {
+	var out = Raphael._engine.group(this);
+	out.appendChild = function(node) { 
+		// Give the node to raphael to render
+  	var el = this.paper.appendChild(node);
+  	this.node.appendChild(el.node);
+  	return el;
+	};
+	return out;
 };
-
-Raphael.fn.g = function() {
-  return new Group(this);
-};//========================================
+//========================================
 // Parse Transform String
 // Converts transform functions to raphael transform strings, ie translate(x,y) => tx,y
 
