@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Rectangle Example</title>
+    <script type="text/javascript" src="../lib/sizzle/sizzle.js"></script>
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="../lib/compat/compat.js"></script>
+		<![endif]-->
+    <script src="../r2d3.v2.js"></script>
+  </head>
+  <body>
+		<div></div>
+		<script>
+      var svg = d3.select('div').append('svg')
+                  .attr('height', 200)
+                  .attr('width', 200),
+					data = d3.random.normal(50, 10),
+					fill = d3.scale.linear().domain([40,50,60]).range(['#ff0000', '#00ff00', '#0000ff']);
+
+			function drawRect() {
+				var rects = svg.selectAll('rect').data([data()]);
+				rects.enter().append('rect')
+					.attr("width", 20)
+					.attr("height", 20)
+					.attr('y', function(d) {return d;})
+					.attr('x', function(d) { return d;})
+					.attr('stroke', 'none')
+					.attr('fill', fill);
+				setTimeout(drawRect, 1000);
+			}
+
+			drawRect();
+		</script>
+  </body>
+</html>
