@@ -322,3 +322,9 @@ Raphael.st.removeAttribute = function(name) {
   });
 };
 
+
+Raphael.st.updateStyle = function(name) {
+  this.forEach(function(el) {
+    el.updateStyle();
+  });
+};

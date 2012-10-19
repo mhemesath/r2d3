@@ -11141,6 +11141,12 @@ Raphael.st.removeAttribute = function(name) {
   });
 };
 
+
+Raphael.st.updateStyle = function(name) {
+  this.forEach(function(el) {
+    el.updateStyle();
+  });
+};
 //========================================
 // Parse Transform String
 // Converts transform functions to raphael transform strings, ie translate(x,y) => tx,y

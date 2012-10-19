@@ -59,7 +59,19 @@
           .attr('stroke', 'none')
           .attr('fill', fill);
       }
-			drawRect();
+      
+			function drawSet() {
+        var set = svg.append('set');
+        var shape = set.selectAll('circle').data([data()]);
+        shape.enter().append('circle')
+          .attr('cx', 30)
+          .attr('cy', 30)
+          .attr('r', function(d) { return d;})
+          .attr('stroke', 'none')
+          .attr('fill', fill);
+        set.attr('fill', 'red');
+      }
+			drawSet();
 		</script>
   </body>
 </html>
