@@ -1,4 +1,3 @@
-
 r2d3
 ==========
 
@@ -89,7 +88,6 @@ See the issues page for a listing of known issues. In summary this
 includes:
 
  * Group elements are not supported, but '''set''' can be used in some cases.
- * IE < 9 does not support styling rendered R2D3 elements with CSS.
 
 
 
