@@ -10818,6 +10818,7 @@ var d3_svg_brushResizes = [
   []
 ];
 
+
 (function(getComputedStyle) {
   window.getComputedStyle = function(node) {
 	  // Override for Raphael
@@ -10998,14 +10999,21 @@ Raphael.fn.appendChild = function(childNode) {
 Raphael.el.updateStyle = function(name) {
 	var attributes = this.data('attributes') || {},
 			style = this.style.props,
-      css = Raphael.vml ? this.shadowDom.currentStyle : {};
+      css = Raphael.vml ? this.shadowDom.currentStyle : {},
+      props = 'arrow-end cursor fill fill-opacity font font-family font-size font-weight opacity r rx ry stroke stroke-dasharay stroke-linecap stroke-linejoin stroke-miterlimit stroke-opacity stroke-width text-anchor'.split(' ');
+      
 
-      if (arguments.length < 1) {
-        var props = 'arrow-end cursor fill fill-opacity font font-family font-size font-weight opacity r rx ry stroke stroke-dasharay stroke-linecap stroke-linejoin stroke-miterlimit stroke-opacity stroke-width text-anchor'.split(' ');
-        for (var i=0; i < props.length; i++) this.updateStyle(props[i]);
-      }
+  if (arguments.length < 1) {
+    for (var i=0; i < props.length; i++) this.updateStyle(props[i]);
+  }
 	
-	this.attr(name, (style[name] || css[name] || attributes[name]));
+  // Props that can't be styled via CSS (e.g path, height, width), apply directly
+  if (props.indexOf(name) < 0) {
+    this.attr(name, attributes[name]);
+  // Honor the precedence for applying styleable attributes
+  } else {
+    this.attr(name, (style[name] || css[name] || attributes[name]));
+  }
   return true;
 };
 
