@@ -11178,18 +11178,18 @@ var $ = function (el, attr) {
 };
 /* Raphael Duplication end */
 
-Raphael._engine.group = function(paper) {
-	if (Raphael.vml) {
+Raphael._engine.group_vml = function(paper) {
 		var el = createNode("group"),
-		p = new Raphael.el.constructor(el, paper);
+				p = new Raphael.el.constructor(el, paper);
 		p.type = "group";
 		var skew = createNode("skew");
     skew.on = true;
-    el.appendChild(skew);
+		el.appendChild(skew);
     p.skew = skew;
 		paper.canvas.appendChild(el);
 		return p; 
-	}
+};
+Raphael._engine.group = function(paper) {
 	var el = $("g");
 	paper.canvas && paper.canvas.appendChild(el);
 	var res = new Raphael.el.constructor(el, paper);
@@ -11199,7 +11199,7 @@ Raphael._engine.group = function(paper) {
 	return res;
 };
 Raphael.fn.g = Raphael.fn.group = function() {
-	var out = Raphael._engine.group(this);
+	var out = Raphael.vml ? Raphael._engine.group_vml(this) : Raphael._engine.group(this);
 	out.appendChild = function(node) { 
 		// Give the node to raphael to render
   	var el = this.paper.appendChild(node);
