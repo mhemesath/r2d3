@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Group Example</title>
+    <script type="text/javascript" src="../lib/sizzle/sizzle.js"></script>
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="../lib/compat/compat.js"></script>
+    <![endif]-->
+    <script src="../r2d3.v2.js"></script>
+  </head>
+  <body>
+    <div></div>
+    <div></div>
+    <script>
+      var svg = d3.select('div').append('svg')
+                  .attr('height', 200)
+                  .attr('width', 200);
+      
+      var g = svg.append('g')
+        .attr('className', 'foo')
+        .attr('transform', 'translate(20, 20)')
+        .append('circle').attr({ cx: 100, cy: 100, r: 100});
+
+    </script>
+  </body>
+</html>
+

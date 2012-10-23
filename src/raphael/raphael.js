@@ -74,6 +74,7 @@ function appendRaphael(parent) {
   var paper =  Raphael(parent, 0, 0);
 
   paper.__attrs = { width: 0, height: 0 };
+  paper.groups = [];
   
   if (Raphael.vml) {
     paper.shadowDom = document.createElement('svg');
@@ -90,9 +91,11 @@ function appendRaphael(parent) {
   paper.ca.y1 = lineAttribute('y1');
   paper.ca.y2 = lineAttribute('y2');
 
+
   // Fool sizzle into thinking the paper is an element
   paper.nodeType = 1;
   paper.nodeName = 'object';
+  paper.node = parent;
 
   return paper;
 }
@@ -141,6 +144,11 @@ Raphael.fn.getElementsByClassName = function(selector) {
 
 
 Raphael.fn.getElementsByTagName = function(tag) {
+
+  if (tag === 'g') {
+    return this.groups;
+  }
+
   var matches = [];
   this.forEach(function(el) {
     var type = el.data('lineAttrs') ? 'line' : el.type;
@@ -166,7 +174,6 @@ Raphael.fn.appendChild = function(childNode) {
   }
   return node;
 };
-
 
 
 
