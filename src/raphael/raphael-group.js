@@ -24,7 +24,6 @@ Group.prototype.getElementsByTagName = function(tag) {
   return this.set.getElementsByTagName(tag);
 };
 
-
 Group.prototype.setAttribute = function(name, value) {
   this.attrs[name] = value;
   if (name === 'className') {
