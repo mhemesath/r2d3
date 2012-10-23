@@ -11154,7 +11154,7 @@ Raphael.st.updateStyle = function(name) {
   });
 };
 /* Raphael Duplication begin */
-var createNode = function(tagName) {
+var createGNode = function(tagName) {
 	var doc = Raphael._g.win.document;
 	return doc.createElement('<rvml:' + tagName + ' class="rvml">');
 };
@@ -11176,17 +11176,31 @@ var $ = function (el, attr) {
 	}
 	return el;
 };
+/*
+var setGAttrs = function(o, params) {
+	o.attrs = o.attrs || {};
+	var node = o.node,
+			a = o.attrs,
+			s = node.style;
+	for (var par in params) if (params["hasOwnProperty"](par)) {
+		a[par] = params[par];
+  }
+	"transform" in params && Raphael.el.transform(params.transform);
+};
+*/
 /* Raphael Duplication end */
 
 Raphael._engine.group_vml = function(paper) {
-		var el = createNode("group"),
+		var el = createGNode("group"),
 				p = new Raphael.el.constructor(el, paper);
+		p.shape = el;
 		p.type = "group";
-		var skew = createNode("skew");
+		p.transform;
+		paper.canvas.appendChild(el);
+		var skew = createGNode("skew");
     skew.on = true;
 		el.appendChild(skew);
     p.skew = skew;
-		paper.canvas.appendChild(el);
 		return p; 
 };
 Raphael._engine.group = function(paper) {
