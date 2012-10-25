@@ -11043,12 +11043,12 @@ function _elementRemoveProperty(level) {
 }
 
 Raphael.el.addEventListener = function(type, listener) {
-  this[type](listener);
+  this.node.addEventListener(type, listener, false);
 };
 
 
 Raphael.el.removeEventListener = function(type, listener) {
-  this['un'+ type](listener);
+  this.node.removeEventListener(type, listener, false);
 };
 
 
@@ -11146,8 +11146,7 @@ Raphael.st.updateStyle = function(name) {
   this.forEach(function(el) {
     el.updateStyle(name);
   });
-};
-//========================================
+};//========================================
 // Parse Transform String
 // Converts transform functions to raphael transform strings, ie translate(x,y) => tx,y
 
