@@ -176,7 +176,6 @@ Raphael.fn.appendChild = function(childNode) {
 };
 
 
-
 //========================================
 // Element Extensions
 
@@ -230,12 +229,12 @@ function _elementRemoveProperty(level) {
 }
 
 Raphael.el.addEventListener = function(type, listener) {
-  this[type](listener);
+  this.node.addEventListener(type, listener, false);
 };
 
 
 Raphael.el.removeEventListener = function(type, listener) {
-  this['un'+ type](listener);
+  this.node.removeEventListener(type, listener, false);
 };
 
 

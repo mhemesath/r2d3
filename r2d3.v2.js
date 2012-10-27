@@ -10995,7 +10995,6 @@ Raphael.fn.appendChild = function(childNode) {
 };
 
 
-
 //========================================
 // Element Extensions
 
@@ -11049,12 +11048,12 @@ function _elementRemoveProperty(level) {
 }
 
 Raphael.el.addEventListener = function(type, listener) {
-  this[type](listener);
+  this.node.addEventListener(type, listener, false);
 };
 
 
 Raphael.el.removeEventListener = function(type, listener) {
-  this['un'+ type](listener);
+  this.node.removeEventListener(type, listener, false);
 };
 
 
@@ -11195,12 +11194,12 @@ Raphael._engine.group_vml = function(paper) {
 				p = new Raphael.el.constructor(el, paper);
 		p.shape = el;
 		p.type = "group";
-		p.transform;
 		paper.canvas.appendChild(el);
 		var skew = createGNode("skew");
     skew.on = true;
 		el.appendChild(skew);
     p.skew = skew;
+		p.transform("");
 		return p; 
 };
 Raphael._engine.group = function(paper) {
