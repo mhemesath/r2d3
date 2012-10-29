@@ -194,6 +194,7 @@ Raphael.el.updateStyle = function(name) {
   }
 	
   // Props that can't be styled via CSS (e.g path, height, width), apply directly
+	if (name === void 0 || name == undefined) return true;
   if (props.indexOf(name) < 0) {
     this.attr(name, attributes[name]);
   // Honor the precedence for applying styleable attributes
@@ -213,7 +214,6 @@ function _elementSetProperty(level) {
 			} else {
 				style[name] = value;
 			}
-			
 			this.data(level, style);
 			this.updateStyle(name);
 	}
@@ -239,11 +239,12 @@ Raphael.el.removeEventListener = function(type, listener) {
 
 
 Raphael.el.setAttribute = function(name, value) {
+	if (name === void 0 || name == undefined) return this; 
   if (name == 'class' || name == 'className') {
     paperClassedAdd(this.node, value);
     if (Raphael.vml) {
       this.shadowDom.className = value;
-      this.updateStyle();
+      this.updateStyle(name);
     }
   }
 	

@@ -11013,6 +11013,7 @@ Raphael.el.updateStyle = function(name) {
   }
 	
   // Props that can't be styled via CSS (e.g path, height, width), apply directly
+	if (name === void 0 || name == undefined) return true;
   if (props.indexOf(name) < 0) {
     this.attr(name, attributes[name]);
   // Honor the precedence for applying styleable attributes
@@ -11032,7 +11033,6 @@ function _elementSetProperty(level) {
 			} else {
 				style[name] = value;
 			}
-			
 			this.data(level, style);
 			this.updateStyle(name);
 	}
@@ -11058,11 +11058,12 @@ Raphael.el.removeEventListener = function(type, listener) {
 
 
 Raphael.el.setAttribute = function(name, value) {
+	if (name === void 0 || name == undefined) return this; 
   if (name == 'class' || name == 'className') {
     paperClassedAdd(this.node, value);
     if (Raphael.vml) {
       this.shadowDom.className = value;
-      this.updateStyle();
+      this.updateStyle(name);
     }
   }
 	
@@ -11175,29 +11176,20 @@ var $ = function (el, attr) {
 	}
 	return el;
 };
-/*
-var setGAttrs = function(o, params) {
-	o.attrs = o.attrs || {};
-	var node = o.node,
-			a = o.attrs,
-			s = node.style;
-	for (var par in params) if (params["hasOwnProperty"](par)) {
-		a[par] = params[par];
-  }
-	"transform" in params && Raphael.el.transform(params.transform);
-};
-*/
 /* Raphael Duplication end */
 
 Raphael._engine.group_vml = function(paper) {
-		var el = createGNode("group"),
-				p = new Raphael.el.constructor(el, paper);
-		p.shape = el;
-		p.type = "group";
-		paper.canvas.appendChild(el);
-		var skew = createGNode("skew");
+		var el = createGNode("shape"),
+				skew = createGNode("skew");
     skew.on = true;
+		el.style.cssText = "position:absolute;left:0;top:0;width:1px;height:1px";
+		el.coordorigin = paper.coordorigin;
 		el.appendChild(skew);
+		var p = new Raphael.el.constructor(el, paper);
+		p.type = "group";
+		p.path = [];
+		p.Path = "";
+		paper.canvas.appendChild(el);
     p.skew = skew;
 		p.transform("");
 		return p; 
@@ -11215,8 +11207,16 @@ Raphael.fn.g = Raphael.fn.group = function() {
 	var out = Raphael.vml ? Raphael._engine.group_vml(this) : Raphael._engine.group(this);
 	out.appendChild = function(node) { 
 		// Give the node to raphael to render
-  	var el = this.paper.appendChild(node);
+		var el = this.paper.appendChild(node);
+		// Apply transforms if any
+		if (this.attr("transform").length != 0) {
+			var tS = this.attr("transform")[0].toString().replace("t,", "t");
+			console.log(tS);
+			console.log(this.attr("transform").toString());
+			el.transform(this.attr("transform").toString());
+		}
   	this.node.appendChild(el.node);
+
   	return el;
 	};
 	return out;
