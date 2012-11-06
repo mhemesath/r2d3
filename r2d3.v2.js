@@ -10934,6 +10934,12 @@ Raphael.fn.line = function () {
 };
 
 
+Raphael.fn.img = function() {
+  // IE8 turns image nodes into img
+  return this.image();
+};
+
+
 Raphael.fn.getAttribute = function(name) {
   return this.__attrs[name];
 };
@@ -11060,15 +11066,28 @@ Raphael.el.setAttribute = function(name, value) {
       this.updateStyle();
     }
   }
+  
+  if (name === 'href' && this.type === 'image') {
+    name = "src"; // Raphael uses src
+  }
 	
 	_elementSetProperty('attributes').apply(this, [name, value]);
   return this;
 };
 
 
+Raphael.el.setAttributeNS = function(namespace, name, value) {
+  if (namespace === 'xlink' && name === 'href' && this.type === 'image') {
+    this.setAttribute('src', value);
+  }
+  this.setAttribute(name, value);
+};
+
 Raphael.el.removeAttribute = _elementRemoveProperty('attributes');
 
 Raphael.el.getAttribute = function(name) {
+  // Raphael uses src
+  if (name === 'href' && this.type === 'image') name = 'src';
 	return this.data('attributes')[name];
 };
 
@@ -11132,6 +11151,10 @@ Raphael.st.setAttribute = function(name, value) {
   this.forEach(function(el) {
     el.setAttribute(name, value);
   });
+};
+
+Raphael.st.setAttributeNS = function(ns, name, value) {
+  this.setAttribute(name, value);
 };
 
 
