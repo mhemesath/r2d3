@@ -247,12 +247,24 @@ function _elementRemoveProperty(level) {
 }
 
 Raphael.el.addEventListener = function(type, listener) {
-  this.node.addEventListener(type, listener, false);
+  if (this.node.addEventListener) {
+    this.node.addEventListener(type, listener, false);
+  } else if (this.node.attachEvent) {
+    this.node.attachEvent("on" + type, listener);
+  } else {
+    throw "Found neither addEventListener nor attachEvent";
+  }
 };
 
 
 Raphael.el.removeEventListener = function(type, listener) {
-  this.node.removeEventListener(type, listener, false);
+  if (this.node.removeEventListener) {
+    this.node.removeEventListener(type, listener, false);
+  } else if (this.node.detachEvent) {
+    this.node.detachEvent("on" + type, listener);
+  } else {
+    throw "Found neither removeEventListener nor detachEvent";
+  }
 };
 
 
