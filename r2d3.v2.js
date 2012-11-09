@@ -10937,6 +10937,12 @@ Raphael.fn.line = function () {
 };
 
 
+Raphael.fn.img = function() {
+  // IE8 turns image nodes into img
+  return this.image();
+};
+
+
 Raphael.fn.getAttribute = function(name) {
   return this.__attrs[name];
 };
@@ -11066,15 +11072,28 @@ Raphael.el.setAttribute = function(name, value) {
       this.updateStyle(name);
     }
   }
+  
+  if (name === 'href' && this.type === 'image') {
+    name = "src"; // Raphael uses src
+  }
 	
 	_elementSetProperty('attributes').apply(this, [name, value]);
   return this;
 };
 
 
+Raphael.el.setAttributeNS = function(namespace, name, value) {
+  if (namespace === 'xlink' && name === 'href' && this.type === 'image') {
+    this.setAttribute('src', value);
+  }
+  this.setAttribute(name, value);
+};
+
 Raphael.el.removeAttribute = _elementRemoveProperty('attributes');
 
 Raphael.el.getAttribute = function(name) {
+  // Raphael uses src
+  if (name === 'href' && this.type === 'image') name = 'src';
 	return this.data('attributes')[name];
 };
 
@@ -11138,6 +11157,10 @@ Raphael.st.setAttribute = function(name, value) {
   this.forEach(function(el) {
     el.setAttribute(name, value);
   });
+};
+
+Raphael.st.setAttributeNS = function(ns, name, value) {
+  this.setAttribute(name, value);
 };
 
 
@@ -11208,12 +11231,12 @@ Raphael.fn.g = Raphael.fn.group = function() {
 	out.appendChild = function(node) { 
 		// Give the node to raphael to render
 		var el = this.paper.appendChild(node);
-		// Apply transforms if any
-		if (this.attr("transform").length != 0) {
-			var tS = this.attr("transform")[0].toString().replace("t,", "t");
-			console.log(tS);
-			console.log(this.attr("transform").toString());
-			el.transform(this.attr("transform").toString());
+		if (Raphael.vml) {
+			// Apply transforms if any
+			if (this.attr("transform").length != 0) {
+				var tS = this.attr("transform")[0].toString().replace("t,", "t");
+				el.transform(this.attr("transform").toString());
+			}
 		}
   	this.node.appendChild(el.node);
 
