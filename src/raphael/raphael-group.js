@@ -49,6 +49,8 @@ Raphael._engine.group = function(paper) {
   res.type = "group";
   var n = new Raphael.st.constructor(el, paper);
   res.node = n.node;
+  res.items = [];
+  res.length = 0;
 	$(el, res.attrs);
 	return res;
 };
