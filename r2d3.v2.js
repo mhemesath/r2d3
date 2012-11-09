@@ -10819,19 +10819,38 @@ var d3_svg_brushResizes = [
 ];
 
 
-(function(getComputedStyle) {
+(function(defaultGetComputedStyle) {
+  // If we don't have window.getComputedStyle, as in IE7,
+  // make a pretend one.
+  if (typeof defaultGetComputedStyle === "undefined") {
+    defaultGetComputedStyle = function(el, pseudo) {
+      this.el = el;
+      this.getPropertyValue = function(prop) {
+        var re = /(\-([a-z]){1})/g;
+        if (prop == 'float') prop = 'styleFloat';
+        if (re.test(prop)) {
+          prop = prop.replace(re, function () {
+            return arguments[2].toUpperCase();
+          });
+        }
+        return el.currentStyle[prop] ? el.currentStyle[prop] : null;
+      }
+      return this;
+    };
+  }
+  
   window.getComputedStyle = function(node) {
-	  // Override for Raphael
-	  if (node && node.paper) {
-		  return {
-			  getPropertyValue: function(name) {
-				  return node.attr(name);
-			  }
-		  };
-	  }
-	  // Default window.getComputedStyle
-	  return getComputedStyle.apply(window, arguments);
-};
+    // Override for Raphael
+    if (node && node.paper) {
+      return {
+        getPropertyValue: function(name) {
+          return node.attr(name);
+        }
+      };
+    }
+    
+    return defaultGetComputedStyle.apply(window, arguments);
+  };
 }(window.getComputedStyle));
 
 // Register SVG elements with IE so they can be styled
@@ -11019,7 +11038,6 @@ Raphael.el.updateStyle = function(name) {
   }
 	
   // Props that can't be styled via CSS (e.g path, height, width), apply directly
-	if (name === void 0 || name == undefined) return true;
   if (props.indexOf(name) < 0) {
     this.attr(name, attributes[name]);
   // Honor the precedence for applying styleable attributes
@@ -11054,12 +11072,24 @@ function _elementRemoveProperty(level) {
 }
 
 Raphael.el.addEventListener = function(type, listener) {
-  this.node.addEventListener(type, listener, false);
+  if (this.node.addEventListener) {
+    this.node.addEventListener(type, listener, false);
+  } else if (this.node.attachEvent) {
+    this.node.attachEvent("on" + type, listener);
+  } else {
+    throw "Found neither addEventListener nor attachEvent";
+  }
 };
 
 
 Raphael.el.removeEventListener = function(type, listener) {
-  this.node.removeEventListener(type, listener, false);
+  if (this.node.removeEventListener) {
+    this.node.removeEventListener(type, listener, false);
+  } else if (this.node.detachEvent) {
+    this.node.detachEvent("on" + type, listener);
+  } else {
+    throw "Found neither removeEventListener nor detachEvent";
+  }
 };
 
 
@@ -11128,16 +11158,39 @@ ElementStyle.prototype.getPropertyValue = function(name) {
 
 Raphael.st.getElementsByClassName  = Raphael.fn.getElementsByClassName;
 
-
 Raphael.st.getElementsByTagName = Raphael.fn.getElementsByTagName;
 
+Raphael.st.constructor = function (node, paper, items) {
 
-Raphael.st.appendChild = function(childNode) {
-  var node = this.paper.appendChild(childNode);
-  this.push(node);
-  return node;
+  this[0] = this.node = node;
+
+  node.raphael = true;
+
+  this.id = Raphael._oid++;
+  node.raphaelid = this.id;
+
+  this.paper = paper;
+
+  this.items = [];
+  this.length = 0;
+  this.type = "set";
+  if (items) {
+      for (var i = 0, ii = items.length; i < ii; i++) {
+          if (items[i] && (items[i].constructor == elproto.constructor || items[i].constructor == Set)) {
+              this[this.items.length] = this.items[this.items.length] = items[i];
+              this.length++;
+          }
+      }
+  }
 };
 
+Raphael.st.appendChild = function(childNode) {
+debugger;
+  var el = this.paper.appendChild(childNode);
+  this.node.appendChild(el.node);
+  this.push(el);
+  return el;
+};
 
 Raphael.st.addEventListener = function(type, listener) {
   this.forEach(function(el) {
@@ -11145,13 +11198,11 @@ Raphael.st.addEventListener = function(type, listener) {
   });
 };
 
-
 Raphael.st.removeEventListener = function(type, listener) {
   this.forEach(function(el) {
     el.removeEventListener(type, listener);
   });
 };
-
 
 Raphael.st.setAttribute = function(name, value) {
   this.forEach(function(el) {
@@ -11163,13 +11214,11 @@ Raphael.st.setAttributeNS = function(ns, name, value) {
   this.setAttribute(name, value);
 };
 
-
 Raphael.st.removeAttribute = function(name) {
   this.forEach(function(el) {
     el.removeAttribute(name);
   });
 };
-
 
 Raphael.st.updateStyle = function(name) {
   this.forEach(function(el) {
@@ -11181,6 +11230,7 @@ var createGNode = function(tagName) {
 	var doc = Raphael._g.win.document;
 	return doc.createElement('<rvml:' + tagName + ' class="rvml">');
 };
+
 var $ = function (el, attr) {
 	if (attr) {
 			if (typeof el == "string") {
@@ -11202,16 +11252,12 @@ var $ = function (el, attr) {
 /* Raphael Duplication end */
 
 Raphael._engine.group_vml = function(paper) {
-		var el = createGNode("shape"),
+		var el = createGNode("group"),
 				skew = createGNode("skew");
     skew.on = true;
-		el.style.cssText = "position:absolute;left:0;top:0;width:1px;height:1px";
-		el.coordorigin = paper.coordorigin;
 		el.appendChild(skew);
 		var p = new Raphael.el.constructor(el, paper);
 		p.type = "group";
-		p.path = [];
-		p.Path = "";
 		paper.canvas.appendChild(el);
     p.skew = skew;
 		p.transform("");
@@ -11220,28 +11266,19 @@ Raphael._engine.group_vml = function(paper) {
 Raphael._engine.group = function(paper) {
 	var el = $("g");
 	paper.canvas && paper.canvas.appendChild(el);
-	var res = new Raphael.el.constructor(el, paper);
-	res.attrs = {};
-	res.type = "group";
+  var res = Raphael.st;
+  res.attrs = {};
+  res.type = "group";
+  var n = new Raphael.st.constructor(el, paper);
+  debugger;
+  res.node = n.node;
+  res.items = [];
+  res.length = 0;
 	$(el, res.attrs);
 	return res;
 };
 Raphael.fn.g = Raphael.fn.group = function() {
 	var out = Raphael.vml ? Raphael._engine.group_vml(this) : Raphael._engine.group(this);
-	out.appendChild = function(node) { 
-		// Give the node to raphael to render
-		var el = this.paper.appendChild(node);
-		if (Raphael.vml) {
-			// Apply transforms if any
-			if (this.attr("transform").length != 0) {
-				var tS = this.attr("transform")[0].toString().replace("t,", "t");
-				el.transform(this.attr("transform").toString());
-			}
-		}
-  	this.node.appendChild(el.node);
-
-  	return el;
-	};
 	return out;
 };
 //========================================

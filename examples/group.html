@@ -17,14 +17,14 @@
                   .attr('width', 200);
       
       var g = svg.append('g')
-         .attr('class', 'foo')
-				 .attr('transform', 'translate(50, 50)');
+         .attr('class', 'foo');
 
 			var circle = g.append('circle').attr({ 
 					cx: 100, cy: 100, r: 100
 					, "transform": "translate(10,10)"
 					});
 
+				 g.attr('transform', 'translate(70, 70)');
     </script>
   </body>
 </html>
