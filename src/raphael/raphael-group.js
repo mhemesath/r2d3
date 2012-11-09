@@ -29,8 +29,13 @@ Raphael._engine.group_vml = function(paper) {
 				skew = createGNode("skew");
     skew.on = true;
 		el.appendChild(skew);
-		var p = new Raphael.el.constructor(el, paper);
-		p.type = "group";
+    var res = Raphael.st;
+    res.attrs = {};
+    res.type = "group";
+		var p = new Raphael.st.constructor(el, paper);
+    res.node = p.node;
+    res.items = [];
+    res.length = 0;
 		paper.canvas.appendChild(el);
     p.skew = skew;
 		p.transform("");
@@ -44,8 +49,6 @@ Raphael._engine.group = function(paper) {
   res.type = "group";
   var n = new Raphael.st.constructor(el, paper);
   res.node = n.node;
-  res.items = [];
-  res.length = 0;
 	$(el, res.attrs);
 	return res;
 };
