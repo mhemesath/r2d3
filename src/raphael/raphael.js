@@ -110,7 +110,6 @@ function appendRaphael(parent) {
   paper.ca.y1 = lineAttribute('y1');
   paper.ca.y2 = lineAttribute('y2');
 
-
   // Fool sizzle into thinking the paper is an element
   paper.nodeType = 1;
   paper.nodeName = 'object';
@@ -275,7 +274,6 @@ Raphael.el.removeEventListener = function(type, listener) {
 
 
 Raphael.el.setAttribute = function(name, value) {
-	if (name === void 0 || name == undefined) return this; 
   if (name == 'class' || name == 'className') {
     paperClassedAdd(this.node, value);
     if (Raphael.vml) {
@@ -351,6 +349,23 @@ Raphael.st.constructor = function (node, paper, items) {
   node.raphaelid = this.id;
 
   this.paper = paper;
+  this.attrs = this.attrs || {};
+  this._ = {
+      transform: [],
+      sx: 1,
+      sy: 1,
+      deg: 0,
+      dx: 0,
+      dy: 0,
+      dirty: 1
+  };
+  !paper.bottom && (paper.bottom = this);
+
+  this.prev = paper.top;
+  paper.top && (paper.top.next = this);
+  paper.top = this;
+
+  this.next = null;
 
   this.items = [];
   this.length = 0;
