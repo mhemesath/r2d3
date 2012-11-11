@@ -1,4 +1,4 @@
-// ┌────────────────────────────────────────────────────────────────────┐ \\
+(function(){// ┌────────────────────────────────────────────────────────────────────┐ \\
 // │ Raphaël 2.1.0 - JavaScript Vector Library                          │ \\
 // ├────────────────────────────────────────────────────────────────────┤ \\
 // │ Copyright © 2008-2012 Dmitry Baranovskiy (http://raphaeljs.com)    │ \\
@@ -5812,7 +5812,7 @@ window.Raphael.vml && function (R) {
             };
         })(method);
     }
-}(window.Raphael);(function(){if (!Date.now) Date.now = function() {
+}(window.Raphael);if (!Date.now) Date.now = function() {
   return +new Date;
 };
 try {
@@ -10912,6 +10912,7 @@ function appendRaphael(parent) {
   var paper =  Raphael(parent, 0, 0);
 
   paper.__attrs = { width: 0, height: 0 };
+  paper.groups = [];
   
   if (Raphael.vml) {
     paper.shadowDom = document.createElement('svg');
@@ -10931,6 +10932,7 @@ function appendRaphael(parent) {
   // Fool sizzle into thinking the paper is an element
   paper.nodeType = 1;
   paper.nodeName = 'object';
+  paper.node = parent;
 
   return paper;
 }
@@ -10985,6 +10987,11 @@ Raphael.fn.getElementsByClassName = function(selector) {
 
 
 Raphael.fn.getElementsByTagName = function(tag) {
+
+  if (tag === 'g') {
+    return this.groups;
+  }
+
   var matches = [];
   this.forEach(function(el) {
     var type = el.data('lineAttrs') ? 'line' : el.type;
@@ -11010,9 +11017,6 @@ Raphael.fn.appendChild = function(childNode) {
   }
   return node;
 };
-
-
-
 
 
 //========================================
@@ -11052,7 +11056,6 @@ function _elementSetProperty(level) {
 			} else {
 				style[name] = value;
 			}
-			
 			this.data(level, style);
 			this.updateStyle(name);
 	}
@@ -11094,7 +11097,7 @@ Raphael.el.setAttribute = function(name, value) {
     paperClassedAdd(this.node, value);
     if (Raphael.vml) {
       this.shadowDom.className = value;
-      this.updateStyle();
+      this.updateStyle(name);
     }
   }
   
@@ -11153,16 +11156,55 @@ ElementStyle.prototype.getPropertyValue = function(name) {
 
 Raphael.st.getElementsByClassName  = Raphael.fn.getElementsByClassName;
 
-
 Raphael.st.getElementsByTagName = Raphael.fn.getElementsByTagName;
 
+Raphael.st.constructor = function (node, paper, items) {
 
-Raphael.st.appendChild = function(childNode) {
-  var node = this.paper.appendChild(childNode);
-  this.push(node);
-  return node;
+  this[0] = this.node = node;
+
+  node.raphael = true;
+
+  this.id = Raphael._oid++;
+  node.raphaelid = this.id;
+
+  this.paper = paper;
+  this.attrs = this.attrs || {};
+  this._ = {
+      transform: [],
+      sx: 1,
+      sy: 1,
+      deg: 0,
+      dx: 0,
+      dy: 0,
+      dirty: 1
+  };
+  !paper.bottom && (paper.bottom = this);
+
+  this.prev = paper.top;
+  paper.top && (paper.top.next = this);
+  paper.top = this;
+
+  this.next = null;
+
+  this.items = [];
+  this.length = 0;
+  this.type = "set";
+  if (items) {
+      for (var i = 0, ii = items.length; i < ii; i++) {
+          if (items[i] && (items[i].constructor == elproto.constructor || items[i].constructor == Set)) {
+              this[this.items.length] = this.items[this.items.length] = items[i];
+              this.length++;
+          }
+      }
+  }
 };
 
+Raphael.st.appendChild = function(childNode) {
+  var el = this.paper.appendChild(childNode);
+  this.node.appendChild(el.node);
+  this.push(el);
+  return el;
+};
 
 Raphael.st.addEventListener = function(type, listener) {
   this.forEach(function(el) {
@@ -11170,13 +11212,11 @@ Raphael.st.addEventListener = function(type, listener) {
   });
 };
 
-
 Raphael.st.removeEventListener = function(type, listener) {
   this.forEach(function(el) {
     el.removeEventListener(type, listener);
   });
 };
-
 
 Raphael.st.setAttribute = function(name, value) {
   this.forEach(function(el) {
@@ -11188,19 +11228,74 @@ Raphael.st.setAttributeNS = function(ns, name, value) {
   this.setAttribute(name, value);
 };
 
-
 Raphael.st.removeAttribute = function(name) {
   this.forEach(function(el) {
     el.removeAttribute(name);
   });
 };
 
-
 Raphael.st.updateStyle = function(name) {
   this.forEach(function(el) {
     el.updateStyle(name);
   });
-};//========================================
+};
+/* Raphael Duplication begin */
+var createGNode = function(tagName) {
+	var doc = Raphael._g.win.document;
+	return doc.createElement('<rvml:' + tagName + ' class="rvml">');
+};
+
+var $ = function (el, attr) {
+	if (attr) {
+			if (typeof el == "string") {
+					el = $(el);
+			}
+			for (var key in attr) if (attr[has](key)) {
+					if (key.substring(0, 6) == "xlink:") {
+							el.setAttributeNS(xlink, key.substring(6), Str(attr[key]));
+					} else {
+							el.setAttribute(key, Str(attr[key]));
+					}
+			}
+	} else {
+			el = Raphael._g.doc.createElementNS("http://www.w3.org/2000/svg", el);
+			el.style && (el.style.webkitTapHighlightColor = "rgba(0,0,0,0)");
+	}
+	return el;
+};
+/* Raphael Duplication end */
+
+Raphael._engine.group_vml = function(paper) {
+		var el = createGNode("group"),
+				skew = createGNode("skew");
+    skew.on = true;
+		el.appendChild(skew);
+    var res = paper.set();
+    res.attrs = {};
+    res.type = "group";
+		var p = new Raphael.st.constructor(el, paper);
+    res.node = p.node;
+		paper.canvas.appendChild(el);
+    p.skew = skew;
+		p.transform("");
+		return res; 
+};
+Raphael._engine.group = function(paper) {
+	var el = $("g");
+	paper.canvas && paper.canvas.appendChild(el);
+  var res = paper.set();
+  res.attrs = {};
+  res.type = "group";
+  var n = new Raphael.st.constructor(el, paper);
+  res.node = n.node;
+	$(el, res.attrs);
+	return res;
+};
+Raphael.fn.g = Raphael.fn.group = function() {
+	var out = Raphael.vml ? Raphael._engine.group_vml(this) : Raphael._engine.group(this);
+	return out;
+};
+//========================================
 // Parse Transform String
 // Converts transform functions to raphael transform strings, ie translate(x,y) => tx,y
 
