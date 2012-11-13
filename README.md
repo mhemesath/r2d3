@@ -19,10 +19,6 @@ R2D3 will use the bundled sizzle.
   </head>
   <body>
     <h1>Hello, world!</h1>
-    <!--[if lte IE 8]>
-    <script type="text/javascript" src="js/compat.js"></script>
-    <![endif]-->
-    <script src="js/sizzle.js"></script>
     <script src="js/r2d3.min.js"></script>
   </body>
 </html>
@@ -88,7 +84,7 @@ See the issues page for a listing of known issues. In summary this
 includes:
 
  * Group elements are not supported, but '''set''' can be used in some cases.
-
+ * Queries for SVG elements must origin from the SVG node. Example use ```svg.select('rect')``` NOT ```d3.select('rect')```
 
 
 Developers

@@ -10,6 +10,8 @@ all: \
 
 .INTERMEDIATE r2d3.v2.js: \
 	lib/raphael/raphael.js \
+	lib/sizzle/sizzle.js \
+	lib/compat/compat.js \
 	lib/d3/src/start.js \
 	r2d3.core.js \
 	r2d3.scale.js \
