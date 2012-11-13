@@ -12642,19 +12642,38 @@ var d3_svg_brushResizes = [
 ];
 
 
-(function(getComputedStyle) {
+(function(defaultGetComputedStyle) {
+  // If we don't have window.getComputedStyle, as in IE7,
+  // make a pretend one.
+  if (typeof defaultGetComputedStyle === "undefined") {
+    defaultGetComputedStyle = function(el, pseudo) {
+      this.el = el;
+      this.getPropertyValue = function(prop) {
+        var re = /(\-([a-z]){1})/g;
+        if (prop == 'float') prop = 'styleFloat';
+        if (re.test(prop)) {
+          prop = prop.replace(re, function () {
+            return arguments[2].toUpperCase();
+          });
+        }
+        return el.currentStyle[prop] ? el.currentStyle[prop] : null;
+      }
+      return this;
+    };
+  }
+  
   window.getComputedStyle = function(node) {
-	  // Override for Raphael
-	  if (node && node.paper) {
-		  return {
-			  getPropertyValue: function(name) {
-				  return node.attr(name);
-			  }
-		  };
-	  }
-	  // Default window.getComputedStyle
-	  return getComputedStyle.apply(window, arguments);
-};
+    // Override for Raphael
+    if (node && node.paper) {
+      return {
+        getPropertyValue: function(name) {
+          return node.attr(name);
+        }
+      };
+    }
+    
+    return defaultGetComputedStyle.apply(window, arguments);
+  };
 }(window.getComputedStyle));
 
 // Register SVG elements with IE so they can be styled
@@ -12872,12 +12891,24 @@ function _elementRemoveProperty(level) {
 }
 
 Raphael.el.addEventListener = function(type, listener) {
-  this.node.addEventListener(type, listener, false);
+  if (this.node.addEventListener) {
+    this.node.addEventListener(type, listener, false);
+  } else if (this.node.attachEvent) {
+    this.node.attachEvent("on" + type, listener);
+  } else {
+    throw "Found neither addEventListener nor attachEvent";
+  }
 };
 
 
 Raphael.el.removeEventListener = function(type, listener) {
-  this.node.removeEventListener(type, listener, false);
+  if (this.node.removeEventListener) {
+    this.node.removeEventListener(type, listener, false);
+  } else if (this.node.detachEvent) {
+    this.node.detachEvent("on" + type, listener);
+  } else {
+    throw "Found neither removeEventListener nor detachEvent";
+  }
 };
 
 
