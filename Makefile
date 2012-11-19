@@ -160,7 +160,10 @@ r2d3.svg.js: \
 	lib/d3/src/svg/brush.js
 
 r2d3.raphael.js: \
+	src/raphael/element-style.js \
 	src/raphael/raphael.js \
+	src/raphael/raphael-el.js \
+	src/raphael/raphael-set.js \
 	src/raphael/raphael-parseTransformString.js
 
 r2d3.behavior.js: \
@@ -238,13 +241,6 @@ r2d3%.js: Makefile
 	cat $(filter %.js,$^) > $@
 	@chmod a-w $@
 
-test:
-
-	@mkdir -p tmp/
-	@(cd lib/d3 && git archive --format=tar  --prefix=d3/ HEAD) | (cd /tmp/ && tar xf -)
-	@cp r2d3.v2.js lib/d3/d3.v2.js
-	@(cd lib/d3 && npm install && npm test)
-	@rm -rf tmp
 
 clean:
 	rm -f d3*.js

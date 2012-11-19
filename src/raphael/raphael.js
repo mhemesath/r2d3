@@ -39,33 +39,10 @@
   var svgElements = 'circle ellipse line polygon polyline rect g svg image path text'.split(' '); 
     
   if (Raphael.svg) return;
-
   for (var i=0; i< svgElements.length; i++) {
     document.createElement(svgElements[i]);
   }
 })();
-
-
-function paperClassedAdd(node, name) {
-  var re = new RegExp("(^|\\s+)" + d3.requote(name) + "(\\s+|$)", "g");
-
-  // Easy case, browser supports classList
-  if (node.classList) return node.classList.add(name);
-
-  var c = node.className || '',
-      cb = c.baseVal !== null,
-      cv = cb ? c.baseVal : c;
-  re.lastIndex = 0;
-  if (!re.test(cv)) {
-    cv = d3_collapse(cv + " " + name);
-    if (cb) {
-      c.baseVal = cv;
-    } else {
-      node.setAttribute('class', cv);
-    }
-  }
-}
-
 
 
 function lineAttribute(name) {
@@ -94,11 +71,9 @@ function appendRaphael(parent) {
 
   paper.__attrs = { width: 0, height: 0 };
   
-  if (Raphael.vml) {
-    paper.shadowDom = document.createElement('svg');
-    paper.shadowDom.style.display = 'none';
-    parent.appendChild(paper.shadowDom);
-  }
+  paper.shadowDom = document.createElement('svg');
+  paper.shadowDom.style.display = 'none';
+  parent.appendChild(paper.shadowDom);
 
   paper.ca.d = function(path) {
     return { path: path };
@@ -140,6 +115,11 @@ Raphael.fn.img = function() {
 };
 
 
+Raphael.fn.g = function() {
+  return this.set();
+};
+
+
 Raphael.fn.getAttribute = function(name) {
   return this.__attrs[name];
 };
@@ -155,230 +135,57 @@ Raphael.fn.setAttribute = function(name, value) {
 
 
 Raphael.fn.getElementsByClassName = function(selector) {
-  var matches = [];
-  selector = '.' + selector;
-
-  this.forEach(function(el) {
-    if (Sizzle.matchesSelector(el.node, selector)) matches.push(el);
-  });
-  return matches;
+  return this.getR2D3Elements(Sizzle(selector, this.shadowDom));
 };
 
 
 Raphael.fn.getElementsByTagName = function(tag) {
-  var matches = [];
-  this.forEach(function(el) {
-    var type = el.data('lineAttrs') ? 'line' : el.type;
-    if (type === tag) matches.push(el);
-  });
-  return matches;
+  return this.getR2D3Elements(this.shadowDom.getElementsByTagName(tag));
 };
 
 
 Raphael.fn.appendChild = function(childNode) {
+  var node = this.buildElement(childNode);
+  if (node) {
+    this.shadowDom.appendChild(childNode);
+    node.updateStyle(); //  Apply CSS styles
+  }
+  return node;
+};
+
+
+Raphael.fn.buildElement = function(childNode) {
   var type = childNode && childNode.nodeName,
       node =  type ? this[type.toLowerCase()]() : null;
       
-  // Ensure Paper can be referenced from sets
   if (node) {
+    // Ensure Paper can be referenced from sets
+    node.shadowDom = childNode;
+    // Link the shadowDOM node by the Raphael id.
+    node.shadowDom.id = 'rd23_' + node.id;
     node.paper = this;
+    node.tagName = type.toLowerCase();
 		node.style = new ElementStyle(node);
-    if (Raphael.vml) {
-      node.shadowDom = childNode;
-      this.shadowDom.appendChild(childNode);
-      node.updateStyle(); //  Apply CSS styles
-    }
   }
   return node;
-};
-
-
-
-
-
-//========================================
-// Element Extensions
-
-/**
- * Updates the style for a given property honoring style
- */
-Raphael.el.updateStyle = function(name) {
-	var attributes = this.data('attributes') || {},
-			style = this.style.props,
-      css = Raphael.vml ? this.shadowDom.currentStyle : {},
-      props = 'arrow-end cursor fill fill-opacity font font-family font-size font-weight opacity r rx ry stroke stroke-dasharay stroke-linecap stroke-linejoin stroke-miterlimit stroke-opacity stroke-width text-anchor'.split(' ');
-      
-
-  if (arguments.length < 1) {
-    for (var i=0; i < props.length; i++) this.updateStyle(props[i]);
-  }
-	
-  // Props that can't be styled via CSS (e.g path, height, width), apply directly
-  if (props.indexOf(name) < 0) {
-    this.attr(name, attributes[name]);
-  // Honor the precedence for applying styleable attributes
-  } else {
-    this.attr(name, (style[name] || css[name] || attributes[name]));
-  }
-  return true;
-};
-
-
-function _elementSetProperty(level) {
-	return function(name, value) {
-			var style = this.data(level) || {};
-			
-			if (value === '' || value === null || value === undefined) {
-				delete style[name];
-			} else {
-				style[name] = value;
-			}
-			
-			this.data(level, style);
-			this.updateStyle(name);
-	}
 }
 
-function _elementRemoveProperty(level) {
-	return function(name) {
-			var style = this.data(level) || {};
-			delete style[name];
-			this.data(level, style);
-			this.updateStyle(name);
-		}
-}
-
-Raphael.el.addEventListener = function(type, listener) {
-  if (this.node.addEventListener) {
-    this.node.addEventListener(type, listener, false);
-  } else if (this.node.attachEvent) {
-    this.node.attachEvent("on" + type, listener);
-  } else {
-    throw "Found neither addEventListener nor attachEvent";
-  }
-};
-
-
-Raphael.el.removeEventListener = function(type, listener) {
-  if (this.node.removeEventListener) {
-    this.node.removeEventListener(type, listener, false);
-  } else if (this.node.detachEvent) {
-    this.node.detachEvent("on" + type, listener);
-  } else {
-    throw "Found neither removeEventListener nor detachEvent";
-  }
-};
-
-
-Raphael.el.setAttribute = function(name, value) {
-  if (name == 'class' || name == 'className') {
-    paperClassedAdd(this.node, value);
-    if (Raphael.vml) {
-      this.shadowDom.className = value;
-      this.updateStyle();
+Raphael.fn.getR2D3Elements = function(domNodes) {
+  var r2d3Matches = [];
+  
+  // Convert DOM matches to R2D3 elements
+  for (var i=0; i<domNodes.length; i++) {
+    var element = this.getR2D3ElementById(domNodes[i]);
+    if (element) {
+      r2d3Matches.push(element);
     }
   }
   
-  if (name === 'href' && this.type === 'image') {
-    name = "src"; // Raphael uses src
-  }
-	
-	_elementSetProperty('attributes').apply(this, [name, value]);
-  return this;
-};
-
-
-Raphael.el.setAttributeNS = function(namespace, name, value) {
-  if (namespace === 'xlink' && name === 'href' && this.type === 'image') {
-    this.setAttribute('src', value);
-  }
-  this.setAttribute(name, value);
-};
-
-Raphael.el.removeAttribute = _elementRemoveProperty('attributes');
-
-Raphael.el.getAttribute = function(name) {
-  // Raphael uses src
-  if (name === 'href' && this.type === 'image') name = 'src';
-	return this.data('attributes')[name];
-};
-
-function ElementStyle(element) {
-	this.element = element;
-	this.props = {};
+  return r2d3Matches;
 }
 
-ElementStyle.prototype.setProperty = function(name, value) {
-	if (value === '' || value === null || value === undefined) {
-		delete this.props[name];
-	} else {
-		this.props[name] = value;
-	}
-			
-	this.element.updateStyle(name);
-};
 
-ElementStyle.prototype.removeProperty = function(name) {
-	delete this.props[name];
-	this.element.updateStyle(name);
-};
-
-ElementStyle.prototype.getPropertyValue = function(name) {
-	return this.props[name];
-};
-
-
-
-//========================================
-// Set Extensions
-
-Raphael.st.getElementsByClassName  = Raphael.fn.getElementsByClassName;
-
-
-Raphael.st.getElementsByTagName = Raphael.fn.getElementsByTagName;
-
-
-Raphael.st.appendChild = function(childNode) {
-  var node = this.paper.appendChild(childNode);
-  this.push(node);
-  return node;
-};
-
-
-Raphael.st.addEventListener = function(type, listener) {
-  this.forEach(function(el) {
-    el.addEventListener(type, listener);
-  });
-};
-
-
-Raphael.st.removeEventListener = function(type, listener) {
-  this.forEach(function(el) {
-    el.removeEventListener(type, listener);
-  });
-};
-
-
-Raphael.st.setAttribute = function(name, value) {
-  this.forEach(function(el) {
-    el.setAttribute(name, value);
-  });
-};
-
-Raphael.st.setAttributeNS = function(ns, name, value) {
-  this.setAttribute(name, value);
-};
-
-
-Raphael.st.removeAttribute = function(name) {
-  this.forEach(function(el) {
-    el.removeAttribute(name);
-  });
-};
-
-
-Raphael.st.updateStyle = function(name) {
-  this.forEach(function(el) {
-    el.updateStyle(name);
-  });
+Raphael.fn.getR2D3ElementById = function(id) {
+  var id = id.id || id;
+  return this.getById(id.split('_')[1]);
 };

@@ -7519,7 +7519,7 @@ if (!Array.prototype.indexOf) {
             }
         }
         return -1;
-    }
+    };
 }
 
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/filter
@@ -7529,13 +7529,15 @@ if (!Array.prototype.filter)
     {
         "use strict";
 
-        if (this == null)
+        if (this == null) {
             throw new TypeError();
+        }
 
         var t = Object(this);
         var len = t.length >>> 0;
-        if (typeof fun != "function")
+        if (typeof fun != "function") {
             throw new TypeError();
+        }
 
         var res = [];
         var thisp = arguments[1];
@@ -7544,8 +7546,9 @@ if (!Array.prototype.filter)
             if (i in t)
             {
                 var val = t[i]; // in case fun mutates this
-                if (fun.call(thisp, val, i, t))
+                if (fun.call(thisp, val, i, t)) {
                     res.push(val);
+                }
             }
         }
 
@@ -7560,81 +7563,56 @@ if (!String.prototype.trim) {
 }
 
 
-window.CSSStyleDeclaration = window.CSSStyleDeclaration || function() { }
+window.CSSStyleDeclaration = window.CSSStyleDeclaration || function() { };
 
 // https://github.com/mbostock/d3/issues/199#issuecomment-1487129
-if (!CSSStyleDeclaration.prototype.getProperty)
+if (!CSSStyleDeclaration.prototype.getProperty) {
     CSSStyleDeclaration.prototype.getProperty = function(a) {
         return this.getAttribute(a);
     };
+}
 
-if(!CSSStyleDeclaration.prototype.setProperty)
+if(!CSSStyleDeclaration.prototype.setProperty) {
     CSSStyleDeclaration.prototype.setProperty = function(a,b) {
         return this.setAttribute(a,b);
     };
+}
 
-if(!CSSStyleDeclaration.prototype.removeProperty)
+if(!CSSStyleDeclaration.prototype.removeProperty) {
     CSSStyleDeclaration.prototype.removeProperty = function(a) {
         return this.removeAttribute(a);
     };
+}
 
 
 // https://github.com/mbostock/d3/issues/42#issuecomment-1265410
-if(!document.createElementNS)
+if(!document.createElementNS) {
     document.createElementNS = function(ns, name) {
         return document.createElement(name);
     };
+}
 
-
-    if (!Element.prototype.addEventListener) {
-      var oListeners = {};
-      function runListeners(oEvent) {
-        if (!oEvent) { oEvent = window.event; }
-        for (var iLstId = 0, iElId = 0, oEvtListeners = oListeners[oEvent.type]; iElId < oEvtListeners.aEls.length; iElId++) {
-          if (oEvtListeners.aEls[iElId] === this) {
-            for (iLstId; iLstId < oEvtListeners.aEvts[iElId].length; iLstId++) { oEvtListeners.aEvts[iElId][iLstId].call(this, oEvent); }
-            break;
-          }
-        }
-      }
-      Element.prototype.addEventListener = function (sEventType, fListener /*, useCapture (will be ignored!) */) {
-        if (oListeners.hasOwnProperty(sEventType)) {
-          var oEvtListeners = oListeners[sEventType];
-          for (var nElIdx = -1, iElId = 0; iElId < oEvtListeners.aEls.length; iElId++) {
-            if (oEvtListeners.aEls[iElId] === this) { nElIdx = iElId; break; }
-          }
-          if (nElIdx === -1) {
-            oEvtListeners.aEls.push(this);
-            oEvtListeners.aEvts.push([fListener]);
-            this["on" + sEventType] = runListeners;
-          } else {
-            var aElListeners = oEvtListeners.aEvts[nElIdx];
-            if (this["on" + sEventType] !== runListeners) {
-              aElListeners.splice(0);
-              this["on" + sEventType] = runListeners;
+if (!window.JSON) {
+    window.JSON = {};
+}
+if (!window.JSON.parse) {
+    window.JSON.parse = (function() {
+       var rvalidchars = /^[\],:{}\s]*$/,
+           rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
+           rvalidescape = /\\(?:["\\\/bfnrt]|u[\da-fA-F]{4})/g,
+           rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d\d*\.|)\d+(?:[eE][\-+]?\d+|)/g;
+       return function(data) {
+            if ( rvalidchars.test( data.replace( rvalidescape, "@" )
+                .replace( rvalidtokens, "]" )
+                .replace( rvalidbraces, "")) )
+            {
+                return ( new Function( "return " + data ) )();
             }
-            for (var iLstId = 0; iLstId < aElListeners.length; iLstId++) {
-              if (aElListeners[iLstId] === fListener) { return; }
-            }     
-            aElListeners.push(fListener);
-          }
-        } else {
-          oListeners[sEventType] = { aEls: [this], aEvts: [ [fListener] ] };
-          this["on" + sEventType] = runListeners;
-        }
-      };
-      Element.prototype.removeEventListener = function (sEventType, fListener /*, useCapture (will be ignored!) */) {
-        if (!oListeners.hasOwnProperty(sEventType)) { return; }
-        var oEvtListeners = oListeners[sEventType];
-        for (var nElIdx = -1, iElId = 0; iElId < oEvtListeners.aEls.length; iElId++) {
-          if (oEvtListeners.aEls[iElId] === this) { nElIdx = iElId; break; }
-        }
-        if (nElIdx === -1) { return; }
-        for (var iLstId = 0, aElListeners = oEvtListeners.aEvts[nElIdx]; iLstId < aElListeners.length; iLstId++) {
-          if (aElListeners[iLstId] === fListener) { aElListeners.splice(iLstId, 1); }
-        }
-      };
-    }
+            
+            return null; // Invalid JSON
+        };
+    })();
+}
 (function(){if (!Date.now) Date.now = function() {
   return +new Date;
 };
@@ -12640,6 +12618,29 @@ var d3_svg_brushResizes = [
   ["n", "s"],
   []
 ];
+function ElementStyle(element) {
+	this.element = element;
+	this.props = {};
+}
+
+ElementStyle.prototype.setProperty = function(name, value) {
+	if (value === '' || value === null || value === undefined) {
+		delete this.props[name];
+	} else {
+		this.props[name] = value;
+	}
+			
+	this.element.updateStyle(name);
+};
+
+ElementStyle.prototype.removeProperty = function(name) {
+	delete this.props[name];
+	this.element.updateStyle(name);
+};
+
+ElementStyle.prototype.getPropertyValue = function(name) {
+	return this.props[name];
+};
 
 
 (function(defaultGetComputedStyle) {
@@ -12681,33 +12682,10 @@ var d3_svg_brushResizes = [
   var svgElements = 'circle ellipse line polygon polyline rect g svg image path text'.split(' '); 
     
   if (Raphael.svg) return;
-
   for (var i=0; i< svgElements.length; i++) {
     document.createElement(svgElements[i]);
   }
 })();
-
-
-function paperClassedAdd(node, name) {
-  var re = new RegExp("(^|\\s+)" + d3.requote(name) + "(\\s+|$)", "g");
-
-  // Easy case, browser supports classList
-  if (node.classList) return node.classList.add(name);
-
-  var c = node.className || '',
-      cb = c.baseVal !== null,
-      cv = cb ? c.baseVal : c;
-  re.lastIndex = 0;
-  if (!re.test(cv)) {
-    cv = d3_collapse(cv + " " + name);
-    if (cb) {
-      c.baseVal = cv;
-    } else {
-      node.setAttribute('class', cv);
-    }
-  }
-}
-
 
 
 function lineAttribute(name) {
@@ -12736,11 +12714,9 @@ function appendRaphael(parent) {
 
   paper.__attrs = { width: 0, height: 0 };
   
-  if (Raphael.vml) {
-    paper.shadowDom = document.createElement('svg');
-    paper.shadowDom.style.display = 'none';
-    parent.appendChild(paper.shadowDom);
-  }
+  paper.shadowDom = document.createElement('svg');
+  paper.shadowDom.style.display = 'none';
+  parent.appendChild(paper.shadowDom);
 
   paper.ca.d = function(path) {
     return { path: path };
@@ -12782,6 +12758,11 @@ Raphael.fn.img = function() {
 };
 
 
+Raphael.fn.g = function() {
+  return this.set();
+};
+
+
 Raphael.fn.getAttribute = function(name) {
   return this.__attrs[name];
 };
@@ -12797,98 +12778,62 @@ Raphael.fn.setAttribute = function(name, value) {
 
 
 Raphael.fn.getElementsByClassName = function(selector) {
-  var matches = [];
-  selector = '.' + selector;
-
-  this.forEach(function(el) {
-    if (Sizzle.matchesSelector(el.node, selector)) matches.push(el);
-  });
-  return matches;
+  return this.getR2D3Elements(Sizzle(selector, this.shadowDom));
 };
 
 
 Raphael.fn.getElementsByTagName = function(tag) {
-  var matches = [];
-  this.forEach(function(el) {
-    var type = el.data('lineAttrs') ? 'line' : el.type;
-    if (type === tag) matches.push(el);
-  });
-  return matches;
+  return this.getR2D3Elements(this.shadowDom.getElementsByTagName(tag));
 };
 
 
 Raphael.fn.appendChild = function(childNode) {
-  var type = childNode && childNode.nodeName,
-      node =  type ? this[type.toLowerCase()]() : null;
-      
-  // Ensure Paper can be referenced from sets
+  var node = this.buildElement(childNode);
   if (node) {
-    node.paper = this;
-		node.style = new ElementStyle(node);
-    if (Raphael.vml) {
-      node.shadowDom = childNode;
-      this.shadowDom.appendChild(childNode);
-      node.updateStyle(); //  Apply CSS styles
-    }
+    this.shadowDom.appendChild(childNode);
+    node.updateStyle(); //  Apply CSS styles
   }
   return node;
 };
 
 
+Raphael.fn.buildElement = function(childNode) {
+  var type = childNode && childNode.nodeName,
+      node =  type ? this[type.toLowerCase()]() : null;
+      
+  if (node) {
+    // Ensure Paper can be referenced from sets
+    node.shadowDom = childNode;
+    // Link the shadowDOM node by the Raphael id.
+    node.shadowDom.id = 'rd23_' + node.id;
+    node.paper = this;
+    node.tagName = type.toLowerCase();
+		node.style = new ElementStyle(node);
+  }
+  return node;
+}
+
+Raphael.fn.getR2D3Elements = function(domNodes) {
+  var r2d3Matches = [];
+  
+  // Convert DOM matches to R2D3 elements
+  for (var i=0; i<domNodes.length; i++) {
+    var element = this.getR2D3ElementById(domNodes[i]);
+    if (element) {
+      r2d3Matches.push(element);
+    }
+  }
+  
+  return r2d3Matches;
+}
 
 
-
+Raphael.fn.getR2D3ElementById = function(id) {
+  var id = id.id || id;
+  return this.getById(id.split('_')[1]);
+};
 //========================================
 // Element Extensions
-
-/**
- * Updates the style for a given property honoring style
- */
-Raphael.el.updateStyle = function(name) {
-	var attributes = this.data('attributes') || {},
-			style = this.style.props,
-      css = Raphael.vml ? this.shadowDom.currentStyle : {},
-      props = 'arrow-end cursor fill fill-opacity font font-family font-size font-weight opacity r rx ry stroke stroke-dasharay stroke-linecap stroke-linejoin stroke-miterlimit stroke-opacity stroke-width text-anchor'.split(' ');
-      
-
-  if (arguments.length < 1) {
-    for (var i=0; i < props.length; i++) this.updateStyle(props[i]);
-  }
-	
-  // Props that can't be styled via CSS (e.g path, height, width), apply directly
-  if (props.indexOf(name) < 0) {
-    this.attr(name, attributes[name]);
-  // Honor the precedence for applying styleable attributes
-  } else {
-    this.attr(name, (style[name] || css[name] || attributes[name]));
-  }
-  return true;
-};
-
-
-function _elementSetProperty(level) {
-	return function(name, value) {
-			var style = this.data(level) || {};
-			
-			if (value === '' || value === null || value === undefined) {
-				delete style[name];
-			} else {
-				style[name] = value;
-			}
-			
-			this.data(level, style);
-			this.updateStyle(name);
-	}
-}
-
-function _elementRemoveProperty(level) {
-	return function(name) {
-			var style = this.data(level) || {};
-			delete style[name];
-			this.data(level, style);
-			this.updateStyle(name);
-		}
-}
 
 Raphael.el.addEventListener = function(type, listener) {
   if (this.node.addEventListener) {
@@ -12913,20 +12858,26 @@ Raphael.el.removeEventListener = function(type, listener) {
 
 
 Raphael.el.setAttribute = function(name, value) {
-  if (name == 'class' || name == 'className') {
-    paperClassedAdd(this.node, value);
-    if (Raphael.vml) {
-      this.shadowDom.className = value;
-      this.updateStyle();
-    }
+  if (name === 'class') {
+    this.shadowDom.className = value;
+    this.updateStyle();
+    return;
   }
   
+  // 1 off for the SVG image element
   if (name === 'href' && this.type === 'image') {
     name = "src"; // Raphael uses src
   }
 	
-	_elementSetProperty('attributes').apply(this, [name, value]);
-  return this;
+  // Update the attributes object
+	var attrs = this.attributes();	
+	if (value === '' || value === null || value === undefined) {
+    // Dont' update style, remove attribute will handle that
+		this.removeAttribute(name);
+	} else {
+		attrs[name] = value;
+    this.updateStyle(name);
+	}
 };
 
 
@@ -12937,41 +12888,85 @@ Raphael.el.setAttributeNS = function(namespace, name, value) {
   this.setAttribute(name, value);
 };
 
-Raphael.el.removeAttribute = _elementRemoveProperty('attributes');
+
+Raphael.el.removeAttribute = function() {
+	var attrs = this.attributes();
+	delete attrs[name];
+	this.updateStyle(name);
+};
+
+
 
 Raphael.el.getAttribute = function(name) {
+  // Get the class from the shadow dom
+  if (name === 'class') {
+    return this.shadowDom.className;
+  }
+  
+  
   // Raphael uses src
   if (name === 'href' && this.type === 'image') name = 'src';
 	return this.data('attributes')[name];
 };
 
-function ElementStyle(element) {
-	this.element = element;
-	this.props = {};
-}
 
-ElementStyle.prototype.setProperty = function(name, value) {
-	if (value === '' || value === null || value === undefined) {
-		delete this.props[name];
-	} else {
-		this.props[name] = value;
-	}
-			
-	this.element.updateStyle(name);
-};
-
-ElementStyle.prototype.removeProperty = function(name) {
-	delete this.props[name];
-	this.element.updateStyle(name);
-};
-
-ElementStyle.prototype.getPropertyValue = function(name) {
-	return this.props[name];
+Raphael.el.attributes = function() {
+  var attrs = this.data('attributes') || {};
+  // Save the attrs if they didn't exist
+  this.data('attributes', attrs);
+  return attrs;
 };
 
 
+Raphael.el.currentStyle = function() {
+  return this.shadowDom.currentStyle;
+};
 
-//========================================
+
+/**
+ * Updates the style for a given property honoring style
+ */
+Raphael.el.updateStyle = function(name) {
+
+	var attributes = this.data('attributes') || {},
+			style = this.style.props,
+      css = this.currentStyle(),
+      props = 'arrow-end cursor fill fill-opacity font font-family font-size font-weight opacity r rx ry stroke stroke-dasharay stroke-linecap stroke-linejoin stroke-miterlimit stroke-opacity stroke-width text-anchor'.split(' ');
+      
+
+  if (arguments.length < 1) {
+    // Update props in stylesheets
+    for (var i=0; i < props.length; i++) this.updateStyle(props[i]);
+    
+    // Update Other Attribute
+    this.updateStyle('transform');
+  }
+	
+  // Transforms take into account parent transforms
+  // as we can't rely on transforms automatically applied
+  // from the parents
+  if (name === 'transform') {
+    var transforms = [attributes['transform'] || ''],
+        node = this;
+
+    while(node.parentNode) {
+      node = node.parentNode;
+      transforms.push(node.getAttribute('transform') || '');
+    }
+
+    this.attr('transform', transforms.reverse().join(''));
+    
+  // Props that can't be styled via CSS (e.g path, height, width), apply directly
+  } else if (props.indexOf(name) < 0) {
+    this.attr(name, attributes[name]);
+    
+  // Honor the precedence for applying styleable attributes
+  } else {
+    // TODO: check for 0
+    this.attr(name, (style[name] || css[name] || attributes[name]));
+  }
+  return true;
+};//========================================
 // Set Extensions
 
 Raphael.st.getElementsByClassName  = Raphael.fn.getElementsByClassName;
@@ -12981,30 +12976,42 @@ Raphael.st.getElementsByTagName = Raphael.fn.getElementsByTagName;
 
 
 Raphael.st.appendChild = function(childNode) {
-  var node = this.paper.appendChild(childNode);
-  this.push(node);
-  return node;
-};
-
-
-Raphael.st.addEventListener = function(type, listener) {
-  this.forEach(function(el) {
-    el.addEventListener(type, listener);
-  });
-};
-
-
-Raphael.st.removeEventListener = function(type, listener) {
-  this.forEach(function(el) {
-    el.removeEventListener(type, listener);
-  });
+  // As of now, only groups can have children
+  if (this.tagName === 'g') {
+    
+    // Buld Raphael element from DOM node
+    var node = null;
+    if (childNode.paper) {
+      // an existing raphael element is being appended
+      node = childNode;
+    } else {
+      // a new DOM element was created to append
+      node = this.paper.buildElement(childNode);
+    }
+    
+    // If the node was an invalid type, 
+    // it wont be created
+    if (node) {
+      node.parentNode = this;
+    
+      // update shadow dom
+      this.shadowDom.appendChild(childNode);
+      node.updateStyle();
+    }
+    return node;
+  }
 };
 
 
 Raphael.st.setAttribute = function(name, value) {
-  this.forEach(function(el) {
-    el.setAttribute(name, value);
-  });
+  this.attrs = this.attrs || {};
+  this.attrs[name] = value;
+  this.updateStyle(name);
+};
+
+Raphael.st.getAttribute = function(name) {
+  this.attrs = this.attrs || {};
+  return this.attrs[name];
 };
 
 Raphael.st.setAttributeNS = function(ns, name, value) {
@@ -13013,16 +13020,22 @@ Raphael.st.setAttributeNS = function(ns, name, value) {
 
 
 Raphael.st.removeAttribute = function(name) {
-  this.forEach(function(el) {
-    el.removeAttribute(name);
-  });
+  this.attrs = this.attrs || {};
+  if (this.attrs[name]) delete this.attrs[name];
 };
 
 
 Raphael.st.updateStyle = function(name) {
-  this.forEach(function(el) {
-    el.updateStyle(name);
-  });
+  // Only an appending the group to a new parent
+  // or adding a transform can trigger a style update
+  // as they may be expensive
+  if (!name || name === 'transform') {
+    var children = this.shadowDom.childNodes;
+    for (var i=0; i<children.length; i++) {
+      var node = this.paper.getR2D3ElementById(children[i]);
+      if (node) node.updateStyle(name);
+    }
+  }
 };//========================================
 // Parse Transform String
 // Converts transform functions to raphael transform strings, ie translate(x,y) => tx,y
