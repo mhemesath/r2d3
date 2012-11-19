@@ -2,7 +2,10 @@
 <html>
   <head>
     <title>Circle Example</title>
-    <script src="../r2d3.v2.js"></script>
+    <!--[if lte IE 8]><script src="../r2d3.v2.js"></script><![endif]-->
+    <!--[if gte IE 9]><!-->
+    <script src="../lib/d3/d3.v2.js"></script>
+    <!--<![endif]-->
     <style>
     .foo { fill: blue; }
     .bar { fill: red; }
@@ -22,12 +25,12 @@
 				.attr('cx', 75)
 				.attr('cy', 100)
 				.attr('r', 50)
-				.attr('className', 'foo')
+				.attr('class', 'foo')
   		svg.append('circle')
   			.attr('cx', 125)
   			.attr('cy', 100)
   			.attr('r', 50)
-  			.attr('className', 'bar')
+  			.attr('class', 'bar')
 		</script>
   </body>
 </html>
