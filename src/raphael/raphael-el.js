@@ -47,6 +47,21 @@ Raphael.el.setAttribute = function(name, value) {
 	}
 };
 
+// Save off old insertBefore API
+Raphael.el.raphaelInsertBefore = Raphael.el.insertBefore;
+
+Raphael.el.insertBefore = function(node, before) {
+  var el = node.paper ? node : this.paper.buildElement(node);
+  
+  // Reposition the element on the paper
+  el.raphaelInsertBefore(before);
+  
+  // Update the shadow DOM
+  before.shadowDom.parentNode.insertBefore(el.shadowDom, before.shadowDom);
+  
+  el.updateStyle();
+};
+
 
 Raphael.el.setAttributeNS = function(namespace, name, value) {
   if (namespace === 'xlink' && name === 'href' && this.type === 'image') {

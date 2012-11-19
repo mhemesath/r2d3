@@ -12731,6 +12731,8 @@ function appendRaphael(parent) {
   paper.nodeType = 1;
   paper.nodeName = 'object';
 
+  paper.r2d3Elements = {};
+
   return paper;
 }
 
@@ -12805,10 +12807,12 @@ Raphael.fn.buildElement = function(childNode) {
     // Ensure Paper can be referenced from sets
     node.shadowDom = childNode;
     // Link the shadowDOM node by the Raphael id.
-    node.shadowDom.id = 'rd23_' + node.id;
+    node.shadowDom.id = r2d3UID();
     node.paper = this;
     node.tagName = type.toLowerCase();
 		node.style = new ElementStyle(node);
+  
+    this.r2d3Elements[node.shadowDom.id] = node;
   }
   return node;
 }
@@ -12827,10 +12831,17 @@ Raphael.fn.getR2D3Elements = function(domNodes) {
   return r2d3Matches;
 }
 
+var r2d3UID = (function() {
+  var id = 0;
+  return function() {
+    id = id + 1;
+    return "r2d3_" +  id;
+  };
+}());
+
 
 Raphael.fn.getR2D3ElementById = function(id) {
-  var id = id.id || id;
-  return this.getById(id.split('_')[1]);
+  return this.r2d3Elements[id];
 };
 //========================================
 // Element Extensions
@@ -12878,6 +12889,21 @@ Raphael.el.setAttribute = function(name, value) {
 		attrs[name] = value;
     this.updateStyle(name);
 	}
+};
+
+// Save off old insertBefore API
+Raphael.el.raphaelInsertBefore = Raphael.el.insertBefore;
+
+Raphael.el.insertBefore = function(node, before) {
+  var el = node.paper ? node : this.paper.buildElement(node);
+  
+  // Reposition the element on the paper
+  el.raphaelInsertBefore(before);
+  
+  // Update the shadow DOM
+  before.shadowDom.parentNode.insertBefore(el.shadowDom, before.shadowDom);
+  
+  el.updateStyle();
 };
 
 
