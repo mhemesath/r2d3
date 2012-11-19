@@ -83,7 +83,6 @@ Limitations
 See the issues page for a listing of known issues. In summary this
 includes:
 
- * Group elements are not supported, but '''set''' can be used in some cases.
  * Queries for SVG elements must origin from the SVG node. Example use ```svg.select('rect')``` NOT ```d3.select('rect')```
 
 
