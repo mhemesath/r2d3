@@ -12780,6 +12780,7 @@ Raphael.fn.setAttribute = function(name, value) {
 
 
 Raphael.fn.getElementsByClassName = function(selector) {
+  alert(selector);
   return this.getR2D3Elements(Sizzle(selector, this.shadowDom));
 };
 
@@ -12822,7 +12823,7 @@ Raphael.fn.getR2D3Elements = function(domNodes) {
   
   // Convert DOM matches to R2D3 elements
   for (var i=0; i<domNodes.length; i++) {
-    var element = this.getR2D3ElementById(domNodes[i]);
+    var element = this.getR2D3ElementById(domNodes[i].id);
     if (element) {
       r2d3Matches.push(element);
     }
@@ -12870,6 +12871,7 @@ Raphael.el.removeEventListener = function(type, listener) {
 
 Raphael.el.setAttribute = function(name, value) {
   if (name === 'class') {
+    this.className = value;
     this.shadowDom.className = value;
     this.updateStyle();
     return;
@@ -12953,8 +12955,20 @@ Raphael.el.currentStyle = function() {
  * Updates the style for a given property honoring style
  */
 Raphael.el.updateStyle = function(name) {
+  
+  /**
+  * Return the first argument that isn't null or undefined
+  */
+  function val() {
+    for (var i=0; i<arguments.length; i++) {
+      var value = arguments[i];
+      if (value !== null && typeof value !== 'undefined') {
+        return value;
+      }
+    }
+  }
 
-	var attributes = this.data('attributes') || {},
+	var attributes = this.attributes(),
 			style = this.style.props,
       css = this.currentStyle(),
       props = 'arrow-end cursor fill fill-opacity font font-family font-size font-weight opacity r rx ry stroke stroke-dasharay stroke-linecap stroke-linejoin stroke-miterlimit stroke-opacity stroke-width text-anchor'.split(' ');
@@ -12982,14 +12996,16 @@ Raphael.el.updateStyle = function(name) {
 
     this.attr('transform', transforms.reverse().join(''));
     
-  // Props that can't be styled via CSS (e.g path, height, width), apply directly
+  // Props that can't be styled via CSS (e.g path, height, width, text), apply directly
   } else if (props.indexOf(name) < 0) {
     this.attr(name, attributes[name]);
     
   // Honor the precedence for applying styleable attributes
   } else {
-    // TODO: check for 0
-    this.attr(name, (style[name] || css[name] || attributes[name]));
+    // Get the first value that ins't null or undefined in order
+    // of precedence
+    var value = val(style[name], css[name], attributes[name]);
+    this.attr(name, value);
   }
   return true;
 };//========================================

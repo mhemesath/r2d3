@@ -137,6 +137,7 @@ Raphael.fn.setAttribute = function(name, value) {
 
 
 Raphael.fn.getElementsByClassName = function(selector) {
+  alert(selector);
   return this.getR2D3Elements(Sizzle(selector, this.shadowDom));
 };
 
@@ -179,7 +180,7 @@ Raphael.fn.getR2D3Elements = function(domNodes) {
   
   // Convert DOM matches to R2D3 elements
   for (var i=0; i<domNodes.length; i++) {
-    var element = this.getR2D3ElementById(domNodes[i]);
+    var element = this.getR2D3ElementById(domNodes[i].id);
     if (element) {
       r2d3Matches.push(element);
     }
