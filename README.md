@@ -8,9 +8,8 @@ data visualizations that work IE7+ and all modern browsers.
 Getting Started
 ---------------
 
-To get started using R2D3,  include r2d3 and the necessary shims.
-Sizzle and Compat need to be incldued for IE8. If you are using jQuery,
-R2D3 will use the bundled sizzle.
+To get started using R2D3,  conditionally load r2d3 if using Internet Explorer less than 8. For modern browsers,
+serve up d3 as you normally would.
 
 ```html
 <html>
