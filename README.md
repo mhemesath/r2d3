@@ -19,7 +19,10 @@ R2D3 will use the bundled sizzle.
   </head>
   <body>
     <h1>Hello, world!</h1>
-    <script src="js/r2d3.min.js"></script>
+    <!--[if lte IE 8]><script src="r2d3.v2.js"></script><![endif]-->
+    <!--[if gte IE 9]><!-->
+    <script src="d3.v2.js"></script>
+    <!--<![endif]-->
   </body>
 </html>
 ```
