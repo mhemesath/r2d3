@@ -23,16 +23,15 @@
         .attr('x', 100)
         .attr('y', 100)
         .attr('font-size', 72)
-        .text('0');
+        .text(0);
 
 
 			function drawText() {
-        svg.selectAll('text').text(count);
-        //d3.select('title').text(svg.selectAll('text').text());
+        svg.select('text').text(count);
         setTimeout(drawText, 1000);
         count++;
 			}
-
+      
 			drawText();
 		</script>
   </body>
