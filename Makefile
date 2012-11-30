@@ -82,7 +82,7 @@ r2d3.core.js: \
 	lib/d3/src/core/hcl.js \
 	lib/d3/src/core/lab.js \
 	lib/d3/src/core/xyz.js \
-	lib/d3/src/core/selection.js \
+	src/core/selection.js \
 	lib/d3/src/core/selection-select.js \
 	lib/d3/src/core/selection-selectAll.js \
 	lib/d3/src/core/selection-attr.js \
