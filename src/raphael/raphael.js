@@ -137,7 +137,6 @@ Raphael.fn.setAttribute = function(name, value) {
 
 
 Raphael.fn.getElementsByClassName = function(selector) {
-  alert(selector);
   return this.getR2D3Elements(Sizzle(selector, this.shadowDom));
 };
 
@@ -165,12 +164,13 @@ Raphael.fn.buildElement = function(childNode) {
     // Ensure Paper can be referenced from sets
     node.shadowDom = childNode;
     // Link the shadowDOM node by the Raphael id.
-    node.shadowDom.id = r2d3UID();
+    node.shadowDom.r2d3 = true;
+    node.shadowDom.r2d3id = r2d3UID();
     node.paper = this;
     node.tagName = type.toLowerCase();
 		node.style = new ElementStyle(node);
   
-    this.r2d3Elements[node.shadowDom.id] = node;
+    r2d3Elements[node.shadowDom.r2d3id] = node;
   }
   return node;
 }
@@ -180,7 +180,7 @@ Raphael.fn.getR2D3Elements = function(domNodes) {
   
   // Convert DOM matches to R2D3 elements
   for (var i=0; i<domNodes.length; i++) {
-    var element = this.getR2D3ElementById(domNodes[i].id);
+    var element = r2d3Elements[domNodes[i].id];
     if (element) {
       r2d3Matches.push(element);
     }
@@ -189,15 +189,11 @@ Raphael.fn.getR2D3Elements = function(domNodes) {
   return r2d3Matches;
 }
 
+var r2d3Elements = {};
+
 var r2d3UID = (function() {
   var id = 0;
   return function() {
-    id = id + 1;
-    return "r2d3_" +  id;
+    return id++;
   };
 }());
-
-
-Raphael.fn.getR2D3ElementById = function(id) {
-  return this.r2d3Elements[id];
-};

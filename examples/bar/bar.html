@@ -2,99 +2,113 @@
 <html>
   <head>
     <title>Bar Chart</title>
-    <script type="text/javascript" src="../../lib/sizzle/sizzle.js"></script>
-    <!--[if lte IE 8]>
-    <script type="text/javascript" src="../../lib/compat/compat.js"></script>
-		<![endif]-->
-    <script type="text/javascript" src="../../r2d3.v2.js"></script>
- <style>
-	body {
-		font: 10px sans-serif;
-	}
-	.axis path,
-	.axis line {
-		fill: none;
-		stroke: #000;
-		shape-rendering: crispEdges;
-	}
-	.bar {
-		fill: steelblue;
-		stroke-width:0;
-	}
-	.x.axis path {
-		display: none;
-	}
-	</style> 
-	</head>
+    <!--[if lte IE 8]><script src="../../r2d3.v2.js"></script><![endif]-->
+    <!--[if gte IE 9]><!-->
+    <script src="../../lib/d3/d3.v2.js"></script>
+    <!--<![endif]-->
+
+    <style type="text/css">
+
+body {
+  font: 10px sans-serif;
+}
+
+.bar rect {
+  fill: steelblue;
+}
+
+.bar text.value {
+  fill: white;
+}
+
+.axis {
+  shape-rendering: crispEdges;
+}
+
+.axis path {
+  fill: none;
+}
+
+.x.axis line {
+  stroke: #fff;
+  stroke-opacity: .8;
+}
+
+.y.axis path {
+  stroke: black;
+}
+
+    </style>
+  </head>
   <body>
-  <script type="text/javascript">
+    <script type="text/javascript">
 
-var margin = {top: 20, right: 20, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+var margin = {top: 30, right: 10, bottom: 10, left: 30},
+    width = 960 - margin.right - margin.left,
+    height = 930 - margin.top - margin.bottom;
 
-var formatPercent = d3.format(".0%");
+var format = d3.format(",.0f");
 
-var x = d3.scale.ordinal()
-    .rangeRoundBands([0, width], .1);
+var x = d3.scale.linear()
+    .range([0, width]);
 
-var y = d3.scale.linear()
-    .range([height, 0]);
+var y = d3.scale.ordinal()
+    .rangeRoundBands([0, height], .1);
 
 var xAxis = d3.svg.axis()
     .scale(x)
-    .orient("bottom");
+    .orient("top")
+    .tickSize(-height);
 
 var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left")
-    .tickFormat(formatPercent);
+    .tickSize(0);
 
 var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom);
-  	/* Diff: Groups 
-		.append("g")
+    .attr("width", width + margin.right + margin.left)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-		*/
 
-d3.tsv("data.tsv", function(data) {
+d3.csv("sample-data.csv", function(data) {
 
-  data.forEach(function(d) {
-    d.frequency = +d.frequency;
-  });
+  // Parse numbers, and sort by value.
+  data.forEach(function(d) { d.value = +d.value; });
+  data.sort(function(a, b) { return b.value - a.value; });
 
-  x.domain(data.map(function(d) { return d.letter; }));
-  y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+  // Set the scale domain.
+  x.domain([0, d3.max(data, function(d) { return d.value; })]);
+  y.domain(data.map(function(d) { return d.name; }));
 
-/* Diff: groups and axis
+  var bar = svg.selectAll("g.bar")
+      .data(data)
+    .enter().append("g")
+      .attr("class", "bar")
+      .attr("transform", function(d) { return "translate(0," + y(d.name) + ")"; });
+
+  bar.append("rect")
+      .attr("width", function(d) { return x(d.value); })
+      .attr("height", y.rangeBand());
+
+  bar.append("text")
+      .attr("class", "value")
+      .attr("x", function(d) { return x(d.value); })
+      .attr("y", y.rangeBand() / 2)
+      .attr("dx", -3)
+      .attr("dy", ".35em")
+      .attr("text-anchor", "end")
+      .text(function(d) { return format(d.value); });
+
   svg.append("g")
       .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
       .call(xAxis);
 
   svg.append("g")
       .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Frequency");
-*/
-
-  svg.selectAll(".bar")
-      .data(data)
-    	.enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", function(d) { return x(d.letter); })
-      .attr("width", x.rangeBand())
-      .attr("y", function(d) { return y(d.frequency); })
-      .attr("height", function(d) { return height - y(d.frequency); });
-
+      .call(yAxis);
 });
-    
-	</script>
+
+    </script>
   </body>
 </html>

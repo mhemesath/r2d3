@@ -61,6 +61,7 @@ Raphael.el.insertBefore = function(node, before) {
   before.shadowDom.parentNode.insertBefore(el.shadowDom, before.shadowDom);
   
   el.updateStyle();
+  return el;
 };
 
 

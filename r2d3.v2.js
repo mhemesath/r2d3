@@ -9290,18 +9290,52 @@ function d3_selection(groups) {
   return groups;
 }
 
-var d3_select = function(s, n) { return n.querySelector(s); },
-    d3_selectAll = function(s, n) { return n.querySelectorAll(s); },
-    d3_selectRoot = document.documentElement,
+var d3_selectRoot = document.documentElement,
     d3_selectMatcher = d3_selectRoot.matchesSelector || d3_selectRoot.webkitMatchesSelector || d3_selectRoot.mozMatchesSelector || d3_selectRoot.msMatchesSelector || d3_selectRoot.oMatchesSelector,
-    d3_selectMatches = function(n, s) { return d3_selectMatcher.call(n, s); };
+    d3_selectMatches = Sizzle.matchesSelector;
 
-// Prefer Sizzle, if available.
-if (typeof Sizzle === "function") {
-  d3_select = function(s, n) { return Sizzle(s, n)[0] || null; };
-  d3_selectAll = function(s, n) { return Sizzle.uniqueSort(Sizzle(s, n)); };
-  d3_selectMatches = Sizzle.matchesSelector;
-}
+
+var d3_select = function(s, n) {
+  // If the selection is on a raphael element,
+  // set the context to its shadowDom node
+  if (n.shadowDom) {
+    n = n.shadowDom;
+  }
+  
+  var node = Sizzle(s, n)[0] || null;
+  // If the match is a R2D3 element, return the
+  // Raphael Element
+  if (node && node.r2d3) {
+    node = r2d3Elements[node.r2d3id];
+  }
+  
+  return node;
+};
+
+
+var d3_selectAll = function(s, n) {
+  // If the selection is on a raphael element,
+  // set the context to its shadowDom node
+  if (n.shadowDom) {
+    n = n.shadowDom;
+  }
+
+  var nodes = Sizzle.uniqueSort(Sizzle(s, n)),
+      matches = [];
+  
+  for (var i=0; i<nodes.length; i++) {
+    var node = nodes[i];
+    // If the match is a R2D3 element, return the
+    // Raphael Element
+    if (node && node.r2d3) {
+      node = r2d3Elements[node.r2d3id];
+    }
+    matches.push(node);
+  }
+  
+  return matches;
+};
+
 
 var d3_selectionPrototype = [];
 
@@ -12780,7 +12814,6 @@ Raphael.fn.setAttribute = function(name, value) {
 
 
 Raphael.fn.getElementsByClassName = function(selector) {
-  alert(selector);
   return this.getR2D3Elements(Sizzle(selector, this.shadowDom));
 };
 
@@ -12808,12 +12841,13 @@ Raphael.fn.buildElement = function(childNode) {
     // Ensure Paper can be referenced from sets
     node.shadowDom = childNode;
     // Link the shadowDOM node by the Raphael id.
-    node.shadowDom.id = r2d3UID();
+    node.shadowDom.r2d3 = true;
+    node.shadowDom.r2d3id = r2d3UID();
     node.paper = this;
     node.tagName = type.toLowerCase();
 		node.style = new ElementStyle(node);
   
-    this.r2d3Elements[node.shadowDom.id] = node;
+    r2d3Elements[node.shadowDom.r2d3id] = node;
   }
   return node;
 }
@@ -12823,7 +12857,7 @@ Raphael.fn.getR2D3Elements = function(domNodes) {
   
   // Convert DOM matches to R2D3 elements
   for (var i=0; i<domNodes.length; i++) {
-    var element = this.getR2D3ElementById(domNodes[i].id);
+    var element = r2d3Elements[domNodes[i].id];
     if (element) {
       r2d3Matches.push(element);
     }
@@ -12832,18 +12866,15 @@ Raphael.fn.getR2D3Elements = function(domNodes) {
   return r2d3Matches;
 }
 
+var r2d3Elements = {};
+
 var r2d3UID = (function() {
   var id = 0;
   return function() {
-    id = id + 1;
-    return "r2d3_" +  id;
+    return id++;
   };
 }());
 
-
-Raphael.fn.getR2D3ElementById = function(id) {
-  return this.r2d3Elements[id];
-};
 //========================================
 // Element Extensions
 
@@ -12906,6 +12937,7 @@ Raphael.el.insertBefore = function(node, before) {
   before.shadowDom.parentNode.insertBefore(el.shadowDom, before.shadowDom);
   
   el.updateStyle();
+  return el;
 };
 
 
@@ -13074,7 +13106,7 @@ Raphael.st.updateStyle = function(name) {
   if (!name || name === 'transform') {
     var children = this.shadowDom.childNodes;
     for (var i=0; i<children.length; i++) {
-      var node = this.paper.getR2D3ElementById(children[i]);
+      var node = r2d3Elements[children[i].r2d3id];
       if (node) node.updateStyle(name);
     }
   }

@@ -64,7 +64,7 @@ Raphael.st.updateStyle = function(name) {
   if (!name || name === 'transform') {
     var children = this.shadowDom.childNodes;
     for (var i=0; i<children.length; i++) {
-      var node = this.paper.getR2D3ElementById(children[i]);
+      var node = r2d3Elements[children[i].r2d3id];
       if (node) node.updateStyle(name);
     }
   }
