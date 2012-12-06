@@ -34,6 +34,19 @@ Raphael.st.appendChild = function(childNode) {
   }
 };
 
+Raphael.st.insertBefore = function(el, before) {
+  // As of now, only groups can have children
+  if (this.tagName === 'g') {
+    
+    if (this.items.length) {
+      return this.forEach(function (el) {
+        el.insertBefore.apply(el, arguments);
+      });
+    } else {
+      return this.appendChild.apply(this, arguments);
+    }
+  }
+};
 
 Raphael.st.setAttribute = function(name, value) {
   this.attrs = this.attrs || {};
