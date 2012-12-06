@@ -69,3 +69,29 @@ test( "nested group transform after", function() {
   equal(bbox.y, 15)
 });
 
+test("insert on empty group", function() {
+  var svg = d3.select('#group').append('svg'),
+      g = svg.append('g'),
+      rect = g.insert('rect', 'path');
+  equal(g.selectAll('rect').length, 1);
+});
+
+test("insert on group with no matching elements", function() {
+  var svg = d3.select('#group').append('svg'),
+      g = svg.append('g'),
+      rect = g.append('rect'),
+      circle = g.insert('circle', 'path');
+
+  equal(g.selectAll('circle').length, 1);
+  equal(g.select('circle')[0][0].next, null);
+});
+
+test('insert on group with matching element', function() {
+  var svg = d3.select('#group').append('svg'),
+      g = svg.append('g'),
+      rect = g.append('rect'),
+      circle = g.insert('circle', rect);
+
+  equal(g.selectAll('circle').length, 1);
+  equal(g.select('circle')[0][0].next.type, 'rect');
+});
