@@ -13070,6 +13070,7 @@ Raphael.st.appendChild = function(childNode) {
     
       // update shadow dom
       this.shadowDom.appendChild(childNode);
+      this.items.push(node);
       node.updateStyle();
     }
     return node;
@@ -13078,15 +13079,18 @@ Raphael.st.appendChild = function(childNode) {
 
 Raphael.st.insertBefore = function(el, before) {
   // As of now, only groups can have children
+  var arg = arguments;
   if (this.tagName === 'g') {
     
     if (this.items.length) {
-      return this.forEach(function (el) {
-        el.insertBefore.apply(el, arguments);
-      });
-    } else {
-      return this.appendChild.apply(this, arguments);
-    }
+      for (var i = 0, ii = this.items.length; i < ii; i++) {
+        if (before && this.items[i].shadowDom.r2d3id === before.shadowDom.r2d3id) {
+          return this.items[i].insertBefore(el, before);
+       } 
+      }
+    } 
+
+  return this.appendChild.apply(this, arg);
   }
 };
 
