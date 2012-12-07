@@ -28,6 +28,7 @@ Raphael.st.appendChild = function(childNode) {
     
       // update shadow dom
       this.shadowDom.appendChild(childNode);
+      this.items.push(node);
       node.updateStyle();
     }
     return node;
