@@ -82,11 +82,12 @@ paper.select('circle')
 Limitations
 -----------
 
-See the issues page for a listing of known issues. In summary this
+See the issues page for a listing of known issues. In addition this
 includes:
 
  * Queries for SVG elements must origin from the SVG node. Example use ```svg.select('rect')``` NOT ```d3.select('rect')```
-
+ * ```<use>``` Is not supported
+ * r2d3 must be included before any stylesheets or ```<style>``` blocks. Soon I will push out a lighter weight shim script that can be used instead so r2d3 can load after the page.
 
 Developers
 ----------
