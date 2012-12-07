@@ -13070,12 +13070,29 @@ Raphael.st.appendChild = function(childNode) {
     
       // update shadow dom
       this.shadowDom.appendChild(childNode);
+      this.items.push(node);
       node.updateStyle();
     }
     return node;
   }
 };
 
+Raphael.st.insertBefore = function(el, before) {
+  // As of now, only groups can have children
+  var arg = arguments;
+  if (this.tagName === 'g') {
+    
+    if (this.items.length) {
+      for (var i = 0, ii = this.items.length; i < ii; i++) {
+        if (before && this.items[i].shadowDom.r2d3id === before.shadowDom.r2d3id) {
+          return this.items[i].insertBefore(el, before);
+       } 
+      }
+    } 
+
+  return this.appendChild.apply(this, arg);
+  }
+};
 
 Raphael.st.setAttribute = function(name, value) {
   this.attrs = this.attrs || {};
@@ -13110,7 +13127,8 @@ Raphael.st.updateStyle = function(name) {
       if (node) node.updateStyle(name);
     }
   }
-};//========================================
+};
+//========================================
 // Parse Transform String
 // Converts transform functions to raphael transform strings, ie translate(x,y) => tx,y
 
