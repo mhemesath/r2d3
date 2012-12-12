@@ -2,7 +2,7 @@ r2d3
 ==========
 
 R2D3 is a customized build of D3 powered by [RaphaelJS](http://raphaeljs.com/).  The combination of D3 and Raphael enable developers to easily
-data visualizations that work IE7+ and all modern browsers.
+data visualizations that work in IE7+ and all modern browsers.
 
 
 Getting Started
