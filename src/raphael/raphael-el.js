@@ -103,7 +103,7 @@ Raphael.el.attributes = function() {
 
 
 Raphael.el.currentStyle = function() {
-  return this.shadowDom.currentStyle;
+  return this.shadowDom.currentStyle || {};
 };
 
 
