@@ -8,7 +8,7 @@ data visualizations that work in IE7+ and all modern browsers.
 Getting Started
 ---------------
 
-To get started using R2D3,  conditionally load r2d3 if using Internet Explorer less than 8. For modern browsers,
+To get started using R2D3,  conditionally load r2d3 for Internet Explorer 8 and below. For modern browsers,
 serve up d3 as you normally would.
 
 ```html
