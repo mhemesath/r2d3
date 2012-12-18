@@ -53,6 +53,14 @@ Raphael.st.insertBefore = function(el, before) {
 };
 
 Raphael.st.setAttribute = function(name, value) {
+  
+  if (name === 'class') {
+    this.className = value;
+    this.shadowDom.className = value;
+    this.updateStyle();
+    return;
+  }
+  
   this.attrs = this.attrs || {};
   this.attrs[name] = value;
   this.updateStyle(name);
