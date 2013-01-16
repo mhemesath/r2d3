@@ -35,6 +35,7 @@ Raphael.st.appendChild = function(childNode) {
   }
 };
 
+
 Raphael.st.insertBefore = function(el, before) {
   // As of now, only groups can have children
   var arg = arguments;
@@ -51,6 +52,12 @@ Raphael.st.insertBefore = function(el, before) {
   return this.appendChild.apply(this, arg);
   }
 };
+
+Raphael.st.removeChild = function(el) {
+  el.shadowDom.parentNode.removeChild(el.shadowDom)
+  el.remove();
+}
+
 
 Raphael.st.setAttribute = function(name, value) {
   

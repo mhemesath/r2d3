@@ -12774,9 +12774,7 @@ function appendRaphael(parent) {
 // Paper Extensions
 
 Raphael.fn.removeChild = function(el) {
-  if (Raphael.vml) {
-    this.shadowDom.removeChild(el.shadowDom);
-  }
+  el.shadowDom.parentNode.removeChild(el.shadowDom)
   el.remove();
 };
 
@@ -12839,7 +12837,8 @@ Raphael.fn.buildElement = function(childNode) {
       
   if (node) {
     // Ensure Paper can be referenced from sets
-    node.shadowDom = childNode;
+    node.shadowDom = childNode
+    node.parentNode = this;
     // Link the shadowDOM node by the Raphael id.
     node.shadowDom.r2d3 = true;
     node.shadowDom.r2d3id = r2d3UID();
@@ -13077,6 +13076,7 @@ Raphael.st.appendChild = function(childNode) {
   }
 };
 
+
 Raphael.st.insertBefore = function(el, before) {
   // As of now, only groups can have children
   var arg = arguments;
@@ -13093,6 +13093,12 @@ Raphael.st.insertBefore = function(el, before) {
   return this.appendChild.apply(this, arg);
   }
 };
+
+Raphael.st.removeChild = function(el) {
+  el.shadowDom.parentNode.removeChild(el.shadowDom)
+  el.remove();
+}
+
 
 Raphael.st.setAttribute = function(name, value) {
   
