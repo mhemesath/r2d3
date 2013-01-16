@@ -34,6 +34,11 @@ Raphael.st.appendChild = function(childNode) {
   }
 };
 
+Raphael.st.removeChild = function(el) {
+  el.shadowDom.parentNode.removeChild(el.shadowDom)
+  el.remove();
+}
+
 
 Raphael.st.setAttribute = function(name, value) {
   this.attrs = this.attrs || {};
