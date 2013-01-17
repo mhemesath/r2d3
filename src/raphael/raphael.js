@@ -104,7 +104,7 @@ Raphael.fn.removeChild = function(el) {
 
 Raphael.fn.line = function () {
   var line =  this.path();
-  line.data('lineAttrs', { });
+  line.data('lineAttrs', { x1: 0, y1: 0, x2: 0, y2: 0 });
   return line;
 };
 
