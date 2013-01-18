@@ -76,8 +76,10 @@ paper.select('circle')
   .on('click', function() { alert('hi'); });
 ```
 
+Who is using R2D3?
+------------------
 
-
+If you'd like to add a D3 visualization you've made IE compatible with R2D3, issue a pull request and add it here!
 
 Limitations
 -----------
