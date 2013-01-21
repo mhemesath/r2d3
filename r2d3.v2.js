@@ -10457,11 +10457,21 @@ var d3_timer_frame = window.requestAnimationFrame
     || window.msRequestAnimationFrame
     || function(callback) { setTimeout(callback, 17); };
 d3.transform = function(string) {
-  var g = document.createElementNS(d3.ns.prefix.svg, "g");
+  var paper = Raphael(this);
   return (d3.transform = function(string) {
-    g.setAttribute("transform", string);
-    var t = g.transform.baseVal.consolidate();
-    return new d3_transform(t ? t.matrix : d3_transformIdentity);
+  // Extract the the variables in the string  
+  var re = /\(([^\)]+)\)/g
+  var new_string = re.exec(string);
+  var circle = paper.circle();
+  if(new_string){
+      var transform_position = new_string[1].split(',');
+      circle.matrix.translate(transform_position[0], transform_position[1]);
+  }
+  // If the string is null, the object stay mobile
+  else{
+      circle.matrix.translate(0,0);
+  }
+  return new d3_transform(circle.matrix);
   })(string);
 };
 
