@@ -122,7 +122,7 @@ r2d3.core.js: \
 	lib/d3/src/core/transition-transition.js \
 	lib/d3/src/core/tween.js \
 	lib/d3/src/core/timer.js \
-	lib/d3/src/core/transform.js \
+	src/core/transform.js \
 	lib/d3/src/core/mouse.js \
 	lib/d3/src/core/touches.js \
 	lib/d3/src/core/noop.js

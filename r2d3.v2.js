@@ -10457,13 +10457,17 @@ var d3_timer_frame = window.requestAnimationFrame
     || window.msRequestAnimationFrame
     || function(callback) { setTimeout(callback, 17); };
 d3.transform = function(string) {
-  var g = document.createElementNS(d3.ns.prefix.svg, "g");
+  var paper = Raphael(document.body, 0, 0);
+
   return (d3.transform = function(string) {
-    g.setAttribute("transform", string);
-    var t = g.transform.baseVal.consolidate();
-    return new d3_transform(t ? t.matrix : d3_transformIdentity);
+    var circle = paper.circle().transform(string),
+        matrix = circle.matrix;
+    circle.remove();
+    return new d3_transform(matrix || d3_transformIdentity);
   })(string);
 };
+
+
 
 // Compute x-scale and normalize the first row.
 // Compute shear and make second row orthogonal to first.
