@@ -168,6 +168,16 @@ Raphael.el.updateStyle = function(name) {
     // Get the first value that ins't null or undefined in order
     // of precedence
     var value = val(style[name], css[name], attributes[name]);
+    if (value == null || value == undefined) {
+      var node = this;
+      while(node.parentNode) {
+        node = node.parentNode;
+        value = val(node.style.getPropertyValue(name), node.getAttribute(name));
+        if (value != null && value != undefined) {
+          break;
+        }
+      }
+    }
     this.attr(name, value);
   }
   return true;

@@ -67,7 +67,7 @@ Raphael.st.setAttribute = function(name, value) {
     this.updateStyle();
     return;
   }
-  
+
   this.attrs = this.attrs || {};
   this.attrs[name] = value;
   this.updateStyle(name);

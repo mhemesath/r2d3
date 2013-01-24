@@ -87,6 +87,7 @@ function appendRaphael(parent) {
   // Fool sizzle into thinking the paper is an element
   paper.nodeType = 1;
   paper.nodeName = 'object';
+  paper.style = new ElementStyle(paper);
 
   paper.r2d3Elements = {};
 
@@ -130,6 +131,10 @@ Raphael.fn.setAttribute = function(name, value) {
 
   if (name === 'height' || name === 'width') {
     this.setSize(this.__attrs.width, this.__attrs.height);
+  }
+  
+  if (name == 'class') {
+    this.shadowDom.className = value;
   }
 };
 

@@ -7613,6 +7613,17 @@ if (!window.JSON.parse) {
         };
     })();
 }
+
+if (!Object.create) {
+    Object.create = function (o) {
+        if (arguments.length > 1) {
+            throw new Error('Object.create implementation only accepts the first parameter.');
+        }
+        function F() {}
+        F.prototype = o;
+        return new F();
+    };
+}
 (function(){if (!Date.now) Date.now = function() {
   return +new Date;
 };
@@ -12776,6 +12787,7 @@ function appendRaphael(parent) {
   // Fool sizzle into thinking the paper is an element
   paper.nodeType = 1;
   paper.nodeName = 'object';
+  paper.style = new ElementStyle(paper);
 
   paper.r2d3Elements = {};
 
@@ -12819,6 +12831,10 @@ Raphael.fn.setAttribute = function(name, value) {
 
   if (name === 'height' || name === 'width') {
     this.setSize(this.__attrs.width, this.__attrs.height);
+  }
+  
+  if (name == 'class') {
+    this.shadowDom.className = value;
   }
 };
 
@@ -13055,6 +13071,16 @@ Raphael.el.updateStyle = function(name) {
     // Get the first value that ins't null or undefined in order
     // of precedence
     var value = val(style[name], css[name], attributes[name]);
+    if (value == null || value == undefined) {
+      var node = this;
+      while(node.parentNode) {
+        node = node.parentNode;
+        value = val(node.style.getPropertyValue(name), node.getAttribute(name));
+        if (value != null && value != undefined) {
+          break;
+        }
+      }
+    }
     this.attr(name, value);
   }
   return true;
@@ -13127,7 +13153,7 @@ Raphael.st.setAttribute = function(name, value) {
     this.updateStyle();
     return;
   }
-  
+
   this.attrs = this.attrs || {};
   this.attrs[name] = value;
   this.updateStyle(name);
