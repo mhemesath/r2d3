@@ -64,7 +64,7 @@ r2d3.core.js: \
 	lib/d3/src/core/range.js \
 	lib/d3/src/core/requote.js \
 	lib/d3/src/core/round.js \
-	lib/d3/src/core/xhr.js \
+	src/core/xhr.js \
 	lib/d3/src/core/text.js \
 	lib/d3/src/core/json.js \
 	lib/d3/src/core/html.js \

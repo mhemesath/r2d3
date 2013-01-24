@@ -8117,7 +8117,15 @@ d3.round = function(x, n) {
       : Math.round(x);
 };
 d3.xhr = function(url, mime, callback) {
-  var req = new XMLHttpRequest;
+  var req;
+  try {
+    req = new ActiveXObject("Msxml2.XMLHTTP");
+  }  catch (e) {
+    try {
+      req = new ActiveXObject("Microsoft.XMLHTTP");
+    } 
+    catch (e) {}
+  }
   if (arguments.length < 3) callback = mime, mime = null;
   else if (mime && req.overrideMimeType) req.overrideMimeType(mime);
   req.open("GET", url, true);
@@ -12880,6 +12888,13 @@ var r2d3UID = (function() {
 
 //========================================
 // Element Extensions
+Raphael.el.appendChild = function() {
+  // Append child is a no-op. AFAIK appending on a
+  // element other than group or SVG is used for things like
+  // title
+  return this;
+}
+
 
 Raphael.el.addEventListener = function(type, listener) {
   if (this.node.addEventListener) {
