@@ -53,22 +53,6 @@ paper.select('circle')
   .attr('fill', '#ff0000');
 ```
 
-Raphael sets can also be used to group elements together.
-
-```javascript
-var set = paper.append('set')
-
-// Add a circle to the set
-set.append('circle')
-  .attr({ cx: 50, cy: 50, r: 10 });
-
-// Add a rectangle to the set
-set.append('rect')
-  .attr({ width: 100, height: 75, x: 0, y: 0 });
-
-// Set the rect and circle fill to #ff0000.
-set.attr({fill: '#ff0000'});
-```
 
 Events can also be bound to Raphael elements using D3 syntax:
 ```javascript
