@@ -1,6 +1,13 @@
 
 //========================================
 // Element Extensions
+Raphael.el.appendChild = function() {
+  // Append child is a no-op. AFAIK appending on a
+  // element other than group or SVG is used for things like
+  // title
+  return this;
+}
+
 
 Raphael.el.addEventListener = function(type, listener) {
   if (this.node.addEventListener) {
