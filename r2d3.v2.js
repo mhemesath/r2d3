@@ -12879,6 +12879,13 @@ Raphael.fn.buildElement = function(childNode) {
   return node;
 }
 
+Raphael.fn.updateStyle = function() {
+  var elements = this.getR2D3Elements(this.shadowDom.childNodes);
+  for (var i=0; i < elements.length; i++) {
+    elements[i].updateStyle();
+  }
+}
+
 Raphael.fn.getR2D3Elements = function(domNodes) {
   var r2d3Matches = [];
   
