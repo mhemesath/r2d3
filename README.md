@@ -15,13 +15,13 @@ serve up d3 as you normally would.
 <html>
   <head>
     <title>R2D3 101</title>
-  </head>
-  <body>
-    <h1>Hello, world!</h1>
     <!--[if lte IE 8]><script src="r2d3.v2.js"></script><![endif]-->
     <!--[if gte IE 9]><!-->
     <script src="d3.v2.js"></script>
     <!--<![endif]-->
+  </head>
+  <body>
+    <h1>Hello, world!</h1>
   </body>
 </html>
 ```
