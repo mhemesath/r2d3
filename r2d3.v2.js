@@ -12920,23 +12920,22 @@ Raphael.el.appendChild = function() {
 
 
 Raphael.el.addEventListener = function(type, listener) {
-  if (this.node.addEventListener) {
-    this.node.addEventListener(type, listener, false);
-  } else if (this.node.attachEvent) {
-    this.node.attachEvent("on" + type, listener);
-  } else {
-    throw "Found neither addEventListener nor attachEvent";
+  var self = this;
+  listener._callback = function(e) {
+    // Ensure the listener is invoked with 'this'
+    // as the raphael node and not the window
+    listener.apply(self, [e]);
+  }
+  
+  if (this.node.attachEvent) {
+    this.node.attachEvent("on" + type, listener._callback);
   }
 };
 
 
 Raphael.el.removeEventListener = function(type, listener) {
-  if (this.node.removeEventListener) {
-    this.node.removeEventListener(type, listener, false);
-  } else if (this.node.detachEvent) {
-    this.node.detachEvent("on" + type, listener);
-  } else {
-    throw "Found neither removeEventListener nor detachEvent";
+  if (this.node.detachEvent) {
+    this.node.detachEvent("on" + type, listener._callback || listener);
   }
 };
 
