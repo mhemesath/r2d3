@@ -43,6 +43,22 @@ test( "rect.translate", function() {
   equal(bbox.x, 20)
   equal(bbox.y, 20)
 });
+//================================
+// Dom Attribute Tests
+module("DOM id attribute", {
+    teardown: function() {
+      document.getElementById('attr').innerHTML = '';
+    }
+});
+
+test('id', function() {
+  var svg = d3.select('#attr').append('svg'),
+      el = svg.append('text');
+      
+  el.attr('id', 'foo');
+  equal(el.attr('id'), 'foo');
+  equal(d3.select('#foo').attr('id'), 'foo');
+});
 
 //================================
 // Circle Tests

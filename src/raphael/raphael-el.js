@@ -36,6 +36,10 @@ Raphael.el.setAttribute = function(name, value) {
     this.shadowDom.className = value;
     this.updateStyle();
     return;
+  } else if (name === 'id') {
+    this.shadowDom.id = value;
+    this.updateStyle();
+    return;
   }
   
   // 1 off for the SVG image element
@@ -91,6 +95,8 @@ Raphael.el.getAttribute = function(name) {
   // Get the class from the shadow dom
   if (name === 'class') {
     return this.shadowDom.className;
+  } else if (name === 'id') {
+    return this.shadowDom.id;
   }
   
   
