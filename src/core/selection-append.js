@@ -10,7 +10,13 @@ var createElementFromCache = (function() {
       fragmentDiv = document.createElement('div');
       fragmentDiv.style.display = "none";
   
-  return function(ns, name) {   
+  return function(ns, name) {
+    // Special case for title, IE doesn't like it to be cloned
+    // in the body
+    if (name === 'title') {
+      return document.createElementNS(ns, name);;
+    }
+       
     if (fragmentDiv.parentNode !== document.body) {
       document.body.appendChild(fragmentDiv); 
     }
@@ -19,9 +25,9 @@ var createElementFromCache = (function() {
       cache[name] = document.createElementNS(ns, name);
     }
     
-    var clone;
     fragmentDiv.innerHTML =  cache[name].outerHTML;
-    fragmentDiv.removeChild( clone = fragmentDiv.firstChild );
+    var clone = fragmentDiv.firstChild;
+    fragmentDiv.removeChild(clone);
     return clone;
   };
 }());
