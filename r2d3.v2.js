@@ -9578,6 +9578,15 @@ function d3_selection_classedName(name) {
     }
   };
 }
+// Returns an IE-style attribute name from a CSS property name.
+function _convertPropertyToIEAttribute(name) {
+  var i = 1, ar = name.split('-'), len = ar.length;
+  for (; i < len; i++) {
+    ar[i] = ar[i].substring(0,1).toUpperCase() + ar[i].substring(1);
+  }
+  return ar.join('');
+}
+
 d3_selectionPrototype.style = function(name, value, priority) {
   var n = arguments.length;
   if (n < 3) {
@@ -9611,13 +9620,21 @@ function d3_selection_style(name, value, priority) {
   // For style(name, null) or style(name, null, priority), remove the style
   // property with the specified name. The priority is ignored.
   function styleNull() {
-    this.style.removeProperty(name);
+    if (this.style.removeProperty) {
+      this.style.removeProperty(name);
+    } else {
+      this.style.removeAttribute(_convertPropertyToIEAttribute(name));
+    }
   }
 
   // For style(name, string) or style(name, string, priority), set the style
   // property with the specified name, using the specified priority.
   function styleConstant() {
-    this.style.setProperty(name, value, priority);
+    if (this.style.setProperty) {
+      this.style.setProperty(name, value, priority);
+    } else {
+      this.style.setAttribute(_convertPropertyToIEAttribute(name), value);
+    }
   }
 
   // For style(name, function) or style(name, function, priority), evaluate the
@@ -9625,8 +9642,19 @@ function d3_selection_style(name, value, priority) {
   // appropriate. When setting, use the specified priority.
   function styleFunction() {
     var x = value.apply(this, arguments);
-    if (x == null) this.style.removeProperty(name);
-    else this.style.setProperty(name, x, priority);
+    if (x == null) {
+      if (this.style.removeProperty) {
+        this.style.removeProperty(name);
+      } else {
+        this.style.removeAttribute(_convertPropertyToIEAttribute(name));
+      }
+    } else {
+      if (this.style.setProperty) {
+        this.style.setProperty(name, x, priority);
+      } else {
+        this.style.setAttribute(_convertPropertyToIEAttribute(name), x, priority);
+      }
+    }
   }
 
   return value == null
@@ -9987,7 +10015,11 @@ function d3_selection_on(type, listener, capture) {
   function onRemove() {
     var wrapper = this[name];
     if (wrapper) {
-      this.removeEventListener(type, wrapper, wrapper.$);
+      if (this.removeEventListener) {
+        this.removeEventListener(type, wrapper, wrapper.$);
+      } else {
+        this.detachEvent("on" + type, wrapper);
+      }
       delete this[name];
     }
   }
@@ -9997,7 +10029,11 @@ function d3_selection_on(type, listener, capture) {
         args = arguments;
 
     onRemove.call(this);
-    this.addEventListener(type, this[name] = wrapper, wrapper.$ = capture);
+    if (this.addEventListener) {
+      this.addEventListener(type, this[name] = wrapper, wrapper.$ = capture);
+    } else {
+      this.attachEvent("on" + type, this[name] = wrapper);
+    }
     wrapper._ = listener;
 
     function wrapper(e) {
