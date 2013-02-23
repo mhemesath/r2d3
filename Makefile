@@ -87,7 +87,7 @@ r2d3.core.js: \
 	lib/d3/src/core/selection-selectAll.js \
 	lib/d3/src/core/selection-attr.js \
 	lib/d3/src/core/selection-classed.js \
-	lib/d3/src/core/selection-style.js \
+	src/core/selection-style.js \
 	lib/d3/src/core/selection-property.js \
 	src/core/selection-text.js \
 	lib/d3/src/core/selection-html.js \
@@ -99,7 +99,7 @@ r2d3.core.js: \
 	lib/d3/src/core/selection-filter.js \
 	lib/d3/src/core/selection-order.js \
 	lib/d3/src/core/selection-sort.js \
-	lib/d3/src/core/selection-on.js \
+	src/core/selection-on.js \
 	lib/d3/src/core/selection-each.js \
 	lib/d3/src/core/selection-call.js \
 	lib/d3/src/core/selection-empty.js \
