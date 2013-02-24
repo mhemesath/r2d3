@@ -32,27 +32,8 @@ Raphael.el.removeEventListener = function(type, listener) {
 
 
 Raphael.el.setAttribute = function(name, value) {
-  if (name === 'class') {
-    this.className = value;
-    this.shadowDom.className = value;
-    this.updateStyle();
-    return;
-  }
-  
-  // 1 off for the SVG image element
-  if (name === 'href' && this.type === 'image') {
-    name = "src"; // Raphael uses src
-  }
-	
-  // Update the attributes object
-	var attrs = this.attributes();	
-	if (value === '' || value === null || value === undefined) {
-    // Dont' update style, remove attribute will handle that
-		this.removeAttribute(name);
-	} else {
-		attrs[name] = value;
-    this.updateStyle(name);
-	}
+  this.shadowDom.setAttribute(name, value);
+  this.updateCurrentStyle();
 };
 
 // Save off old insertBefore API
@@ -66,119 +47,83 @@ Raphael.el.insertBefore = function(node, before) {
   
   // Update the shadow DOM
   before.shadowDom.parentNode.insertBefore(el.shadowDom, before.shadowDom);
-  
-  el.updateStyle();
-  return el;
+    return el;
 };
 
 
 Raphael.el.setAttributeNS = function(namespace, name, value) {
-  if (namespace === 'xlink' && name === 'href' && this.type === 'image') {
-    this.setAttribute('src', value);
-  }
-  this.setAttribute(name, value);
+  this.shadowDom.setAttribute(name, value);
 };
 
 
-Raphael.el.removeAttribute = function() {
-	var attrs = this.attributes();
-	delete attrs[name];
-	this.updateStyle(name);
+Raphael.el.removeAttribute = function(name) {
+  this.shadowDom.removeAttribute(name);
 };
 
 
 
 Raphael.el.getAttribute = function(name) {
-  // Get the class from the shadow dom
-  if (name === 'class') {
-    return this.shadowDom.className;
-  }
+	return this.shadowDom.getAttribute(name);
+};
+
+Raphael.el.updateCurrentStyle = function() {
+  var currentStyle = this.shadowDom.currentStyle,
+      opacity = currentStyle.getAttribute('opacity'),
+      strokeOpacity = currentStyle.getAttribute('stroke-opacity');
   
-  
-  // Raphael uses src
-  if (name === 'href' && this.type === 'image') name = 'src';
-	return this.data('attributes')[name];
+  this.attr({
+    'arrow-end': currentStyle.getAttribute('arrow-end'),
+    'cursor': currentStyle.getAttribute('cursor'),
+    'fill': currentStyle.getAttribute('fill') || 'black',
+    'fill-opacity': 1,
+    'font': currentStyle.getAttribute('font'),
+    'font-family': currentStyle.getAttribute('font-family'),
+    'font-size': currentStyle.getAttribute('font-size'),
+    'font-weight': currentStyle.getAttribute('font-weight'),
+    'opacity': 1,
+    'stroke': currentStyle.getAttribute('stroke') || 'black',
+    'stroke-dasharray': currentStyle.getAttribute('stroke-dasharray'),
+    'stroke-linecap': currentStyle.getAttribute('stroke-linecap') || 'butt',
+    'stroke-linejoin': currentStyle.getAttribute('stroke-linejoin') || 'miter',
+    'stroke-miterlimit': currentStyle.getAttribute('stroke-miterlimit') || 4,
+    'stroke-opacity': 1,
+    'stroke-width': currentStyle.getAttribute('stroke-width') || 1,
+    'text-anchor': currentStyle.getAttribute('text-anchor') || 'start'
+  });
 };
-
-
-Raphael.el.attributes = function() {
-  var attrs = this.data('attributes') || {};
-  // Save the attrs if they didn't exist
-  this.data('attributes', attrs);
-  return attrs;
-};
-
-
-Raphael.el.currentStyle = function() {
-  return this.shadowDom.currentStyle || {};
-};
-
 
 /**
  * Updates the style for a given property honoring style
  */
-Raphael.el.updateStyle = function(name) {
+Raphael.el.updateProperty = function(name) {
+  name = name.split('.');
+  name = name[name.length-1];
   
-  /**
-  * Return the first argument that isn't null or undefined
-  */
-  function val() {
-    for (var i=0; i<arguments.length; i++) {
-      var value = arguments[i];
-      if (value !== null && typeof value !== 'undefined') {
-        return value;
-      }
-    }
-  }
-
-	var attributes = this.attributes(),
-			style = this.style.props,
-      css = this.currentStyle(),
-      props = 'arrow-end cursor fill fill-opacity font font-family font-size font-weight opacity r rx ry stroke stroke-dasharay stroke-linecap stroke-linejoin stroke-miterlimit stroke-opacity stroke-width text-anchor'.split(' ');
-      
-
-  if (arguments.length < 1) {
-    // Update props in stylesheets
-    for (var i=0; i < props.length; i++) this.updateStyle(props[i]);
-    
-    // Update Other Attribute
-    this.updateStyle('transform');
-  }
-	
-  // Transforms take into account parent transforms
-  // as we can't rely on transforms automatically applied
-  // from the parents
-  if (name === 'transform') {
-    var transforms = [attributes['transform'] || ''],
-        node = this;
+  
+  if (name === "transform") {
+    var transforms = new Array(10), // assume 10 > depth
+        node = this.shadowDom,
+        index = 0;
+        
+    transforms[index++] = node.getAttribute('transform');
 
     while(node.parentNode) {
       node = node.parentNode;
-      transforms.push(node.getAttribute('transform') || '');
+      transforms[index++] = node.getAttribute('transform');
+      if (node.tagName === 'svg') {
+        break;
+      }
     }
 
     this.attr('transform', transforms.reverse().join(''));
-    
-  // Props that can't be styled via CSS (e.g path, height, width, text), apply directly
-  } else if (props.indexOf(name) < 0) {
-    this.attr(name, attributes[name]);
-    
-  // Honor the precedence for applying styleable attributes
-  } else {
-    // Get the first value that ins't null or undefined in order
-    // of precedence
-    var value = val(style[name], css[name], attributes[name]);
-    if (value == null || value == undefined) {
-      var node = this;
-      while(node.parentNode) {
-        node = node.parentNode;
-        value = val(node.style.getPropertyValue(name), node.getAttribute(name));
-        if (value != null && value != undefined) {
-          break;
-        }
-      }
-    }
-    this.attr(name, value);
+    return
   }
-  return true;
+  
+  var attr = this.shadowDom.getAttribute(name),
+      style = this.shadowDom.style.getAttribute(name);
+      
+  attr = attr === '' ? null : attr;
+  style = style === '' ? null : style;
+  
+  this.attr(name, style || attr);
 };

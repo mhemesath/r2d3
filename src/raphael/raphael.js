@@ -1,38 +1,30 @@
-
-
-(function(defaultGetComputedStyle) {
-  // If we don't have window.getComputedStyle, as in IE7,
-  // make a pretend one.
-  if (typeof defaultGetComputedStyle === "undefined") {
-    defaultGetComputedStyle = function(el, pseudo) {
-      this.el = el;
-      this.getPropertyValue = function(prop) {
-        var re = /(\-([a-z]){1})/g;
-        if (prop == 'float') prop = 'styleFloat';
-        if (re.test(prop)) {
-          prop = prop.replace(re, function () {
-            return arguments[2].toUpperCase();
-          });
+// getComputedStyle shim: http://johnkpaul.tumblr.com/post/17380987688/shim-for-javascript
+(function(window, undefined){
+  window.getComputedStylePropertyValue = function(el,cssProperty){
+    el = el.shadowDom || el;
+    if(!window.getComputedStyle){
+      if(document.defaultView && document.defaultView.getComputedStyle){
+        return document.defaultView.getComputedStyle.getPropertyValue(cssProperty);
+      } else {
+        var camelCasedCssProperty = getCamelCasedCssProperty(cssProperty);
+        if(el.currentStyle){
+          return el.currentStyle(camelCasedCssProperty);
+        } else {
+          return el.style[camelCasedCssProperty];
         }
-        return el.currentStyle[prop] ? el.currentStyle[prop] : null;
       }
-      return this;
-    };
+    } else{
+      return window.getComputedStyle(el).getPropertyValue(cssProperty);
+    }      
   }
   
-  window.getComputedStyle = function(node) {
-    // Override for Raphael
-    if (node && node.paper) {
-      return {
-        getPropertyValue: function(name) {
-          return node.attr(name);
-        }
-      };
-    }
-    
-    return defaultGetComputedStyle.apply(window, arguments);
-  };
-}(window.getComputedStyle));
+  function getCamelCasedCssProperty(cssProperty){
+    return cssProperty.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase() });
+  }
+  
+})(this);
+
+
 
 // Register SVG elements with IE so they can be styled
 (function() {
@@ -68,12 +60,13 @@ function lineAttribute(name) {
 
 function appendRaphael(parent) {
   var paper =  Raphael(parent, 0, 0);
-
-  paper.__attrs = { width: 0, height: 0 };
   
   paper.shadowDom = document.createElement('svg');
   paper.shadowDom.style.display = 'none';
   parent.appendChild(paper.shadowDom);
+  
+  paper.shadowDom.height = 0;
+  paper.shadowDom.width = 0;
 
   paper.ca.d = function(path) {
     return { path: path };
@@ -87,7 +80,7 @@ function appendRaphael(parent) {
   // Fool sizzle into thinking the paper is an element
   paper.nodeType = 1;
   paper.nodeName = 'object';
-  paper.style = new ElementStyle(paper);
+  paper.style = paper.shadowDom.style;
 
   paper.r2d3Elements = {};
 
@@ -122,19 +115,15 @@ Raphael.fn.g = function() {
 
 
 Raphael.fn.getAttribute = function(name) {
-  return this.__attrs[name];
+  return this.shadowDom.getAttribute(name);
 };
 
 
 Raphael.fn.setAttribute = function(name, value) {
-  this.__attrs[name] = value;
-
-  if (name === 'height' || name === 'width') {
-    this.setSize(this.__attrs.width, this.__attrs.height);
-  }
+  this.shadowDom.setAttribute(name, value);
   
-  if (name == 'class') {
-    this.shadowDom.className = value;
+  if (name === 'height' || name === 'width') {
+    this.setSize(this.shadowDom.getAttribute('width'), this.shadowDom.getAttribute('height'));
   }
 };
 
@@ -150,12 +139,8 @@ Raphael.fn.getElementsByTagName = function(tag) {
 
 
 Raphael.fn.appendChild = function(childNode) {
-  var node = this.buildElement(childNode);
-  if (node) {
-    this.shadowDom.appendChild(childNode);
-    node.updateStyle(); //  Apply CSS styles
-  }
-  return node;
+  this.shadowDom.appendChild(childNode);
+  return this.buildElement(childNode);;
 };
 
 
@@ -163,19 +148,24 @@ Raphael.fn.buildElement = function(childNode) {
   var type = childNode && childNode.nodeName,
       node =  type ? this[type.toLowerCase()]() : null;
       
-  if (node) {
-    // Ensure Paper can be referenced from sets
-    node.shadowDom = childNode
-    node.parentNode = this;
-    // Link the shadowDOM node by the Raphael id.
-    node.shadowDom.r2d3 = true;
-    node.shadowDom.r2d3id = r2d3UID();
-    node.paper = this;
-    node.tagName = type.toLowerCase();
-		node.style = new ElementStyle(node);
+
+  // Ensure Paper can be referenced from sets
+  node.shadowDom = childNode
+  node.parentNode = this;
+  // Link the shadowDOM node by the Raphael id.
+  node.shadowDom.r2d3id = r2d3UID();
+  node.paper = this;
+  node.tagName = type.toLowerCase();
+	node.style = node.shadowDom.style;
   
-    r2d3Elements[node.shadowDom.r2d3id] = node;
+  r2d3Elements[node.shadowDom.r2d3id] = node;
+  
+  node.updateCurrentStyle();
+  
+  node.shadowDom.onpropertychange = function() {
+    node.updateProperty(event.propertyName);
   }
+
   return node;
 }
 
@@ -201,3 +191,4 @@ var r2d3UID = (function() {
     return id++;
   };
 }());
+

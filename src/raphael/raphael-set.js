@@ -1,15 +1,18 @@
-//========================================
-// Set Extensions
+Raphael.st.setAttribute = Raphael.el.setAttribute;
+Raphael.st.getAttribute = Raphael.el.getAttribute;
+Raphael.st.setAttributeNS = Raphael.el.setAttributeNS;
+Raphael.st.removeAttribute = Raphael.el.removeAttribute;
 
-Raphael.st.getElementsByClassName  = Raphael.fn.getElementsByClassName;
 
 
-Raphael.st.getElementsByTagName = Raphael.fn.getElementsByTagName;
+Raphael.st.updateCurrentStyle = function() {
+}
 
 
 Raphael.st.appendChild = function(childNode) {
   // As of now, only groups can have children
   if (this.tagName === 'g') {
+    this.shadowDom.appendChild(childNode);
     
     // Buld Raphael element from DOM node
     var node = null;
@@ -23,14 +26,12 @@ Raphael.st.appendChild = function(childNode) {
     
     // If the node was an invalid type, 
     // it wont be created
-    if (node) {
-      node.parentNode = this;
+    node.parentNode = this;
     
-      // update shadow dom
-      this.shadowDom.appendChild(childNode);
-      this.items.push(node);
-      node.updateStyle();
-    }
+    // update shadow dom
+    this.items.push(node);
+      
+    node.updateProperty('transform');
     return node;
   }
 };
@@ -53,43 +54,14 @@ Raphael.st.insertBefore = function(el, before) {
   }
 };
 
+
 Raphael.st.removeChild = function(el) {
   el.shadowDom.parentNode.removeChild(el.shadowDom)
   el.remove();
-}
-
-
-Raphael.st.setAttribute = function(name, value) {
-  
-  if (name === 'class') {
-    this.className = value;
-    this.shadowDom.className = value;
-    this.updateStyle();
-    return;
-  }
-
-  this.attrs = this.attrs || {};
-  this.attrs[name] = value;
-  this.updateStyle(name);
-};
-
-Raphael.st.getAttribute = function(name) {
-  this.attrs = this.attrs || {};
-  return this.attrs[name];
-};
-
-Raphael.st.setAttributeNS = function(ns, name, value) {
-  this.setAttribute(name, value);
 };
 
 
-Raphael.st.removeAttribute = function(name) {
-  this.attrs = this.attrs || {};
-  if (this.attrs[name]) delete this.attrs[name];
-};
-
-
-Raphael.st.updateStyle = function(name) {
+Raphael.st.updateProperty = function(name) {
   // Only an appending the group to a new parent
   // or adding a transform can trigger a style update
   // as they may be expensive
@@ -97,7 +69,9 @@ Raphael.st.updateStyle = function(name) {
     var children = this.shadowDom.childNodes;
     for (var i=0; i<children.length; i++) {
       var node = r2d3Elements[children[i].r2d3id];
-      if (node) node.updateStyle(name);
+      if (node) {
+        node.updateProperty(name);
+      }
     }
   }
 };

@@ -26,7 +26,11 @@ body {
 
 </style>
 <body>
-<script src="../../d3.v2.js"></script>
+  <!--[if lte IE 8]><script src="../../../r2d3.v2.js"></script><![endif]-->
+  <!--[if gte IE 9]><!-->
+  <script src="../../../lib/d3/d3.v2.js"></script>
+  <!--<![endif]-->
+
 <script>
 
 var data = d3.range(40).map(function(i) {

@@ -49,7 +49,7 @@ var xy = d3.geo.albers(),
     path = d3.geo.path().projection(xy);
 
 d3.select("body")
-  .append("svg")
+  .append("svg").attr({ width: 960, height: 500 })
   .append("g")
     .attr("id", "states");
 

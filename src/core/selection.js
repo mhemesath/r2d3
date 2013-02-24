@@ -18,7 +18,7 @@ var d3_select = function(s, n) {
   var node = Sizzle(s, n)[0] || null;
   // If the match is a R2D3 element, return the
   // Raphael Element
-  if (node && node.r2d3) {
+  if (node && node.r2d3id) {
     node = r2d3Elements[node.r2d3id];
   }
   
@@ -40,7 +40,7 @@ var d3_selectAll = function(s, n) {
     var node = nodes[i];
     // If the match is a R2D3 element, return the
     // Raphael Element
-    if (node && node.r2d3) {
+    if (node && node.r2d3id) {
       node = r2d3Elements[node.r2d3id];
     }
     matches.push(node);

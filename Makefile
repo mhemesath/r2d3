@@ -160,7 +160,6 @@ r2d3.svg.js: \
 	lib/d3/src/svg/brush.js
 
 r2d3.raphael.js: \
-	src/raphael/element-style.js \
 	src/raphael/raphael.js \
 	src/raphael/raphael-el.js \
 	src/raphael/raphael-set.js \
