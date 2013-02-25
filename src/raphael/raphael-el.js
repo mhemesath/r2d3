@@ -33,7 +33,6 @@ Raphael.el.removeEventListener = function(type, listener) {
 
 Raphael.el.setAttribute = function(name, value) {
   this.shadowDom.setAttribute(name, value);
-  this.updateCurrentStyle();
 };
 
 // Save off old insertBefore API
@@ -60,36 +59,47 @@ Raphael.el.removeAttribute = function(name) {
   this.shadowDom.removeAttribute(name);
 };
 
-
-
 Raphael.el.getAttribute = function(name) {
 	return this.shadowDom.getAttribute(name);
 };
 
-Raphael.el.updateCurrentStyle = function() {
+Raphael.el.updateCurrentStyle = function(name) {
   var currentStyle = this.shadowDom.currentStyle,
-      opacity = currentStyle.getAttribute('opacity'),
-      strokeOpacity = currentStyle.getAttribute('stroke-opacity');
+      el = this.shadowDom;
   
-  this.attr({
-    'arrow-end': currentStyle.getAttribute('arrow-end'),
-    'cursor': currentStyle.getAttribute('cursor'),
-    'fill': currentStyle.getAttribute('fill') || 'black',
-    'fill-opacity': 1,
-    'font': currentStyle.getAttribute('font'),
-    'font-family': currentStyle.getAttribute('font-family'),
-    'font-size': currentStyle.getAttribute('font-size'),
-    'font-weight': currentStyle.getAttribute('font-weight'),
-    'opacity': 1,
-    'stroke': currentStyle.getAttribute('stroke') || 'black',
-    'stroke-dasharray': currentStyle.getAttribute('stroke-dasharray'),
-    'stroke-linecap': currentStyle.getAttribute('stroke-linecap') || 'butt',
-    'stroke-linejoin': currentStyle.getAttribute('stroke-linejoin') || 'miter',
-    'stroke-miterlimit': currentStyle.getAttribute('stroke-miterlimit') || 4,
-    'stroke-opacity': 1,
-    'stroke-width': currentStyle.getAttribute('stroke-width') || 1,
-    'text-anchor': currentStyle.getAttribute('text-anchor') || 'start'
-  });
+  function getValue(el, name, currentStyle) {
+    return el.style.getAttribute(name)
+        || currentStyle.getAttribute(name)
+        || el.getAttribute(name);
+  }
+  
+  var attrs = {
+    'arrow-end': getValue(el, 'arrow-end', currentStyle),
+    'cursor': getValue(el, 'cursor', currentStyle),
+    'fill': getValue(el, 'fill', currentStyle) || 'black',
+    'fill-opacity': getValue(el, 'fill-opacity', currentStyle) || 1,
+    'font': getValue(el, 'font', currentStyle),
+    'font-family': getValue(el, 'font-family', currentStyle),
+    'font-size': getValue(el, 'font-size', currentStyle),
+    'font-weight': getValue(el, 'font-weight', currentStyle),
+    'opacity': getValue(el, 'opacity', currentStyle) || 1,
+    'stroke': getValue(el, 'stroke', currentStyle) || 'black',
+    'stroke-dasharray': getValue(el, 'stroke-dasharray', currentStyle),
+    'stroke-linecap': getValue(el, 'stroke-linecap', currentStyle)|| 'butt',
+    'stroke-linejoin': getValue(el, 'stroke-linejoin', currentStyle) || 'miter',
+    'stroke-miterlimit': getValue(el, 'stroke-miterlimit', currentStyle) || 4,
+    'stroke-opacity': getValue(el, 'stroke-opacity', currentStyle) || 1,
+    'stroke-width': getValue(el, 'stroke-width', currentStyle) || 1,
+    'text-anchor': getValue(el, 'text-anchor', currentStyle) || 'start',
+    'd': el.getAttribute()
+  };
+  
+  if (name && attrs[name] === undefined) {
+    attrs[name] = el.getAttribute(name);
+  }
+
+  this.attr(attrs);
+  
 };
 
 /**
@@ -98,7 +108,6 @@ Raphael.el.updateCurrentStyle = function() {
 Raphael.el.updateProperty = function(name) {
   name = name.split('.');
   name = name[name.length-1];
-  
   
   if (name === "transform") {
     var transforms = new Array(10), // assume 10 > depth
@@ -114,16 +123,8 @@ Raphael.el.updateProperty = function(name) {
         break;
       }
     }
-
     this.attr('transform', transforms.reverse().join(''));
-    return
+  } else {    
+    this.updateCurrentStyle(name);
   }
-  
-  var attr = this.shadowDom.getAttribute(name),
-      style = this.shadowDom.style.getAttribute(name);
-      
-  attr = attr === '' ? null : attr;
-  style = style === '' ? null : style;
-  
-  this.attr(name, style || attr);
 };
