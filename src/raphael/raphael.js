@@ -30,64 +30,24 @@
 (function() {
   var svgElements = 'circle ellipse line polygon polyline rect g svg image path text'.split(' '); 
     
-  if (Raphael.svg) return;
   for (var i=0; i< svgElements.length; i++) {
     document.createElement(svgElements[i]);
   }
 })();
 
 
-
-
 function appendRaphael(parent) {
-  var paper =  Raphael(parent, 0, 0);
+  var paper =  Raphael(parent, 0, 0),
+      svg = document.createElement('svg');
+      
+  // Create the DOM node representing the SVG docuemnt
+  // This will enable us to pull in styles from the stylesheets using
+  // node.currentStyle
+  svg.style.display = 'none';
+  parent.appendChild(svg);
   
-  paper.domNode = document.createElement('svg');
-  paper.domNode.style.display = 'none';
-  parent.appendChild(paper.domNode);
-  
-  paper.domNode.height = 0;
-  paper.domNode.width = 0;
-
-  // Fool sizzle into thinking the paper is an element
-  paper.style = paper.domNode.style;
-
-  return paper;
+  return new R2D3Element(paper, svg, parent);
 }
-
-//========================================
-// Paper Extensions
-
-Raphael.fn.removeChild = function(el) {
-  // Remove reference to r2d3 element
-  // to prevent IE memory leaks
-  el.element.r2d3 = null;
-  
-  el.element.parentNode.removeChild(el.element)
-  el.remove();
-};
-
-
-Raphael.fn.getAttribute = function(name) {
-  return this.shadowDom.getAttribute(name);
-};
-
-
-Raphael.fn.setAttribute = function(name, value) {
-  this.shadowDom.setAttribute(name, value);
-  
-  if (name === 'height' || name === 'width') {
-    this.setSize(this.shadowDom.getAttribute('width'), this.shadowDom.getAttribute('height'));
-  }
-};
-
-
-Raphael.fn.appendChild = function(childNode) {
-  var element new Element(childNode);
-  element.parentNode = this;
-  
-  return element;
-};
 
 
 Raphael.fn.getR2D3Elements = function(domNodes) {
