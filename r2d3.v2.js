@@ -7556,6 +7556,31 @@ if (!Array.prototype.filter)
     };
 }
 
+if (!Array.prototype.reduce) {
+  Array.prototype.reduce = function reduce(accumulator){
+    if (this===null || this===undefined) throw new TypeError("Object is null or undefined");
+    var i = 0, l = this.length >> 0, curr;
+ 
+    if(typeof accumulator !== "function") // ES5 : "If IsCallable(callbackfn) is false, throw a TypeError exception."
+      throw new TypeError("First argument is not callable");
+ 
+    if(arguments.length < 2) {
+      if (l === 0) throw new TypeError("Array length is 0 and no second argument");
+      curr = this[0];
+      i = 1; // start accumulating at the second element
+    }
+    else
+      curr = arguments[1];
+ 
+    while (i < l) {
+      if(i in this) curr = accumulator.call(undefined, curr, this[i], i, this);
+      ++i;
+    }
+ 
+    return curr;
+  };
+}
+
 if (!String.prototype.trim) {
     String.prototype.trim = function() {
       return this.replace(/^\s+|\s+$/g, '');
@@ -9544,6 +9569,15 @@ function d3_selection_classedName(name) {
     }
   };
 }
+// Returns an IE-style attribute name from a CSS property name.
+function _convertPropertyToIEAttribute(name) {
+  var i = 1, ar = name.split('-'), len = ar.length;
+  for (; i < len; i++) {
+    ar[i] = ar[i].substring(0,1).toUpperCase() + ar[i].substring(1);
+  }
+  return ar.join('');
+}
+
 d3_selectionPrototype.style = function(name, value, priority) {
   var n = arguments.length;
   if (n < 3) {
@@ -9577,13 +9611,21 @@ function d3_selection_style(name, value, priority) {
   // For style(name, null) or style(name, null, priority), remove the style
   // property with the specified name. The priority is ignored.
   function styleNull() {
-    this.style.removeProperty(name);
+    if (this.style.removeProperty) {
+      this.style.removeProperty(name);
+    } else {
+      this.style.removeAttribute(_convertPropertyToIEAttribute(name));
+    }
   }
 
   // For style(name, string) or style(name, string, priority), set the style
   // property with the specified name, using the specified priority.
   function styleConstant() {
-    this.style.setProperty(name, value, priority);
+    if (this.style.setProperty) {
+      this.style.setProperty(name, value, priority);
+    } else {
+      this.style.setAttribute(_convertPropertyToIEAttribute(name), value);
+    }
   }
 
   // For style(name, function) or style(name, function, priority), evaluate the
@@ -9591,8 +9633,19 @@ function d3_selection_style(name, value, priority) {
   // appropriate. When setting, use the specified priority.
   function styleFunction() {
     var x = value.apply(this, arguments);
-    if (x == null) this.style.removeProperty(name);
-    else this.style.setProperty(name, x, priority);
+    if (x == null) {
+      if (this.style.removeProperty) {
+        this.style.removeProperty(name);
+      } else {
+        this.style.removeAttribute(_convertPropertyToIEAttribute(name));
+      }
+    } else {
+      if (this.style.setProperty) {
+        this.style.setProperty(name, x, priority);
+      } else {
+        this.style.setAttribute(_convertPropertyToIEAttribute(name), x, priority);
+      }
+    }
   }
 
   return value == null
@@ -9667,19 +9720,52 @@ d3_selectionPrototype.html = function(value) {
 };
 // TODO append(node)?
 // TODO append(function)?
+
+/**
+ * Gives IE a performance boost on creating elements from clone
+ * rather than from scratch.
+ */
+var createElementFromCache = (function() {
+  var cache = {},
+      fragmentDiv = document.createElement('div');
+      fragmentDiv.style.display = "none";
+  
+  return function(ns, name) {
+    // Special case for title, IE doesn't like it to be cloned
+    // in the body
+    if (name === 'title') {
+      return document.createElementNS(ns, name);;
+    }
+       
+    if (fragmentDiv.parentNode !== document.body) {
+      document.body.appendChild(fragmentDiv); 
+    }
+     
+    if (cache[name] === undefined) {
+      cache[name] = document.createElementNS(ns, name);
+    }
+    
+    fragmentDiv.innerHTML =  cache[name].outerHTML;
+    var clone = fragmentDiv.firstChild;
+    fragmentDiv.removeChild(clone);
+    return clone;
+  };
+}());
+
+
 d3_selectionPrototype.append = function(name) {
   name = d3.ns.qualify(name);
 
   function append() {
     if (name.local === 'svg') return appendRaphael(this);
 
-    return this.appendChild(document.createElementNS(this.namespaceURI, name));
+    return this.appendChild(createElementFromCache(this.namespaceURI, name));
   }
 
   function appendNS() {
     if (name.local === 'svg') return appendRaphael(this);
 
-    return this.appendChild(document.createElementNS(name.space, name.local));
+    return this.appendChild(createElementFromCache(name.space, name.local));
   }
 
   return this.select(name.local ? appendNS : append);
@@ -9920,7 +10006,11 @@ function d3_selection_on(type, listener, capture) {
   function onRemove() {
     var wrapper = this[name];
     if (wrapper) {
-      this.removeEventListener(type, wrapper, wrapper.$);
+      if (this.removeEventListener) {
+        this.removeEventListener(type, wrapper, wrapper.$);
+      } else {
+        this.detachEvent("on" + type, wrapper);
+      }
       delete this[name];
     }
   }
@@ -9930,7 +10020,11 @@ function d3_selection_on(type, listener, capture) {
         args = arguments;
 
     onRemove.call(this);
-    this.addEventListener(type, this[name] = wrapper, wrapper.$ = capture);
+    if (this.addEventListener) {
+      this.addEventListener(type, this[name] = wrapper, wrapper.$ = capture);
+    } else {
+      this.attachEvent("on" + type, this[name] = wrapper);
+    }
     wrapper._ = listener;
 
     function wrapper(e) {
@@ -12830,9 +12924,6 @@ Raphael.fn.buildElement = function(childNode) {
   
   node.updateCurrentStyle();
   
-  node.shadowDom.onpropertychange = function() {
-    node.updateProperty(event.propertyName);
-  }
 
   return node;
 }
@@ -12872,29 +12963,29 @@ Raphael.el.appendChild = function() {
 
 
 Raphael.el.addEventListener = function(type, listener) {
-  if (this.node.addEventListener) {
-    this.node.addEventListener(type, listener, false);
-  } else if (this.node.attachEvent) {
-    this.node.attachEvent("on" + type, listener);
-  } else {
-    throw "Found neither addEventListener nor attachEvent";
+  var self = this;
+  listener._callback = function(e) {
+    // Ensure the listener is invoked with 'this'
+    // as the raphael node and not the window
+    listener.apply(self, [e]);
+  }
+  
+  if (this.node.attachEvent) {
+    this.node.attachEvent("on" + type, listener._callback);
   }
 };
 
 
 Raphael.el.removeEventListener = function(type, listener) {
-  if (this.node.removeEventListener) {
-    this.node.removeEventListener(type, listener, false);
-  } else if (this.node.detachEvent) {
-    this.node.detachEvent("on" + type, listener);
-  } else {
-    throw "Found neither removeEventListener nor detachEvent";
+  if (this.node.detachEvent) {
+    this.node.detachEvent("on" + type, listener._callback || listener);
   }
 };
 
 
 Raphael.el.setAttribute = function(name, value) {
   this.shadowDom.setAttribute(name, value);
+  this.updateProperty(name);
 };
 
 // Save off old insertBefore API
@@ -12945,7 +13036,7 @@ Raphael.el.updateCurrentStyle = function(name) {
     'font-size': getValue(el, 'font-size', currentStyle),
     'font-weight': getValue(el, 'font-weight', currentStyle),
     'opacity': getValue(el, 'opacity', currentStyle) || 1,
-    'stroke': getValue(el, 'stroke', currentStyle) || 'black',
+    'stroke': getValue(el, 'stroke', currentStyle) || 'none',
     'stroke-dasharray': getValue(el, 'stroke-dasharray', currentStyle),
     'stroke-linecap': getValue(el, 'stroke-linecap', currentStyle)|| 'butt',
     'stroke-linejoin': getValue(el, 'stroke-linejoin', currentStyle) || 'miter',
@@ -12967,10 +13058,7 @@ Raphael.el.updateCurrentStyle = function(name) {
 /**
  * Updates the style for a given property honoring style
  */
-Raphael.el.updateProperty = function(name) {
-  name = name.split('.');
-  name = name[name.length-1];
-  
+Raphael.el.updateProperty = function(name) {  
   if (name === "transform") {
     var transforms = new Array(10), // assume 10 > depth
         node = this.shadowDom,
@@ -12986,8 +13074,14 @@ Raphael.el.updateProperty = function(name) {
       }
     }
     this.attr('transform', transforms.reverse().join(''));
-  } else {    
-    this.updateCurrentStyle(name);
+  } else if (name === 'class') {
+    this.updateCurrentStyle();
+  } else  {
+    var value = this.shadowDom.style.getAttribute(name)
+        || this.shadowDom.currentStyle.getAttribute(name)
+        || this.shadowDom.getAttribute(name);
+            
+    this.attr(name, value);
   }
 };
 Raphael.st.setAttribute = Raphael.el.setAttribute;

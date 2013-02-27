@@ -46,7 +46,7 @@ test('select class', function() {
   equal(svg.select('.foo').node(), el.node())
 });
 
-test('select class', function() {
+test('select tagname with class', function() {
   var svg = d3.select('#selection').append('svg'),
       el = svg.append('rect').attr('class', 'foo');
       

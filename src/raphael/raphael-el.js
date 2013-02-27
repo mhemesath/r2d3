@@ -10,29 +10,29 @@ Raphael.el.appendChild = function() {
 
 
 Raphael.el.addEventListener = function(type, listener) {
-  if (this.node.addEventListener) {
-    this.node.addEventListener(type, listener, false);
-  } else if (this.node.attachEvent) {
-    this.node.attachEvent("on" + type, listener);
-  } else {
-    throw "Found neither addEventListener nor attachEvent";
+  var self = this;
+  listener._callback = function(e) {
+    // Ensure the listener is invoked with 'this'
+    // as the raphael node and not the window
+    listener.apply(self, [e]);
+  }
+  
+  if (this.node.attachEvent) {
+    this.node.attachEvent("on" + type, listener._callback);
   }
 };
 
 
 Raphael.el.removeEventListener = function(type, listener) {
-  if (this.node.removeEventListener) {
-    this.node.removeEventListener(type, listener, false);
-  } else if (this.node.detachEvent) {
-    this.node.detachEvent("on" + type, listener);
-  } else {
-    throw "Found neither removeEventListener nor detachEvent";
+  if (this.node.detachEvent) {
+    this.node.detachEvent("on" + type, listener._callback || listener);
   }
 };
 
 
 Raphael.el.setAttribute = function(name, value) {
   this.shadowDom.setAttribute(name, value);
+  this.updateProperty(name);
 };
 
 // Save off old insertBefore API
@@ -83,7 +83,7 @@ Raphael.el.updateCurrentStyle = function(name) {
     'font-size': getValue(el, 'font-size', currentStyle),
     'font-weight': getValue(el, 'font-weight', currentStyle),
     'opacity': getValue(el, 'opacity', currentStyle) || 1,
-    'stroke': getValue(el, 'stroke', currentStyle) || 'black',
+    'stroke': getValue(el, 'stroke', currentStyle) || 'none',
     'stroke-dasharray': getValue(el, 'stroke-dasharray', currentStyle),
     'stroke-linecap': getValue(el, 'stroke-linecap', currentStyle)|| 'butt',
     'stroke-linejoin': getValue(el, 'stroke-linejoin', currentStyle) || 'miter',
@@ -105,10 +105,7 @@ Raphael.el.updateCurrentStyle = function(name) {
 /**
  * Updates the style for a given property honoring style
  */
-Raphael.el.updateProperty = function(name) {
-  name = name.split('.');
-  name = name[name.length-1];
-  
+Raphael.el.updateProperty = function(name) {  
   if (name === "transform") {
     var transforms = new Array(10), // assume 10 > depth
         node = this.shadowDom,
@@ -124,7 +121,13 @@ Raphael.el.updateProperty = function(name) {
       }
     }
     this.attr('transform', transforms.reverse().join(''));
-  } else {    
-    this.updateCurrentStyle(name);
+  } else if (name === 'class') {
+    this.updateCurrentStyle();
+  } else  {
+    var value = this.shadowDom.style.getAttribute(name)
+        || this.shadowDom.currentStyle.getAttribute(name)
+        || this.shadowDom.getAttribute(name);
+            
+    this.attr(name, value);
   }
 };
