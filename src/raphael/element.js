@@ -73,7 +73,10 @@ R2D3Element.prototype._initialize = function() {
       
       this.raphaelNode = paper.ellipse(cx, cy, rx, ry);
       break;
-  }
+    }
+    
+    this.updateCurrentStyle();
+    this.updateProperty('transform');
 }
 
 /**
@@ -114,7 +117,7 @@ R2D3Element.prototype._ready = function() {
       
     // x, y default to 0
     case 'text':
-      ready = this.domNode.getAttribute('text');;
+      ready = this.domNode.getAttribute('text');
       break;
     
     // cx, cy default to 0
@@ -195,6 +198,12 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
  * are used for each property.
  */
 R2D3Element.prototype.updateCurrentStyle = function(name) {
+  
+  // Groups don't have raphael nodes
+  if (!this.raphaelNode) {
+    return;
+  }
+  
   var currentStyle = this.domNode.currentStyle,
       el = this.domNode;
   
@@ -244,6 +253,7 @@ R2D3Element.prototype.appendChild = function(node) {
     // TODO: Reposition raphael paper node
     return node.r2d3;
   }
+  
   this.domNode.appendChild(node);
   return new R2D3Element(this.paper, node);
 }
@@ -290,10 +300,7 @@ R2D3Element.prototype.setAttribute = function(name, value) {
 
 
 R2D3Element.prototype.insertBefore = function(node, before) {
-  var el = node.paper ? node : new R2D3Element(this.paper, node, this)
-  
-  // Reposition the element on the paper
-  el.raphaelInsertBefore(before);
+  var el = node.paper ? node : new R2D3Element(this.paper, node);
   
   // Update the shadow DOM
   before.domNode.parentNode.insertBefore(el.domNode, before.domNode);
