@@ -1,10 +1,9 @@
-function R2D3Element(paper, node, parentNode) {
+function R2D3Element(paper, node) {
   this.initialized = false;
   this.paper = paper;
   
   this.domNode = node;
   this.domNode.r2d3 = this;
-  this.parentNode = parentNode;
   this.raphaelNode = null;
 }
 
@@ -18,12 +17,12 @@ R2D3Element.prototype._initialize = function() {
   var paper = this.paper,
       domNode = this.domNode;
   
-  switch(this.domNode.nodeName) {
-    case: 'PATH':
+  switch(this.domNode.tagName) {
+    case 'path':
       this.raphaelNode = paper.path(domNode.getAttribute('d'));
       break;
       
-    case: 'RECT':
+    case 'rect':
       var x = domNode.getAttribute('x') || 0,
           y = domNode.getAttribute('y') || 0,
           width = domNode.getAttribute('width'),
@@ -32,21 +31,21 @@ R2D3Element.prototype._initialize = function() {
       this.raphaelNode = paper.rect(x, y, width, height);
       break;
       
-    case: 'CIRCLE':
+    case 'circle':
       var cx = domNode.getAttribute('cx') || 0,
           cy = domNode.getAttribute('cy') || 0,
           r = domNode.getAttribute('r');
           
-      this.raphaelNode = paper.rect(cx, cy, r);
+      this.raphaelNode = paper.circle(cx, cy, r);
       break;
 
     // Groups don't have a raphael representation
-    case: 'G':
+    case 'g':
       break;
       
     // Lines dont' exist in Raphael,
     // so we represent it as a path instead
-    case: 'LINE':
+    case 'line':
       var x1 =  domNode.getAttribute('x1') || 0,
           x2 = domNode.getAttribute('x2') || 0,
           y1 = domNode.getAttribute('x2') || 0,
@@ -57,7 +56,7 @@ R2D3Element.prototype._initialize = function() {
       
       
     // x, y default to 0
-    case: 'TEXT':
+    case 'text':
       var x = domNode.getAttribute('x') || 0,
           y = domNode.getAttribute('y') || 0;
           text = domNode.getAttribute('text');
@@ -66,7 +65,7 @@ R2D3Element.prototype._initialize = function() {
       break;
     
     // cx, cy default to 0
-    case: 'ELLIPSE':
+    case 'ellipse':
       var cx =  domNode.getAttribute('cx') || 0,
           cy = domNode.getAttribute('cy') || 0,
           rx = domNode.getAttribute('rx') || 0,
@@ -88,44 +87,44 @@ R2D3Element.prototype._initialize = function() {
 R2D3Element.prototype._ready = function() {
   var ready = false;
   
-  switch(this.nodeName) {
-    case: 'PATH':
+  switch(this.domNode.tagName) {
+    case 'path':
       ready = this.domNode.getAttribute('d');
       break;
       
     // x, y default to 0
-    case: 'RECT':
-      ready = this.domNode.getAttribute('width')
-          && this.domNode.getAttribute('height');
+    case 'rect':
+      ready = this.domNode.getAttribute('width') !== undefined
+          && this.domNode.getAttribute('height') !== undefined;
       break;
       
     // cx, cy default to 0
-    case: 'CIRCLE':
-      ready = this.domNode.getAttribute('r');
+    case 'circle':
+      ready = this.domNode.getAttribute('r') !== undefined;
       break;
       
-    case: 'G':
+    case 'g':
       ready = true;
       break;
       
     // x1,y1,x2,y2 all default to 0
-    case: 'LINE':
+    case 'line':
       ready = true;
       break;
       
     // x, y default to 0
-    case: 'TEXT':
+    case 'text':
       ready = this.domNode.getAttribute('text');;
       break;
     
     // cx, cy default to 0
-    case: 'ELLIPSE':
-      ready = this.domNode.getAttribute('rx')
-           && this.domNode.getAttribute('ry');
+    case 'ellipse':
+      ready = this.domNode.getAttribute('rx') !== undefined
+           && this.domNode.getAttribute('ry') !== undefined;
       break;
     
     // SVG never ready, initialized outside of element
-    case: 'SVG':
+    case 'svg':
       ready = false;
       break;
   }
@@ -138,15 +137,15 @@ R2D3Element.prototype._ready = function() {
  * of the element will be triggered.
  */
 R2D3Element.prototype.updateProperty = function(propertyName) {  
-  if (!raphaelNode) {
+  if (!this.raphaelNode) {
     return;
   }
   
   switch(propertyName) {
     // transform, traverse up DOM to determine nested tranforms
-    case: 'transform':
+    case 'transform':
       var transforms = new Array(10), // assume 10 > depth
-          node = this.shadowDom,
+          node = this.domNode,
           index = 0;
           
       transforms[index++] = node.getAttribute('transform');
@@ -159,23 +158,23 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
         }
       }
       
-      this.attr('transform', transforms.reverse().join(''));
+      this.raphaelNode.attr('transform', transforms.reverse().join(''));
       break
     
     // Class change, update all the styles
-    case: 'class':
+    case 'class':
       this.updateCurrentStyle();
       break;
       
     // Update SVG height
-    case: 'height':
+    case 'height':
       if (this.raphaelNode === this.paper) {
         this.raphaelNode.setSize(this.domNode.getAttribute('width'), this.domNode.getAttribute('height'));
       }
       break;
      
     // Update SVG width 
-    case: 'width':
+    case 'width':
       if (this.raphaelNode === this.paper) {
         this.raphaelNode.setSize(this.domNode.getAttribute('width'), this.domNode.getAttribute('height'));
       }
@@ -183,9 +182,10 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       
     // Just apply the attribute
     default:
-      var value = this.domNode.style.getAttribute(name)
-          || this.domNode.currentStyle.getAttribute(name)
-          || this.domNode.getAttribute(name);
+      var value = this.domNode.style.getAttribute(propertyName)
+          || this.domNode.currentStyle.getAttribute(propertyName)
+          || this.domNode.getAttribute(propertyName);
+      this.raphaelNode.attr(propertyName, value);
   }
 };
 
@@ -229,7 +229,7 @@ R2D3Element.prototype.updateCurrentStyle = function(name) {
     attrs[name] = el.getAttribute(name);
   }
 
-  this.attr(attrs);
+  this.raphaelNode.attr(attrs);
 };
 
 
@@ -240,7 +240,12 @@ R2D3Element.prototype.updateCurrentStyle = function(name) {
 //=====================================
 
 R2D3Element.prototype.appendChild = function(node) {
-  return new R2D3Element(this.paper, node, this);
+  if (node.r2d3) {
+    // TODO: Reposition raphael paper node
+    return node.r2d3;
+  }
+  this.domNode.appendChild(node);
+  return new R2D3Element(this.paper, node);
 }
 
 

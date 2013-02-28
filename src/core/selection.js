@@ -11,26 +11,22 @@ var d3_selectRoot = document.documentElement,
 var d3_select = function(s, n) {
   // If the selection is on a raphael element,
   // set the context to its shadowDom node
-  if (n.shadowDom) {
-    n = n.shadowDom;
+  if (n.domNode) {
+    n = n.domNode;
   }
   
   var node = Sizzle(s, n)[0] || null;
   // If the match is a R2D3 element, return the
   // Raphael Element
-  if (node && node.r2d3id) {
-    node = r2d3Elements[node.r2d3id];
-  }
-  
-  return node;
+  return node && (node.r2d3 || node);
 };
 
 
 var d3_selectAll = function(s, n) {
   // If the selection is on a raphael element,
   // set the context to its shadowDom node
-  if (n.shadowDom) {
-    n = n.shadowDom;
+  if (n.domNode) {
+    n = n.domNode;
   }
 
   var nodes = Sizzle.uniqueSort(Sizzle(s, n)),
@@ -40,10 +36,7 @@ var d3_selectAll = function(s, n) {
     var node = nodes[i];
     // If the match is a R2D3 element, return the
     // Raphael Element
-    if (node && node.r2d3id) {
-      node = r2d3Elements[node.r2d3id];
-    }
-    matches.push(node);
+    matches.push(node.r2d3 || node);
   }
   
   return matches;

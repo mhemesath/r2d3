@@ -46,19 +46,5 @@ function appendRaphael(parent) {
   svg.style.display = 'none';
   parent.appendChild(svg);
   
-  return new R2D3Element(paper, svg, parent);
+  return new R2D3Element(paper, svg);
 }
-
-
-Raphael.fn.getR2D3Elements = function(domNodes) {
-  var r2d3Nodes = new Array(domNodes.length);
-  // Convert DOM matches to R2D3 elements
-  for (var i=0; i<domNodes.length; i++) {
-    var node = domNodes[i];
-    if (node.r2d3 !== undefined) {
-      r2d3Matches.push(node.r2d3);
-    }
-  }
-  return r2d3Nodes;
-}
-

@@ -161,8 +161,7 @@ r2d3.svg.js: \
 
 r2d3.raphael.js: \
 	src/raphael/raphael.js \
-	src/raphael/raphael-el.js \
-	src/raphael/raphael-set.js \
+	src/raphael/element.js \
 	src/raphael/raphael-parseTransformString.js
 
 r2d3.behavior.js: \
