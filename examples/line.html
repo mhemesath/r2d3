@@ -6,6 +6,9 @@
     <!--[if gte IE 9]><!-->
     <script src="../lib/d3/d3.v2.js"></script>
     <!--<![endif]-->
+    <style>
+    line { stroke: #000; }
+    </style>
   </head>
   <body>
 		<div></div>
@@ -24,7 +27,7 @@
           .attr('y1', count % 200)
           .attr('y2', count % 200);
 
-        setTimeout(drawLine, 100);
+        setTimeout(drawLine, 10);
         count++;
 			}
 

@@ -12850,12 +12850,7 @@ R2D3Element.prototype._initialize = function() {
     // Lines dont' exist in Raphael,
     // so we represent it as a path instead
     case 'line':
-      var x1 =  domNode.getAttribute('x1') || 0,
-          x2 = domNode.getAttribute('x2') || 0,
-          y1 = domNode.getAttribute('x2') || 0,
-          y2 = domNode.getAttribute('x2') || 0;
-          
-      this.raphaelNode = paper.path(['path', 'M', x1, ' ', y1, 'L', x2, ' ', y2, 'Z'].join(''));
+      this.raphaelNode = paper.path(this._linePath());
       break;
       
       
@@ -12939,6 +12934,17 @@ R2D3Element.prototype._ready = function() {
   return ready;
 }
 
+
+R2D3Element.prototype._linePath = function() {
+  var x1 = this.domNode.getAttribute('x1') || 0,
+      x2 = this.domNode.getAttribute('x2') || 0,
+      y1 = this.domNode.getAttribute('y1') || 0,
+      y2 = this.domNode.getAttribute('y2') || 0;
+          
+  return ['M', x1, ' ', y1, 'L', x2, ' ', y2, 'Z'].join('');
+}
+
+
 /**
  * Updates an individual property. If the classname changes, all restyle
  * of the element will be triggered.
@@ -12985,6 +12991,25 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       if (this.raphaelNode === this.paper) {
         this.raphaelNode.setSize(this.domNode.getAttribute('width'), this.domNode.getAttribute('height'));
       }
+      break;
+    
+    // Paths map d to raphael path attribute
+    case 'd':
+      this.raphaelNode.attr('path', this.domNode.getAttribute('d'));
+      break;
+      
+    // Line Attributes need to rebuild path representing line
+    case 'x1':
+      this.raphaelNode.attr('path', this._linePath());
+      break;
+    case 'x2':
+      this.raphaelNode.attr('path', this._linePath());
+      break;
+    case 'y1':
+      this.raphaelNode.attr('path', this._linePath());
+      break;
+    case 'y2':
+      this.raphaelNode.attr('path', this._linePath());
       break;
       
     // Just apply the attribute
