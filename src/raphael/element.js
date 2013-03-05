@@ -49,6 +49,16 @@ R2D3Element.prototype._initialize = function() {
       this.raphaelNode = paper.path(this._linePath());
       break;
       
+    // IE converts image to img
+    case 'IMG':
+      var x = domNode.getAttribute('x') || 0,
+          y = domNode.getAttribute('y') || 0,
+          width = domNode.getAttribute('width') || 0,
+          height = domNode.getAttribute('height') || 0,
+          href = domNode.getAttribute('href');
+        
+      this.raphaelNode = paper.image('http://placekitten.com/50/50', 5, 5, 50, 50);
+      break;
       
     // x, y default to 0
     case 'text':
@@ -120,7 +130,17 @@ R2D3Element.prototype._ready = function() {
       ready = this.domNode.getAttribute('rx') !== undefined
            && this.domNode.getAttribute('ry') !== undefined;
       break;
-    
+  
+    // IE converts image to img
+    // Technically width/height are defaulted to 0, but the image won't
+    // render until they are present so might as well wait till they are set
+    case 'IMG':
+      this.isImage = true;
+      ready = this.domNode.getAttribute('href') !== undefined
+           && this.domNode.getAttribute('width') !== undefined
+           && this.domNode.getAttribute('height') !== undefined;
+      break;
+      
     // SVG never ready, initialized outside of element
     case 'svg':
       ready = false;
@@ -187,6 +207,10 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       if (this.raphaelNode === this.paper) {
         this.raphaelNode.setSize(this.domNode.getAttribute('width'), this.domNode.getAttribute('height'));
       }
+      break;
+      
+    case 'href':
+      this.raphaelNode.attr('src', this.domNode.getAttribute('href'));
       break;
     
     // Paths map d to raphael path attribute
@@ -255,12 +279,16 @@ R2D3Element.prototype.updateCurrentStyle = function(name) {
     'stroke-miterlimit': getValue(el, 'stroke-miterlimit', currentStyle) || 4,
     'stroke-opacity': getValue(el, 'stroke-opacity', currentStyle) || 1,
     'stroke-width': getValue(el, 'stroke-width', currentStyle) || 1,
-    'text-anchor': getValue(el, 'text-anchor', currentStyle) || 'start',
-    'd': el.getAttribute()
+    'text-anchor': getValue(el, 'text-anchor', currentStyle) || 'start'
   };
   
   if (name && attrs[name] === undefined) {
     attrs[name] = el.getAttribute(name);
+  }
+  
+  if (this.isImage) {
+    // Images wont render in raphael if fill set
+    delete attrs['fill'];
   }
 
   this.raphaelNode.attr(attrs);
