@@ -1,10 +1,21 @@
 function R2D3Element(paper, node) {
-  this.initialized = false;
+  // Raphael Paper object
   this.paper = paper;
   
+  // The SVG DOM node representing the Raphael element
+  // This is used as a hook for querying and styling
   this.domNode = node;
+  
+  // Reference back to the R2D3 element wrapper
   this.domNode.r2d3 = this;
+  
+  // Reference to the rendered Raphael element
+  // Initialization is delayed until all required props
+  // are set
   this.raphaelNode = null;
+  
+  // Reference to the parent R2D3 element
+  this.parentNode = node.parentNode.r2d3;
 }
 
 
@@ -12,8 +23,7 @@ function R2D3Element(paper, node) {
  * Initializes the Raphael paper element.
  */
 R2D3Element.prototype._initialize = function() {
-  this.initialized = true;
-  
+
   var paper = this.paper,
       domNode = this.domNode;
   
@@ -41,6 +51,7 @@ R2D3Element.prototype._initialize = function() {
 
     // Groups don't have a raphael representation
     case 'g':
+      this.isGroup = true;
       break;
       
     // Lines dont' exist in Raphael,
@@ -63,7 +74,7 @@ R2D3Element.prototype._initialize = function() {
     // x, y default to 0
     case 'text':
       var x = domNode.getAttribute('x') || 0,
-          y = domNode.getAttribute('y') || 0;
+          y = domNode.getAttribute('y') || 0,
           text = domNode.getAttribute('text');
       
       this.raphaelNode = paper.text(x, y, text);
@@ -71,7 +82,7 @@ R2D3Element.prototype._initialize = function() {
     
     // cx, cy default to 0
     case 'ellipse':
-      var cx =  domNode.getAttribute('cx') || 0,
+      var cx = domNode.getAttribute('cx') || 0,
           cy = domNode.getAttribute('cy') || 0,
           rx = domNode.getAttribute('rx') || 0,
           ry = domNode.getAttribute('ry') || 0;
@@ -166,7 +177,7 @@ R2D3Element.prototype._linePath = function() {
  * of the element will be triggered.
  */
 R2D3Element.prototype.updateProperty = function(propertyName) {  
-  if (!this.raphaelNode) {
+  if (!this.raphaelNode && !this.isGroup) {
     return;
   }
   
@@ -187,7 +198,16 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
         }
       }
       
-      this.raphaelNode.attr('transform', transforms.reverse().join(''));
+      if (this.isGroup) {
+        var childNodes = this.domNode.childNodes;
+        for (var i=0; i < childNodes.length; i++) {
+          childNodes[i].r2d3.updateProperty('transform');
+        }
+      }
+      
+      if (this.raphaelNode) {
+        this.raphaelNode.attr('transform', transforms.reverse().join(''));
+      }
       break
     
     // Class change, update all the styles
@@ -234,10 +254,12 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       
     // Just apply the attribute
     default:
-      var value = this.domNode.style.getAttribute(propertyName)
-          || this.domNode.currentStyle.getAttribute(propertyName)
-          || this.domNode.getAttribute(propertyName);
-      this.raphaelNode.attr(propertyName, value);
+      if (this.raphaelNode) {
+        var value = this.domNode.style.getAttribute(propertyName)
+            || this.domNode.currentStyle.getAttribute(propertyName)
+            || this.domNode.getAttribute(propertyName);
+        this.raphaelNode.attr(propertyName, value);
+      }
   }
 };
 
@@ -307,6 +329,7 @@ R2D3Element.prototype.appendChild = function(node) {
     return node.r2d3;
   }
   
+
   this.domNode.appendChild(node);
   return new R2D3Element(this.paper, node);
 }
@@ -315,10 +338,12 @@ R2D3Element.prototype.appendChild = function(node) {
 R2D3Element.prototype.removeChild = function(node) {
   // Nullify reference to non-DOM object to prevent
   // memory leak in IE
-  this.domNode.r2d3 = null;
-  
-  this.domNode.parentNode.removeChild(el.domNode);
-  this.raphaelNode.remove();
+  node.domNode.r2d3 = null;
+  this.domNode.removeChild(node.domNode);
+    
+  if (node.raphaelNode) {
+    node.raphaelNode.remove();
+  }
 }
 
 
@@ -345,7 +370,7 @@ R2D3Element.prototype.removeEventListener = function(type, listener) {
 
 R2D3Element.prototype.setAttribute = function(name, value) {
   this.domNode.setAttribute(name, value);
-  if (!this.initialized && this._ready()) {
+  if (!this.raphaelNode && this._ready()) {
     this._initialize();
   }
   this.updateProperty(name);
@@ -353,10 +378,11 @@ R2D3Element.prototype.setAttribute = function(name, value) {
 
 
 R2D3Element.prototype.insertBefore = function(node, before) {
-  var el = node.paper ? node : new R2D3Element(this.paper, node);
+  // Before will be the R2D3Element, if it exists
+  this.domNode.insertBefore(node, before ? before.domNode : before);
   
-  // Update the shadow DOM
-  before.domNode.parentNode.insertBefore(el.domNode, before.domNode);
+  
+  var el = node.r2d3 ? node : new R2D3Element(this.paper, node);
   return el;
 };
 
@@ -375,3 +401,11 @@ R2D3Element.prototype.removeAttribute = function(name) {
 R2D3Element.prototype.getAttribute = function(name) {
   return this.domNode.getAttribute(name);
 };
+
+R2D3Element.prototype.getBBox = function() {
+  if (this.raphaelNode) {
+    return this.raphaelNode.getBBox();
+  }
+  
+  return { x: 0, y: 0, width: 0, height: 0 }
+}
