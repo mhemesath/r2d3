@@ -9604,20 +9604,20 @@ function d3_selection_style(name, value, priority) {
   // For style(name, null) or style(name, null, priority), remove the style
   // property with the specified name. The priority is ignored.
   function styleNull() {
-    if (this.style.removeProperty) {
-      this.style.removeProperty(name);
+    if (this.paper) {
+      this.removeStyleProperty(name);
     } else {
-      this.style.removeAttribute(_convertPropertyToIEAttribute(name));
+      this.style.removeProperty(name);
     }
   }
 
   // For style(name, string) or style(name, string, priority), set the style
   // property with the specified name, using the specified priority.
   function styleConstant() {
-    if (this.style.setProperty) {
-      this.style.setProperty(name, value, priority);
+    if (this.paper) {
+      this.setStyleProperty(name, value);
     } else {
-      this.style.setAttribute(_convertPropertyToIEAttribute(name), value);
+      this.style.setProperty(name, value, priority);
     }
   }
 
@@ -9627,16 +9627,16 @@ function d3_selection_style(name, value, priority) {
   function styleFunction() {
     var x = value.apply(this, arguments);
     if (x == null) {
-      if (this.style.removeProperty) {
-        this.style.removeProperty(name);
+      if (this.paper) {
+        this.removeStyleProperty(name); 
       } else {
-        this.style.removeAttribute(_convertPropertyToIEAttribute(name));
+        this.style.removeProperty(name);
       }
     } else {
-      if (this.style.setProperty) {
-        this.style.setProperty(name, x, priority);
+      if (this.paper) {
+        this.setStyleProperty(name, x);
       } else {
-        this.style.setAttribute(_convertPropertyToIEAttribute(name), x, priority);
+        this.style.setProperty(name, x, priority);
       }
     }
   }
@@ -9688,14 +9688,13 @@ function d3_selection_property(name, value) {
 }
 d3_selectionPrototype.text = function(value) {
 
-  var node = this.node();
   // For raphael elements get/set text through paper.
-  if (node && node.paper) {
+  if (this.node().paper) {
     return arguments.length < 1
-        ? this.attr('text') : this.each(typeof value === "function"
-        ? function() { var v = value.apply(this, arguments); node.setAttribute('text', v == null ? "" : v); } : value == null
-        ? function() { node.setAttribute('text', ''); }
-        : function() { node.setAttribute('text', value); });
+        ? this.node().getAttribute('text') : this.each(typeof value === "function"
+        ? function() { var v = value.apply(this, arguments); this.setAttribute('text', v == null ? "" : v); } : value == null
+        ? function() { this.setAttribute('text', ''); }
+        : function() { this.setAttribute('text', value); });
   }
 
   return arguments.length < 1
@@ -12820,13 +12819,6 @@ function appendRaphael(parent) {
   
   // Reference to the parent R2D3 element
   this.parentNode = node.parentNode.r2d3;
-  
-  this.style = {
-    setProperty: function(name, value) {
-      node.style[name] = value;
-      this.updateProperty(name);
-    }
-  };
 }
 
 
@@ -12900,10 +12892,15 @@ R2D3Element.prototype._initialize = function() {
       
       this.raphaelNode = paper.ellipse(cx, cy, rx, ry);
       break;
-    }
     
-    this.updateCurrentStyle();
-    this.updateProperty('transform');
+    case 'svg':
+      this.raphaelNode = null;
+      this.isSVG = true;
+  }
+  
+  this.initialized = true;
+  this.updateCurrentStyle();
+  this.updateProperty('transform');
 }
 
 /**
@@ -12925,7 +12922,7 @@ R2D3Element.prototype._ready = function() {
     // x, y default to 0
     case 'rect':
       ready = this.domNode.getAttribute('width') !== undefined
-          && this.domNode.getAttribute('height') !== undefined;
+           && this.domNode.getAttribute('height') !== undefined;
       break;
       
     // cx, cy default to 0
@@ -12963,9 +12960,8 @@ R2D3Element.prototype._ready = function() {
            && this.domNode.getAttribute('height') !== undefined;
       break;
       
-    // SVG never ready, initialized outside of element
     case 'svg':
-      ready = false;
+      ready = true;
       break;
   }
   
@@ -12988,7 +12984,7 @@ R2D3Element.prototype._linePath = function() {
  * of the element will be triggered.
  */
 R2D3Element.prototype.updateProperty = function(propertyName) {  
-  if (!this.raphaelNode && !this.isGroup) {
+  if (!this.initialized) {
     return;
   }
   
@@ -13001,12 +12997,9 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
           
       transforms[index++] = node.getAttribute('transform');
       
-      while(node.parentNode) {
+      while(node.parentNode && node.r2d3) {
         node = node.parentNode;
         transforms[index++] = node.getAttribute('transform');
-        if (node.tagName === 'svg') {
-          break;
-        }
       }
       
       if (this.isGroup) {
@@ -13028,15 +13021,23 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       
     // Update SVG height
     case 'height':
-      if (this.raphaelNode === this.paper) {
-        this.raphaelNode.setSize(this.domNode.getAttribute('width'), this.domNode.getAttribute('height'));
+      var width = this.domNode.getAttribute('width') || 0,
+          height = this.domNode.getAttribute('height') || 0;
+      if (this.domNode.tagName === 'svg') {
+        this.paper.setSize(width, height);
+      } else {
+        this.raphaelNode.attr('height', height);
       }
       break;
      
     // Update SVG width 
     case 'width':
-      if (this.raphaelNode === this.paper) {
-        this.raphaelNode.setSize(this.domNode.getAttribute('width'), this.domNode.getAttribute('height'));
+      var width = this.domNode.getAttribute('width') || 0,
+          height = this.domNode.getAttribute('height') || 0;
+      if (this.domNode.tagName === 'svg') {
+        this.paper.setSize(width, height);
+      } else {
+        this.raphaelNode.attr('width', width);
       }
       break;
       
@@ -13126,6 +13127,20 @@ R2D3Element.prototype.updateCurrentStyle = function(name) {
 
   this.raphaelNode.attr(attrs);
 };
+
+R2D3Element.prototype.setStyleProperty = function(name, value) {
+  this.domNode.style.setAttribute(name, value);
+  this.updateProperty(name);
+};
+
+R2D3Element.prototype.getStyleProperty = function(name) {
+  return this.domNode.style.getAttribute(name);
+};
+
+R2D3Element.prototype.removeStyleProperty = function(name) {
+  this.domNode.style.removeAttribute(name);
+  this.updateProperty(name);
+}
 
 
 

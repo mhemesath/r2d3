@@ -40,20 +40,20 @@ function d3_selection_style(name, value, priority) {
   // For style(name, null) or style(name, null, priority), remove the style
   // property with the specified name. The priority is ignored.
   function styleNull() {
-    if (this.style.removeProperty) {
-      this.style.removeProperty(name);
+    if (this.paper) {
+      this.removeStyleProperty(name);
     } else {
-      this.style.removeAttribute(_convertPropertyToIEAttribute(name));
+      this.style.removeProperty(name);
     }
   }
 
   // For style(name, string) or style(name, string, priority), set the style
   // property with the specified name, using the specified priority.
   function styleConstant() {
-    if (this.style.setProperty) {
-      this.style.setProperty(name, value, priority);
+    if (this.paper) {
+      this.setStyleProperty(name, value);
     } else {
-      this.style.setAttribute(_convertPropertyToIEAttribute(name), value);
+      this.style.setProperty(name, value, priority);
     }
   }
 
@@ -63,16 +63,16 @@ function d3_selection_style(name, value, priority) {
   function styleFunction() {
     var x = value.apply(this, arguments);
     if (x == null) {
-      if (this.style.removeProperty) {
-        this.style.removeProperty(name);
+      if (this.paper) {
+        this.removeStyleProperty(name); 
       } else {
-        this.style.removeAttribute(_convertPropertyToIEAttribute(name));
+        this.style.removeProperty(name);
       }
     } else {
-      if (this.style.setProperty) {
-        this.style.setProperty(name, x, priority);
+      if (this.paper) {
+        this.setStyleProperty(name, x);
       } else {
-        this.style.setAttribute(_convertPropertyToIEAttribute(name), x, priority);
+        this.style.setProperty(name, x, priority);
       }
     }
   }

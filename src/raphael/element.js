@@ -89,10 +89,15 @@ R2D3Element.prototype._initialize = function() {
       
       this.raphaelNode = paper.ellipse(cx, cy, rx, ry);
       break;
-    }
     
-    this.updateCurrentStyle();
-    this.updateProperty('transform');
+    case 'svg':
+      this.raphaelNode = null;
+      this.isSVG = true;
+  }
+  
+  this.initialized = true;
+  this.updateCurrentStyle();
+  this.updateProperty('transform');
 }
 
 /**
@@ -114,7 +119,7 @@ R2D3Element.prototype._ready = function() {
     // x, y default to 0
     case 'rect':
       ready = this.domNode.getAttribute('width') !== undefined
-          && this.domNode.getAttribute('height') !== undefined;
+           && this.domNode.getAttribute('height') !== undefined;
       break;
       
     // cx, cy default to 0
@@ -152,9 +157,8 @@ R2D3Element.prototype._ready = function() {
            && this.domNode.getAttribute('height') !== undefined;
       break;
       
-    // SVG never ready, initialized outside of element
     case 'svg':
-      ready = false;
+      ready = true;
       break;
   }
   
@@ -177,7 +181,7 @@ R2D3Element.prototype._linePath = function() {
  * of the element will be triggered.
  */
 R2D3Element.prototype.updateProperty = function(propertyName) {  
-  if (!this.raphaelNode && !this.isGroup) {
+  if (!this.initialized) {
     return;
   }
   
@@ -190,12 +194,9 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
           
       transforms[index++] = node.getAttribute('transform');
       
-      while(node.parentNode) {
+      while(node.parentNode && node.r2d3) {
         node = node.parentNode;
         transforms[index++] = node.getAttribute('transform');
-        if (node.tagName === 'svg') {
-          break;
-        }
       }
       
       if (this.isGroup) {
@@ -217,15 +218,23 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       
     // Update SVG height
     case 'height':
-      if (this.raphaelNode === this.paper) {
-        this.raphaelNode.setSize(this.domNode.getAttribute('width'), this.domNode.getAttribute('height'));
+      var width = this.domNode.getAttribute('width') || 0,
+          height = this.domNode.getAttribute('height') || 0;
+      if (this.domNode.tagName === 'svg') {
+        this.paper.setSize(width, height);
+      } else {
+        this.raphaelNode.attr('height', height);
       }
       break;
      
     // Update SVG width 
     case 'width':
-      if (this.raphaelNode === this.paper) {
-        this.raphaelNode.setSize(this.domNode.getAttribute('width'), this.domNode.getAttribute('height'));
+      var width = this.domNode.getAttribute('width') || 0,
+          height = this.domNode.getAttribute('height') || 0;
+      if (this.domNode.tagName === 'svg') {
+        this.paper.setSize(width, height);
+      } else {
+        this.raphaelNode.attr('width', width);
       }
       break;
       
@@ -315,6 +324,20 @@ R2D3Element.prototype.updateCurrentStyle = function(name) {
 
   this.raphaelNode.attr(attrs);
 };
+
+R2D3Element.prototype.setStyleProperty = function(name, value) {
+  this.domNode.style.setAttribute(name, value);
+  this.updateProperty(name);
+};
+
+R2D3Element.prototype.getStyleProperty = function(name) {
+  return this.domNode.style.getAttribute(name);
+};
+
+R2D3Element.prototype.removeStyleProperty = function(name) {
+  this.domNode.style.removeAttribute(name);
+  this.updateProperty(name);
+}
 
 
 
