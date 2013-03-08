@@ -9586,9 +9586,14 @@ d3_selectionPrototype.style = function(name, value, priority) {
     }
 
     // For style(string), return the computed style value for the first node.
-    if (n < 2) return window
-        .getComputedStyle(this.node(), null)
-        .getPropertyValue(name);
+    if (n < 2) {
+      if (this.node().paper) {
+        return this.node().raphaelNode.attr(name);
+      } else {
+        return window.getComputedStyle(this.node(), null)
+                     .getPropertyValue(name);
+      } 
+    }
 
     // For style(string, string) or style(string, function), use the default
     // priority. The priority is ignored for style(string, null).
@@ -12755,7 +12760,7 @@ var d3_svg_brushResizes = [
 // getComputedStyle shim: http://johnkpaul.tumblr.com/post/17380987688/shim-for-javascript
 (function(window, undefined){
   window.getComputedStylePropertyValue = function(el,cssProperty){
-    el = el.shadowDom || el;
+    el = el.domNode || el;
     if(!window.getComputedStyle){
       if(document.defaultView && document.defaultView.getComputedStyle){
         return document.defaultView.getComputedStyle.getPropertyValue(cssProperty);
@@ -13082,22 +13087,33 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
  */
 R2D3Element.prototype.updateCurrentStyle = function(name) {
   
-  // Groups don't have raphael nodes
-  if (!this.raphaelNode) {
-    return;
-  }
-  
-  var currentStyle = this.domNode.currentStyle,
-      el = this.domNode;
-  
   function getValue(el, name, currentStyle) {
     return el.style.getAttribute(name)
         || currentStyle.getAttribute(name)
         || el.getAttribute(name);
   }
   
+  var currentStyle = this.domNode.currentStyle,
+      el = this.domNode;
+  
+  // SVG can have the size set via CSS
+  if (this.isSVG) {
+    var height = getValue(el, 'height', currentStyle),
+        width = getValue(el, 'width', currentStyle);
+    
+    // If the browser returns auto, default to using the attribute height/width    
+    height = height === 'auto' ? el.getAttribute('height') : height;
+    width = width === 'auto' ? el.getAttribute('width') : width;
+        
+    this.paper.setSize(width || 0, height || 0);
+  }
+  
+  // Groups don't have raphael nodes
+  if (!this.raphaelNode) {
+    return;
+  }
+  
   var attrs = {
-    'arrow-end': getValue(el, 'arrow-end', currentStyle),
     'cursor': getValue(el, 'cursor', currentStyle),
     'fill': getValue(el, 'fill', currentStyle) || 'black',
     'fill-opacity': getValue(el, 'fill-opacity', currentStyle) || 1,
@@ -13174,23 +13190,54 @@ R2D3Element.prototype.removeChild = function(node) {
 
 
 R2D3Element.prototype.addEventListener = function(type, listener) {
-  var self = this;
-  listener._callback = function(e) {
-    // Ensure the listener is invoked with 'this'
-    // as the raphael node and not the window
-    listener.apply(self, [e]);
+  
+  // If the raphael node isn't constructed yet, force it to initialize
+  // so we can attach the event to it
+  if (!this.raphaelNode) {
+    this._initialize();
   }
   
-  if (this.raphaelNode.attachEvent) {
-    this.raphaelNode.attachEvent("on" + type, listener._callback);
+  var self = this;
+  if (!listener._callback) {
+    listener._callback = function(e) {
+      // Ensure the listener is invoked with 'this'
+      // as the raphael node and not the window
+      listener.apply(self, [e]);
+    }
+  }
+  
+  // Groups don't exist, bind the events to the children directly
+  if (this.isGroup) {
+    for (var i=0; i < this.domNode.childNodes; i++) {
+      this.domNode.childNodes[i].r2d3.addEventListener(type, listener);
+    }
+    
+  // Bind directly to the raphael node
+  } else {
+    if (this.isSVG) {
+      this.domNode.parentNode.attachEvent("on" + type, listener._callback)
+    } else {
+      this.raphaelNode.node.attachEvent("on" + type, listener._callback);
+    }
   }
 };
 
 
-R2D3Element.prototype.removeEventListener = function(type, listener) {
-  if (this.raphaelNode.detachEvent) {
-    this.raphaelNode.detachEvent("on" + type, listener._callback || listener);
-  }
+R2D3Element.prototype.removeEventListener = function(type, listener) {  
+  // Groups don't exist, bind the events to the children directly
+  if (this.isGroup) {
+    for (var i=0; i < this.domNode.childNodes; i++) {
+      this.domNode.childNodes[i].r2d3.removeEventListener(type, listener);
+    }
+    
+  // Bind directly to the raphael node
+  } else {
+    if (this.isSVG) {
+      this.domNode.parentNode.detachEvent("on" + type, listener._callback || listener)
+    } else {
+      this.raphaelNode.node.detachEvent("on" + type, listener._callback || listener);
+    }
+  }  
 };
 
 

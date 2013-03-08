@@ -1,7 +1,7 @@
 // getComputedStyle shim: http://johnkpaul.tumblr.com/post/17380987688/shim-for-javascript
 (function(window, undefined){
   window.getComputedStylePropertyValue = function(el,cssProperty){
-    el = el.shadowDom || el;
+    el = el.domNode || el;
     if(!window.getComputedStyle){
       if(document.defaultView && document.defaultView.getComputedStyle){
         return document.defaultView.getComputedStyle.getPropertyValue(cssProperty);

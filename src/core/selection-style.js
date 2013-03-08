@@ -22,9 +22,14 @@ d3_selectionPrototype.style = function(name, value, priority) {
     }
 
     // For style(string), return the computed style value for the first node.
-    if (n < 2) return window
-        .getComputedStyle(this.node(), null)
-        .getPropertyValue(name);
+    if (n < 2) {
+      if (this.node().paper) {
+        return this.node().raphaelNode.attr(name);
+      } else {
+        return window.getComputedStyle(this.node(), null)
+                     .getPropertyValue(name);
+      } 
+    }
 
     // For style(string, string) or style(string, function), use the default
     // priority. The priority is ignored for style(string, null).
