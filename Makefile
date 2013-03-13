@@ -113,7 +113,7 @@ r2d3.core.js: \
 	lib/d3/src/core/transition-selectAll.js \
 	lib/d3/src/core/transition-filter.js \
 	lib/d3/src/core/transition-attr.js \
-	lib/d3/src/core/transition-style.js \
+	src/core/transition-style.js \
 	lib/d3/src/core/transition-text.js \
 	lib/d3/src/core/transition-remove.js \
 	lib/d3/src/core/transition-delay.js \

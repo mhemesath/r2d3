@@ -350,12 +350,18 @@ R2D3Element.prototype.removeStyleProperty = function(name) {
   this.updateProperty(name);
 }
 
+R2D3Element.prototype.getCurrentStyle = function() {
+  return this.domNode.currentStyle;
+}
+
 
 
 
 //=====================================
 // DOM APIs
 //=====================================
+
+
 
 R2D3Element.prototype.appendChild = function(node) {
   if (node.r2d3) {

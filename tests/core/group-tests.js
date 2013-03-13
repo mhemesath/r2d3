@@ -94,14 +94,3 @@ test('insert on group with matching element', function() {
 
   equal(g.selectAll('circle').length, 1);
 });
-
-
-test('inherit styles from group', function() {
-  var svg = d3.select('#group').append('svg'),
-      g = svg.append('g');
-  
-  g.style('fill', '#ffffff');
-  var rect = g.append('rect');
-  equal(rect.node().attr('fill'), '#ffffff');
-  
-})

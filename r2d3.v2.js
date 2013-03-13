@@ -10374,10 +10374,10 @@ d3_transitionPrototype.style = function(name, value, priority) {
 d3_transitionPrototype.styleTween = function(name, tween, priority) {
   if (arguments.length < 3) priority = "";
   return this.tween("style." + name, function(d, i) {
-    var f = tween.call(this, d, i, window.getComputedStyle(this, null).getPropertyValue(name));
+    var f = tween.call(this, d, i, this.getCurrentStyle()[name]);
     return f === d3_tweenRemove
-        ? (this.style.removeProperty(name), null)
-        : f && function(t) { this.style.setProperty(name, f(t), priority); };
+        ? (this.removeStyleProperty(name), null)
+        : f && function(t) { this.setStyleProperty(name, f(t), priority); };
   });
 };
 d3_transitionPrototype.text = function(value) {
@@ -13158,12 +13158,18 @@ R2D3Element.prototype.removeStyleProperty = function(name) {
   this.updateProperty(name);
 }
 
+R2D3Element.prototype.getCurrentStyle = function() {
+  return this.domNode.currentStyle;
+}
+
 
 
 
 //=====================================
 // DOM APIs
 //=====================================
+
+
 
 R2D3Element.prototype.appendChild = function(node) {
   if (node.r2d3) {
