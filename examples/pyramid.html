@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <head>
-<!--[if lte IE 8]><script src="../r2d3.v2.js"></script><![endif]-->
+<!--[if lte IE 8]><script src="../r2d3.js" charset="UTF-8"/script><![endif]-->
 <!--[if gte IE 9]><!-->
 <script src="../lib/d3/d3.v2.js"></script>
 <!--<![endif]-->
@@ -145,17 +145,17 @@ var labelleftbars = "male";
     //leftbars.append("title").text(tooltipText);
 
     // label leftbars
-     svg.append("text")
-     .attr("x",width/2+20)
-     .attr("y",height/2)
-     .attr("fill","#f3f3f3")
-     .attr("pointer-events","none")
-     .attr("font-weight","bold")
-     .attr("font-family","sant-serif")
-     .attr("font-size","18px")
-     .attr("width",30)
-     .attr("height",30)
-     .text(labelleftbars);
+     svg.append("text").attr({
+       "x": width/2+20,
+       "y": height/2,
+       "fill": "#f3f3f3",
+       "pointer-events": "none",
+       "font-weight": "bold",
+       "font-family": "sans-serif",
+       "font-size": "18px",
+       "width": 30,
+       "height": 30
+     }).text(labelleftbars);
 
     // ---------------------------- X Label -------------------------
     svg.append("text")
