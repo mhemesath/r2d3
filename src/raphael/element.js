@@ -207,7 +207,7 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       }
       
       if (this.raphaelNode) {
-        this.raphaelNode.attr('transform', transforms.reverse().join(''));
+        this.raphaelNode.attr('transform', transforms.reverse().join(' '));
       }
       break
     

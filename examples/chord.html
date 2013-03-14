@@ -1,16 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+}
+
+.chord path {
+  fill-opacity: .67;
+  stroke: #000;
+  stroke-width: .5px;
+}
+
+</style>
+<body>
+<!--[if lte IE 8]><script src="../../../r2d3.js"></script><![endif]-->
+<!--[if gte IE 9]><!-->
+<script src="../../../d3.js"></script>
+<!--<![endif]-->
+<script>
+
 // From http://mkweb.bcgsc.ca/circos/guide/tables/
+var matrix = [
+  [11975,  5871, 8916, 2868],
+  [ 1951, 10048, 2060, 6171],
+  [ 8010, 16145, 8090, 8045],
+  [ 1013,   990,  940, 6907]
+];
+
 var chord = d3.layout.chord()
     .padding(.05)
     .sortSubgroups(d3.descending)
-    .matrix([
-      [11975,  5871, 8916, 2868],
-      [ 1951, 10048, 2060, 6171],
-      [ 8010, 16145, 8090, 8045],
-      [ 1013,   990,  940, 6907]
-    ]);
+    .matrix(matrix);
 
-var width = 600,
-    height = 600,
+var width = 960,
+    height = 500,
     innerRadius = Math.min(width, height) * .41,
     outerRadius = innerRadius * 1.1;
 
@@ -18,15 +42,13 @@ var fill = d3.scale.ordinal()
     .domain(d3.range(4))
     .range(["#000000", "#FFDD89", "#957244", "#F26223"]);
 
-var svg = d3.select("#chart")
-  .append("svg")
+var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height)
   .append("g")
     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-svg.append("g")
-  .selectAll("path")
+svg.append("g").selectAll("path")
     .data(chord.groups)
   .enter().append("path")
     .style("fill", function(d) { return fill(d.index); })
@@ -35,11 +57,9 @@ svg.append("g")
     .on("mouseover", fade(.1))
     .on("mouseout", fade(1));
 
-var ticks = svg.append("g")
-  .selectAll("g")
+var ticks = svg.append("g").selectAll("g")
     .data(chord.groups)
-  .enter().append("g")
-  .selectAll("g")
+  .enter().append("g").selectAll("g")
     .data(groupTicks)
   .enter().append("g")
     .attr("transform", function(d) {
@@ -57,12 +77,8 @@ ticks.append("line")
 ticks.append("text")
     .attr("x", 8)
     .attr("dy", ".35em")
-    .attr("text-anchor", function(d) {
-      return d.angle > Math.PI ? "end" : null;
-    })
-    .attr("transform", function(d) {
-      return d.angle > Math.PI ? "rotate(180)translate(-16)" : null;
-    })
+    .attr("transform", function(d) { return d.angle > Math.PI ? "rotate(180)translate(-16)" : null; })
+    .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : "start"; })
     .text(function(d) { return d.label; });
 
 svg.append("g")
@@ -70,11 +86,11 @@ svg.append("g")
   .selectAll("path")
     .data(chord.chords)
   .enter().append("path")
-    .style("fill", function(d) { return fill(d.target.index); })
     .attr("d", d3.svg.chord().radius(innerRadius))
+    .style("fill", function(d) { return fill(d.target.index); })
     .style("opacity", 1);
 
-/** Returns an array of tick angles and labels, given a group. */
+// Returns an array of tick angles and labels, given a group.
 function groupTicks(d) {
   var k = (d.endAngle - d.startAngle) / d.value;
   return d3.range(0, d.value, 1000).map(function(v, i) {
@@ -85,14 +101,14 @@ function groupTicks(d) {
   });
 }
 
-/** Returns an event handler for fading a given chord group. */
+// Returns an event handler for fading a given chord group.
 function fade(opacity) {
   return function(g, i) {
-    svg.selectAll("g.chord path")
-        .filter(function(d) {
-          return d.source.index != i && d.target.index != i;
-        })
+    svg.selectAll(".chord path")
+        .filter(function(d) { return d.source.index != i && d.target.index != i; })
       .transition()
         .style("opacity", opacity);
   };
 }
+
+</script>
