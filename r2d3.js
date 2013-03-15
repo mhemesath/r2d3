@@ -10186,36 +10186,23 @@ d3 = function() {
     sw: "nesw-resize"
   };
   var d3_svg_brushResizes = [ [ "n", "e", "s", "w", "nw", "ne", "se", "sw" ], [ "e", "w" ], [ "n", "s" ], [] ];
-  var rParseTransformString = Raphael.parseTransformString;
-  Raphael.parseTransformString = function(TString) {
-    if (/translate|rotate|scale/i.test(TString)) TString = toRTransformString(TString);
-    return rParseTransformString(TString);
-  };
-  function toRTransformString(TString) {
-    return TString.replace(/translate\(/gi, "t").replace(/rotate\(/gi, "r").replace(/scale\(/gi, "s").replace(/[)]/g, "");
-  }
   function R2D3Element(paper, node) {
     this.paper = paper;
     this.domNode = node;
     this.domNode.r2d3 = this;
     this.raphaelNode = null;
     this.parentNode = node.parentNode.r2d3;
-  }
-  R2D3Element.prototype._initialize = function() {
-    var paper = this.paper, domNode = this.domNode;
-    switch (this.domNode.tagName) {
+    switch (node.tagName) {
      case "path":
-      this.raphaelNode = paper.path(domNode.getAttribute("d"));
+      this.raphaelNode = paper.path("Z");
       break;
 
      case "rect":
-      var x = domNode.getAttribute("x") || 0, y = domNode.getAttribute("y") || 0, width = domNode.getAttribute("width"), height = domNode.getAttribute("height");
-      this.raphaelNode = paper.rect(x, y, width, height);
+      this.raphaelNode = paper.rect(0, 0, 0, 0);
       break;
 
      case "circle":
-      var cx = domNode.getAttribute("cx") || 0, cy = domNode.getAttribute("cy") || 0, r = domNode.getAttribute("r");
-      this.raphaelNode = paper.circle(cx, cy, r);
+      this.raphaelNode = paper.circle(0, 0, 0);
       break;
 
      case "g":
@@ -10223,97 +10210,56 @@ d3 = function() {
       break;
 
      case "line":
-      this.raphaelNode = paper.path(this._linePath());
+      this.raphaelNode = paper.path("Z");
       break;
 
      case "IMG":
-      var x = domNode.getAttribute("x") || 0, y = domNode.getAttribute("y") || 0, width = domNode.getAttribute("width") || 0, height = domNode.getAttribute("height") || 0, href = domNode.getAttribute("href");
-      this.raphaelNode = paper.image("http://placekitten.com/50/50", 5, 5, 50, 50);
+      this.raphaelNode = paper.image("#", 0, 0, 0, 0);
       break;
 
      case "text":
-      var x = domNode.getAttribute("x") || 0, y = domNode.getAttribute("y") || 0, text = domNode.getAttribute("text");
-      this.raphaelNode = paper.text(x, y, text || "");
+      this.raphaelNode = paper.text(0, 0, "");
       break;
 
      case "ellipse":
-      var cx = domNode.getAttribute("cx") || 0, cy = domNode.getAttribute("cy") || 0, rx = domNode.getAttribute("rx") || 0, ry = domNode.getAttribute("ry") || 0;
-      this.raphaelNode = paper.ellipse(cx, cy, rx, ry);
+      this.raphaelNode = paper.ellipse(0, 0, 0, 0);
       break;
 
      case "svg":
       this.raphaelNode = null;
       this.isSVG = true;
     }
-    this.initialized = true;
     this.updateCurrentStyle();
     this.updateProperty("transform");
-  };
-  R2D3Element.prototype._ready = function() {
-    var ready = false;
-    switch (this.domNode.tagName) {
-     case "path":
-      ready = this.domNode.getAttribute("d");
-      break;
-
-     case "rect":
-      ready = this.domNode.getAttribute("width") !== undefined && this.domNode.getAttribute("height") !== undefined;
-      break;
-
-     case "circle":
-      ready = this.domNode.getAttribute("r") !== undefined;
-      break;
-
-     case "g":
-      ready = true;
-      break;
-
-     case "line":
-      ready = true;
-      break;
-
-     case "text":
-      ready = true;
-      break;
-
-     case "ellipse":
-      ready = this.domNode.getAttribute("rx") !== undefined && this.domNode.getAttribute("ry") !== undefined;
-      break;
-
-     case "IMG":
-      this.isImage = true;
-      ready = this.domNode.getAttribute("href") !== undefined && this.domNode.getAttribute("width") !== undefined && this.domNode.getAttribute("height") !== undefined;
-      break;
-
-     case "svg":
-      ready = true;
-      break;
-    }
-    return ready;
-  };
+  }
   R2D3Element.prototype._linePath = function() {
     var x1 = this.domNode.getAttribute("x1") || 0, x2 = this.domNode.getAttribute("x2") || 0, y1 = this.domNode.getAttribute("y1") || 0, y2 = this.domNode.getAttribute("y2") || 0;
     return [ "M", x1, " ", y1, "L", x2, " ", y2, "Z" ].join("");
   };
   R2D3Element.prototype.updateProperty = function(propertyName) {
-    if (!this.initialized) {
-      return;
-    }
     switch (propertyName) {
      case "transform":
-      var transforms = new Array(10), node = this.domNode, index = 0;
+      var node = this.domNode;
+      var transform = null;
       if (this.isGroup) {
-        var childNodes = this.domNode.childNodes;
-        for (var i = 0; i < childNodes.length; i++) {
+        var childNodes = node.childNodes, length = childNodes.length, i = 0;
+        for (i; i < length; i++) {
           childNodes[i].r2d3.updateProperty("transform");
         }
       } else if (this.raphaelNode) {
-        transforms[index++] = node.getAttribute("transform");
+        transform = node.getAttribute("transform");
+        if (transform) {
+          this.raphaelNode.transform(_map_svg_transform_to_raphael(transform));
+        } else {
+          this.raphaelNode.transform("");
+        }
         while (node.parentNode && node.parentNode.r2d3) {
           node = node.parentNode;
-          transforms[index++] = node.getAttribute("transform");
+          transform = node.getAttribute("transform");
+          if (transform) {
+            this.raphaelNode.transform(_map_svg_transform_to_raphael(transform) + "...");
+          }
         }
-        this.raphaelNode.attr("transform", transforms.reverse().join(""));
       }
       break;
 
@@ -10424,6 +10370,14 @@ d3 = function() {
   R2D3Element.prototype.getCurrentStyle = function() {
     return this.domNode.currentStyle;
   };
+  var _raphael_transform_map = {};
+  function _map_svg_transform_to_raphael(transform) {
+    if (_raphael_transform_map[transform] === undefined) {
+      _raphael_transform_map[transform] = transform.replace(/translate\(/gi, "t").replace(/rotate\(/gi, "r").replace(/scale\(/gi, "s").replace(/[)]/g, "");
+    }
+    return _raphael_transform_map[transform];
+  }
+  window.transformMap = _raphael_transform_map;
   R2D3Element.prototype.appendChild = function(node) {
     if (node.r2d3) {
       return node.r2d3;
@@ -10475,9 +10429,6 @@ d3 = function() {
   };
   R2D3Element.prototype.setAttribute = function(name, value) {
     this.domNode.setAttribute(name, value);
-    if (!this.raphaelNode && this._ready()) {
-      this._initialize();
-    }
     this.updateProperty(name);
   };
   R2D3Element.prototype.insertBefore = function(node, before) {

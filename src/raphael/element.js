@@ -16,153 +16,40 @@ function R2D3Element(paper, node) {
   
   // Reference to the parent R2D3 element
   this.parentNode = node.parentNode.r2d3;
-}
-
-
-/**
- * Initializes the Raphael paper element.
- */
-R2D3Element.prototype._initialize = function() {
-
-  var paper = this.paper,
-      domNode = this.domNode;
-  
-  switch(this.domNode.tagName) {
+    
+  switch(node.tagName) {
     case 'path':
-      this.raphaelNode = paper.path(domNode.getAttribute('d'));
+      this.raphaelNode = paper.path('Z');
       break;
-      
     case 'rect':
-      var x = domNode.getAttribute('x') || 0,
-          y = domNode.getAttribute('y') || 0,
-          width = domNode.getAttribute('width'),
-          height = domNode.getAttribute('height');
-          
-      this.raphaelNode = paper.rect(x, y, width, height);
+      this.raphaelNode = paper.rect(0, 0, 0, 0);
       break;
-      
-    case 'circle':
-      var cx = domNode.getAttribute('cx') || 0,
-          cy = domNode.getAttribute('cy') || 0,
-          r = domNode.getAttribute('r');
-          
-      this.raphaelNode = paper.circle(cx, cy, r);
+    case 'circle':  
+      this.raphaelNode = paper.circle(0, 0, 0);
       break;
-
-    // Groups don't have a raphael representation
     case 'g':
       this.isGroup = true;
       break;
-      
-    // Lines dont' exist in Raphael,
-    // so we represent it as a path instead
     case 'line':
-      this.raphaelNode = paper.path(this._linePath());
+      this.raphaelNode = paper.path('Z');
       break;
-      
-    // IE converts image to img
     case 'IMG':
-      var x = domNode.getAttribute('x') || 0,
-          y = domNode.getAttribute('y') || 0,
-          width = domNode.getAttribute('width') || 0,
-          height = domNode.getAttribute('height') || 0,
-          href = domNode.getAttribute('href');
-        
-      this.raphaelNode = paper.image('http://placekitten.com/50/50', 5, 5, 50, 50);
+      this.raphaelNode = paper.image('#', 0, 0, 0, 0);
       break;
-      
-    // x, y default to 0
     case 'text':
-      var x = domNode.getAttribute('x') || 0,
-          y = domNode.getAttribute('y') || 0,
-          text = domNode.getAttribute('text');
-      
-      this.raphaelNode = paper.text(x, y, text || '');
+      this.raphaelNode = paper.text(0, 0, '');
       break;
-    
-    // cx, cy default to 0
     case 'ellipse':
-      var cx = domNode.getAttribute('cx') || 0,
-          cy = domNode.getAttribute('cy') || 0,
-          rx = domNode.getAttribute('rx') || 0,
-          ry = domNode.getAttribute('ry') || 0;
-      
-      this.raphaelNode = paper.ellipse(cx, cy, rx, ry);
+      this.raphaelNode = paper.ellipse(0, 0, 0, 0);
       break;
-    
     case 'svg':
       this.raphaelNode = null;
       this.isSVG = true;
   }
   
-  this.initialized = true;
   this.updateCurrentStyle();
   this.updateProperty('transform');
-}
-
-/**
- * Indicates whether or not the Raphael paper element
- * has enough attributes set to be drawn. 
- *
- * Note: This provides a minor performance improvement as we dont' end
- * up drawing some elements then immediately redrawing them when their
- * path or text is set.
- */
-R2D3Element.prototype._ready = function() {
-  var ready = false;
   
-  switch(this.domNode.tagName) {
-    case 'path':
-      ready = this.domNode.getAttribute('d');
-      break;
-      
-    // x, y default to 0
-    case 'rect':
-      ready = this.domNode.getAttribute('width') !== undefined
-           && this.domNode.getAttribute('height') !== undefined;
-      break;
-      
-    // cx, cy default to 0
-    case 'circle':
-      ready = this.domNode.getAttribute('r') !== undefined;
-      break;
-      
-    case 'g':
-      ready = true;
-      break;
-      
-    // x1,y1,x2,y2 all default to 0
-    case 'line':
-      ready = true;
-      break;
-      
-    // x, y default to 0
-    case 'text':
-      ready = true;
-      break;
-    
-    // cx, cy default to 0
-    case 'ellipse':
-      ready = this.domNode.getAttribute('rx') !== undefined
-           && this.domNode.getAttribute('ry') !== undefined;
-      break;
-  
-    // IE converts image to img
-    // Technically width/height are defaulted to 0, but the image won't
-    // render until they are present so might as well wait till they are set
-    case 'IMG':
-      this.isImage = true;
-      ready = this.domNode.getAttribute('href') !== undefined
-           && this.domNode.getAttribute('width') !== undefined
-           && this.domNode.getAttribute('height') !== undefined;
-      break;
-      
-    case 'svg':
-      ready = true;
-      break;
-  }
-  
-  return ready;
 }
 
 
@@ -181,30 +68,40 @@ R2D3Element.prototype._linePath = function() {
  * of the element will be triggered.
  */
 R2D3Element.prototype.updateProperty = function(propertyName) {  
-  if (!this.initialized) {
-    return;
-  }
-  
   switch(propertyName) {
     // transform, traverse up DOM to determine nested tranforms
     case 'transform':
-      var transforms = new Array(10), // assume 10 > depth
-          node = this.domNode,
-          index = 0;
+      var node = this.domNode;
+      var transform = null;
       
+      // Groups trigger transforms on all child raphael nodes
+      // as they don't have a raphael reference themselves
       if (this.isGroup) {
-        var childNodes = this.domNode.childNodes;
-        for (var i=0; i < childNodes.length; i++) {
+        var childNodes = node.childNodes,
+            length = childNodes.length,
+            i=0;
+        for (i; i < length; i++) {
           childNodes[i].r2d3.updateProperty('transform');
         }
+        
+      // Raphael nodes search up the DOM tree to get all transforms affecting them
       } else if (this.raphaelNode) {
-        transforms[index++] = node.getAttribute('transform');
+        transform = node.getAttribute('transform');
+        if (transform) {
+          this.raphaelNode.transform(_map_svg_transform_to_raphael(transform));
+        } else {
+          // Reset transform if none
+          this.raphaelNode.transform('');
+        } 
       
         while(node.parentNode && node.parentNode.r2d3) {
           node = node.parentNode;
-          transforms[index++] = node.getAttribute('transform');
+          transform = node.getAttribute('transform');
+          if (transform) {
+            // Prepend the transforms
+            this.raphaelNode.transform(_map_svg_transform_to_raphael(transform) + '...');
+          }
         }
-        this.raphaelNode.attr('transform', transforms.reverse().join(''));
       }
       break
     
@@ -352,6 +249,19 @@ R2D3Element.prototype.getCurrentStyle = function() {
 }
 
 
+var _raphael_transform_map = {};
+function _map_svg_transform_to_raphael(transform) {
+  if (_raphael_transform_map[transform] === undefined) {
+    _raphael_transform_map[transform] = transform.replace(/translate\(/gi, "t")
+                                                 .replace(/rotate\(/gi, "r")
+                                                 .replace(/scale\(/gi, "s")
+                                                 .replace(/[)]/g, "");
+  }
+  return _raphael_transform_map[transform];  
+}
+
+
+window.transformMap = _raphael_transform_map;
 
 
 //=====================================
@@ -438,9 +348,6 @@ R2D3Element.prototype.removeEventListener = function(type, listener) {
 
 R2D3Element.prototype.setAttribute = function(name, value) {
   this.domNode.setAttribute(name, value);
-  if (!this.raphaelNode && this._ready()) {
-    this._initialize();
-  }
   this.updateProperty(name);
 };
 
