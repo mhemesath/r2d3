@@ -77,9 +77,10 @@ ticks.append("line")
 ticks.append("text")
     .attr("x", 8)
     .attr("dy", ".35em")
-    .attr("transform", function(d) { return d.angle > Math.PI ? "rotate(180)translate(-16)" : null; })
+    .text(function(d) { return d.label; })
+    .attr("transform", function(d) { return d.angle > Math.PI ? "rotate(180) translate(-16)" : null; })
     .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : "start"; })
-    .text(function(d) { return d.label; });
+    
 
 svg.append("g")
     .attr("class", "chord")

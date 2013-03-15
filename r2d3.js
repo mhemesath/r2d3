@@ -10233,7 +10233,7 @@ d3 = function() {
 
      case "text":
       var x = domNode.getAttribute("x") || 0, y = domNode.getAttribute("y") || 0, text = domNode.getAttribute("text");
-      this.raphaelNode = paper.text(x, y, text);
+      this.raphaelNode = paper.text(x, y, text || "");
       break;
 
      case "ellipse":
@@ -10273,7 +10273,7 @@ d3 = function() {
       break;
 
      case "text":
-      ready = this.domNode.getAttribute("text");
+      ready = true;
       break;
 
      case "ellipse":
@@ -10302,19 +10302,18 @@ d3 = function() {
     switch (propertyName) {
      case "transform":
       var transforms = new Array(10), node = this.domNode, index = 0;
-      transforms[index++] = node.getAttribute("transform");
-      while (node.parentNode && node.r2d3) {
-        node = node.parentNode;
-        transforms[index++] = node.getAttribute("transform");
-      }
       if (this.isGroup) {
         var childNodes = this.domNode.childNodes;
         for (var i = 0; i < childNodes.length; i++) {
           childNodes[i].r2d3.updateProperty("transform");
         }
-      }
-      if (this.raphaelNode) {
-        this.raphaelNode.attr("transform", transforms.reverse().join(" "));
+      } else if (this.raphaelNode) {
+        transforms[index++] = node.getAttribute("transform");
+        while (node.parentNode && node.parentNode.r2d3) {
+          node = node.parentNode;
+          transforms[index++] = node.getAttribute("transform");
+        }
+        this.raphaelNode.attr("transform", transforms.reverse().join(""));
       }
       break;
 

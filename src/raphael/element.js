@@ -77,7 +77,7 @@ R2D3Element.prototype._initialize = function() {
           y = domNode.getAttribute('y') || 0,
           text = domNode.getAttribute('text');
       
-      this.raphaelNode = paper.text(x, y, text);
+      this.raphaelNode = paper.text(x, y, text || '');
       break;
     
     // cx, cy default to 0
@@ -138,7 +138,7 @@ R2D3Element.prototype._ready = function() {
       
     // x, y default to 0
     case 'text':
-      ready = this.domNode.getAttribute('text');
+      ready = true;
       break;
     
     // cx, cy default to 0
@@ -191,23 +191,20 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       var transforms = new Array(10), // assume 10 > depth
           node = this.domNode,
           index = 0;
-          
-      transforms[index++] = node.getAttribute('transform');
-      
-      while(node.parentNode && node.r2d3) {
-        node = node.parentNode;
-        transforms[index++] = node.getAttribute('transform');
-      }
       
       if (this.isGroup) {
         var childNodes = this.domNode.childNodes;
         for (var i=0; i < childNodes.length; i++) {
           childNodes[i].r2d3.updateProperty('transform');
         }
-      }
+      } else if (this.raphaelNode) {
+        transforms[index++] = node.getAttribute('transform');
       
-      if (this.raphaelNode) {
-        this.raphaelNode.attr('transform', transforms.reverse().join(' '));
+        while(node.parentNode && node.parentNode.r2d3) {
+          node = node.parentNode;
+          transforms[index++] = node.getAttribute('transform');
+        }
+        this.raphaelNode.attr('transform', transforms.reverse().join(''));
       }
       break
     
