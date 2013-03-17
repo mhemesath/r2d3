@@ -9,13 +9,14 @@ Getting Started
 ---------------
 
 To get started using R2D3,  conditionally load r2d3 for Internet Explorer 8 and below. For modern browsers,
-serve up d3 as you normally would.
+serve up d3 as you normally would.  Don't exclude the charset attribute in the script block, IE needs it parse
+the latest version of D3 correctly.
 
 ```html
 <html>
   <head>
     <title>R2D3 101</title>
-    <!--[if lte IE 8]><script src="r2d3.v2.js"></script><![endif]-->
+    <!--[if lte IE 8]><script src="r2d3.v2.js" charset="utf-8"></script><![endif]-->
     <!--[if gte IE 9]><!-->
     <script src="d3.v2.js"></script>
     <!--<![endif]-->
@@ -26,44 +27,16 @@ serve up d3 as you normally would.
 </html>
 ```
 
-R2D3 uses Raphael under the covers for rendering SVG and VML when
-necessary.  Creating a SVG element in R2D3 is the same as D3:
-
-```javascript
-var paper = d3.select('div').append('svg')
-            .attr('width', 200)
-            .attr('height', 200);
-```
-
-Using the paper selection,  Raphael elements can be created and
-manipulated using D3 syntax:
-
-```javascript
-paper.append('circle')
-  .attr('cx', 50)
-  .attr('cy', 50)
-  .attr('r', function() { return Math.random() * 50; });
-```
-
-R2D3 can also query for existing shapes on the paper and update them.
-
-```javascript
-paper.select('circle')
-  .transition()
-  .attr('fill', '#ff0000');
-```
-
-
-Events can also be bound to Raphael elements using D3 syntax:
-```javascript
-paper.select('circle')
-  .on('click', function() { alert('hi'); });
-```
-
-Who is using R2D3?
+Should I use R2D3?
 ------------------
 
-If you'd like to add a D3 visualization you've made IE compatible with R2D3, issue a pull request and add it here!
+R2D3 is an attempt to shim SVG functionality via Rapahel to be consumed by D3. Although R2D3 handles most basic SVG functionality, it will 
+never be able to completely shim every feature of SVG.  Also, as Internet Explorer 7 & 8 are older browsers, longer rendering times can be expected.
+
+I recommend to try out R2D3 on each of your visualizations to ensure the shim functions correctly for that specific use case.
+If you find an issue, please log a bug so it can either be patched, or documented as a limitation.
+
+In general, R2D3 works great for smaller, simpler visualizations with limited animations and interactivity.
 
 Limitations
 -----------
@@ -71,9 +44,34 @@ Limitations
 See the issues page for a listing of known issues. In addition this
 includes:
 
- * Queries for SVG elements must origin from the SVG node. Example use ```svg.select('rect')``` NOT ```d3.select('rect')```
- * ```<use>``` Is not supported
- * r2d3 must be included before any stylesheets or ```<style>``` blocks. Soon I will push out a lighter weight shim script that can be used instead so r2d3 can load after the page.
+### <use> ###
+Use is not supported.
+  
+###<text>###
+* The ```dx``` and ```dy```  attributes of text are not yet supported. In the meantime, adjust the ```x``` and ```y``` attributes.
+
+###<polyline>###
+* Not yet supported
+
+###<polygon>###
+* Not yet supported
+
+###Transforms###
+* Ensure translations declare both the X and Y coordinates. Example:
+
+```javascript
+// BAD
+circles.transform('translate(20)');
+
+// GOOD
+circles.transform('transalte(20,0)');
+```
+
+Who is using R2D3?
+------------------
+
+If you'd like to add a D3 visualization you've made IE compatible with R2D3, issue a pull request and add it here!
+
 
 Developers
 ----------

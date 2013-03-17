@@ -10218,6 +10218,7 @@ d3 = function() {
       break;
 
      case "text":
+      this.isText = true;
       this.raphaelNode = paper.text(0, 0, "");
       break;
 
@@ -10229,8 +10230,8 @@ d3 = function() {
       this.raphaelNode = null;
       this.isSVG = true;
     }
-    this.updateCurrentStyle();
     this.updateProperty("transform");
+    this.updateCurrentStyle();
   }
   R2D3Element.prototype._linePath = function() {
     var x1 = this.domNode.getAttribute("x1") || 0, x2 = this.domNode.getAttribute("x2") || 0, y1 = this.domNode.getAttribute("y1") || 0, y2 = this.domNode.getAttribute("y2") || 0;
@@ -10240,7 +10241,7 @@ d3 = function() {
     switch (propertyName) {
      case "transform":
       var node = this.domNode;
-      var transform = null;
+      var transforms = new Array(5);
       if (this.isGroup) {
         var childNodes = node.childNodes, length = childNodes.length, i = 0;
         for (i; i < length; i++) {
@@ -10249,17 +10250,16 @@ d3 = function() {
       } else if (this.raphaelNode) {
         transform = node.getAttribute("transform");
         if (transform) {
-          this.raphaelNode.transform(_map_svg_transform_to_raphael(transform));
-        } else {
-          this.raphaelNode.transform("");
+          transforms.push(_map_svg_transform_to_raphael(transform));
         }
         while (node.parentNode && node.parentNode.r2d3) {
           node = node.parentNode;
           transform = node.getAttribute("transform");
           if (transform) {
-            this.raphaelNode.transform(_map_svg_transform_to_raphael(transform) + "...");
+            transforms.push(_map_svg_transform_to_raphael(transform));
           }
         }
+        this.raphaelNode.transform(transforms.reverse().join(""));
       }
       break;
 
@@ -10334,10 +10334,6 @@ d3 = function() {
       cursor: getValue(el, "cursor", currentStyle),
       fill: getValue(el, "fill", currentStyle) || "black",
       "fill-opacity": getValue(el, "fill-opacity", currentStyle) || 1,
-      font: getValue(el, "font", currentStyle),
-      "font-family": getValue(el, "font-family", currentStyle),
-      "font-size": getValue(el, "font-size", currentStyle),
-      "font-weight": getValue(el, "font-weight", currentStyle),
       opacity: getValue(el, "opacity", currentStyle) || 1,
       stroke: getValue(el, "stroke", currentStyle) || "none",
       "stroke-dasharray": getValue(el, "stroke-dasharray", currentStyle),
@@ -10345,9 +10341,15 @@ d3 = function() {
       "stroke-linejoin": getValue(el, "stroke-linejoin", currentStyle) || "miter",
       "stroke-miterlimit": getValue(el, "stroke-miterlimit", currentStyle) || 4,
       "stroke-opacity": getValue(el, "stroke-opacity", currentStyle) || 1,
-      "stroke-width": getValue(el, "stroke-width", currentStyle) || 1,
-      "text-anchor": getValue(el, "text-anchor", currentStyle) || "start"
+      "stroke-width": getValue(el, "stroke-width", currentStyle) || 1
     };
+    if (this.isText) {
+      attrs["font"] = getValue(el, "font", currentStyle);
+      attrs["font-family"] = getValue(el, "font-family", currentStyle);
+      attrs["font-size"] = getValue(el, "font-size", currentStyle);
+      attrs["font-weight"] = getValue(el, "font-weight", currentStyle);
+      attrs["text-anchor"] = getValue(el, "text-anchor", currentStyle) || "start";
+    }
     if (name && attrs[name] === undefined) {
       attrs[name] = el.getAttribute(name);
     }

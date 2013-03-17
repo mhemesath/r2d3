@@ -24,7 +24,6 @@ all: \
 	lib/d3/src/end.js
 
 r2d3.raphael.js: \
-	src/raphael/raphael-parseTransformString.js \
 	src/raphael/element.js \
 	src/raphael/raphael.js
 

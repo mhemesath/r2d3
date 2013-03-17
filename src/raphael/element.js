@@ -37,6 +37,7 @@ function R2D3Element(paper, node) {
       this.raphaelNode = paper.image('#', 0, 0, 0, 0);
       break;
     case 'text':
+      this.isText = true;
       this.raphaelNode = paper.text(0, 0, '');
       break;
     case 'ellipse':
@@ -47,9 +48,8 @@ function R2D3Element(paper, node) {
       this.isSVG = true;
   }
   
-  this.updateCurrentStyle();
   this.updateProperty('transform');
-  
+  this.updateCurrentStyle()
 }
 
 
@@ -72,7 +72,7 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
     // transform, traverse up DOM to determine nested tranforms
     case 'transform':
       var node = this.domNode;
-      var transform = null;
+      var transforms = new Array(5);
       
       // Groups trigger transforms on all child raphael nodes
       // as they don't have a raphael reference themselves
@@ -80,6 +80,7 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
         var childNodes = node.childNodes,
             length = childNodes.length,
             i=0;
+            
         for (i; i < length; i++) {
           childNodes[i].r2d3.updateProperty('transform');
         }
@@ -88,20 +89,17 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       } else if (this.raphaelNode) {
         transform = node.getAttribute('transform');
         if (transform) {
-          this.raphaelNode.transform(_map_svg_transform_to_raphael(transform));
-        } else {
-          // Reset transform if none
-          this.raphaelNode.transform('');
-        } 
+          transforms.push(_map_svg_transform_to_raphael(transform))
+        }
       
         while(node.parentNode && node.parentNode.r2d3) {
           node = node.parentNode;
           transform = node.getAttribute('transform');
           if (transform) {
-            // Prepend the transforms
-            this.raphaelNode.transform(_map_svg_transform_to_raphael(transform) + '...');
+            transforms.push(_map_svg_transform_to_raphael(transform))
           }
         }
+        this.raphaelNode.transform(transforms.reverse().join(''))
       }
       break
     
@@ -203,10 +201,6 @@ R2D3Element.prototype.updateCurrentStyle = function(name) {
     'cursor': getValue(el, 'cursor', currentStyle),
     'fill': getValue(el, 'fill', currentStyle) || 'black',
     'fill-opacity': getValue(el, 'fill-opacity', currentStyle) || 1,
-    'font': getValue(el, 'font', currentStyle),
-    'font-family': getValue(el, 'font-family', currentStyle),
-    'font-size': getValue(el, 'font-size', currentStyle),
-    'font-weight': getValue(el, 'font-weight', currentStyle),
     'opacity': getValue(el, 'opacity', currentStyle) || 1,
     'stroke': getValue(el, 'stroke', currentStyle) || 'none',
     'stroke-dasharray': getValue(el, 'stroke-dasharray', currentStyle),
@@ -215,8 +209,15 @@ R2D3Element.prototype.updateCurrentStyle = function(name) {
     'stroke-miterlimit': getValue(el, 'stroke-miterlimit', currentStyle) || 4,
     'stroke-opacity': getValue(el, 'stroke-opacity', currentStyle) || 1,
     'stroke-width': getValue(el, 'stroke-width', currentStyle) || 1,
-    'text-anchor': getValue(el, 'text-anchor', currentStyle) || 'start'
   };
+
+  if (this.isText) {
+    attrs['font'] = getValue(el, 'font', currentStyle);
+    attrs['font-family'] = getValue(el, 'font-family', currentStyle);
+    attrs['font-size'] = getValue(el, 'font-size', currentStyle);
+    attrs['font-weight'] = getValue(el, 'font-weight', currentStyle);
+    attrs['text-anchor'] = getValue(el, 'text-anchor', currentStyle) || 'start';
+  }
   
   if (name && attrs[name] === undefined) {
     attrs[name] = el.getAttribute(name);

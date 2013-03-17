@@ -6,8 +6,6 @@
     <!--[if gte IE 9]><!-->
     <script src="../../../lib/d3/d3.js"></script>
     <!--<![endif]-->
-    <script type="text/javascript" src="packages.js"></script>
-    <link type="text/css" rel="stylesheet" href="style.css"/>
     <style type="text/css">
 
 path.arc {
@@ -74,8 +72,7 @@ vis.append("path")
     .attr("d", d3.svg.arc().innerRadius(ry - 120).outerRadius(ry).startAngle(0).endAngle(2 * Math.PI))
     .on("mousedown", mousedown);
 
-d3.xhr("flare.json", 'application/json', function(request) {
-  var json = JSON.parse(request.responseText);
+d3.json("flare.json?d=" + (new Date()).getTime() , function(error, json) {
   var nodes = cluster.nodes(json);
 
   var link = vis.selectAll("path.link")
@@ -88,7 +85,7 @@ d3.xhr("flare.json", 'application/json', function(request) {
       .data(nodes)
     .enter().append("g")
       .attr("class", "node")
-      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ",0)"; })
 
   node.append("circle")
       .attr("r", 3);
