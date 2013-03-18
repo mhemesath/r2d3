@@ -1,3 +1,10 @@
+/**
+ * element.js
+ *
+ * Wrapper object containing the SVG DOM node and corresponding Raphael element.  This is the object that D3 interacts with
+ * build the data visualizations. The DOM node is used as a hook for queries and styling via CSS and the style element. The attributes
+ * are then taken from the DOM node and mapped onto Raphael to be drawn on the canvas.
+ */
 function R2D3Element(paper, node) {
   // Raphael Paper object
   this.paper = paper;
