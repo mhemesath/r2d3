@@ -51,20 +51,21 @@ Limitations
 See the issues page for a listing of known issues. In addition this
 includes:
 
-### <use> ###
+### ```<use>``` ###
 Use is not supported.
   
-###<text>###
+###````<text>````###
 * The ```dx``` and ```dy```  attributes of text are not yet supported. In the meantime, adjust the ```x``` and ```y``` attributes.
 
-###<polyline>###
+###```<polyline>```###
 * Not yet supported
 
-###<polygon>###
+###```<polygon>```###
 * Not yet supported
 
-###Transforms###
+###```Transforms```###
 * Ensure translations declare both the X and Y coordinates. Example:
+
 
 ```javascript
 // BAD
