@@ -2,7 +2,7 @@ d3.transform = function(string) {
   var paper = Raphael(document.body, 0, 0);
 
   return (d3.transform = function(string) {
-    var circle = paper.circle().transform(string),
+    var circle = paper.circle().transform(_map_svg_transform_to_raphael(string)),
         matrix = circle.matrix;
     circle.remove();
     return new d3_transform(matrix || d3_transformIdentity);

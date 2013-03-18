@@ -7,42 +7,42 @@ module( "Selection Append", {
 
 test( "SVG", function() {
   var svg = d3.select('#append').append('svg');
-  ok(svg.node().raphael, "Raphael paper appended to DOM" );
+  ok(svg.node().paper, "Raphael paper appended to DOM" );
   svg.remove();
 });
 
 test('image', function() {
   var svg = d3.select('#append').append('svg');
    var el = svg.append('image');
-   ok(el.node().type, 'image');
+   ok(el.node().domNode.tagName, 'image');
 });
 
 test('line', function() {
   var svg = d3.select('#append').append('svg');
    var el = svg.append('line');
-   ok(el.node().type, 'line');
+   ok(el.node().domNode.tagName, 'line');
 });
 
 test('path', function() {
   var svg = d3.select('#append').append('svg');
    var el = svg.append('path');
-   ok(el.node().type, 'path');
+   ok(el.node().domNode.tagName, 'path');
 });
 
 test('rect', function() {
   var svg = d3.select('#append').append('svg');
    var el = svg.append('rect');
-   ok(el.node().type, 'rect');
+   ok(el.node().domNode.tagName, 'rect');
 });
 
 test('circle', function() {
   var svg = d3.select('#append').append('svg');
    var el = svg.append('circle');
-   ok(el.node().type, 'circle');
+   ok(el.node().domNode.tagName, 'circle');
 });
 
 test('text', function() {
   var svg = d3.select('#append').append('svg');
    var el = svg.append('text');
-   ok(el.node().type, 'text');
+   ok(el.node().domNode.tagName, 'text');
 });
