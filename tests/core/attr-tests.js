@@ -38,10 +38,6 @@ test( "rect.translate", function() {
       
   el.attr('transform', 'translate(20,20)')
   equal(el.attr('transform'), 'translate(20,20)')
-  // Ensure the tranform actually applied
-  var bbox = el.node().getBBox();
-  equal(bbox.x, 20)
-  equal(bbox.y, 20)
 });
 //================================
 // Dom Attribute Tests
