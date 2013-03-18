@@ -5,6 +5,13 @@ R2D3 is a customized build of D3 powered by [RaphaelJS](http://raphaeljs.com/). 
 data visualizations that work in IE7+ and all modern browsers.
 
 
+Updating to v0.1.0 (2013-3-17)
+------------------------------
+
+* R2D3 now using v3.0.8 of D3. Update your code accordingly.
+* The ```<script>``` element that loads R2D3 now needs ```charset="utf-8"``` set.
+
+
 Getting Started
 ---------------
 
@@ -16,7 +23,7 @@ the latest version of D3 correctly.
 <html>
   <head>
     <title>R2D3 101</title>
-    <!--[if lte IE 8]><script src="r2d3.v2.js" charset="utf-8"></script><![endif]-->
+    <!--[if lte IE 8]><script src="r2d3.js" charset="utf-8"></script><![endif]-->
     <!--[if gte IE 9]><!-->
     <script src="d3.v2.js"></script>
     <!--<![endif]-->
