@@ -1,3 +1,8 @@
+0.1.1 / 2013-03-18
+==================
+
+  * Patch d3 compat/style. [Bug 83](https://github.com/mhemesath/r2d3/issues/83)
+
 0.1.0 / 2013-03-17
 ==================
 
