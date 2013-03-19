@@ -10,6 +10,7 @@ all: \
 	lib/raphael/raphael.js \
 	lib/sizzle/sizzle.js \
 	lib/compat/compat.js \
+	lib/compat/json3.min.js \
 	lib/d3/src/start.js \
 	r2d3.core.js \
 	r2d3.scale.js \
@@ -31,7 +32,7 @@ r2d3.core.js: \
 	lib/d3/src/core/core.js \
 	lib/d3/src/core/format-$(LOCALE).js \
 	lib/d3/src/compat/date.js \
-	lib/d3/src/compat/style.js \
+  src/compat/style.js \
 	lib/d3/src/core/class.js \
 	lib/d3/src/core/array.js \
 	lib/d3/src/core/map.js \
