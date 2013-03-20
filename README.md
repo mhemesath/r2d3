@@ -2,7 +2,7 @@ r2d3
 ==========
 
 R2D3 is a customized build of D3 powered by [RaphaelJS](http://raphaeljs.com/).  The combination of D3 and Raphael enable developers to easily
-data visualizations that work in IE7+ and all modern browsers.
+build data visualizations that work in IE7+ and all modern browsers.
 
 
 Updating to v0.1.0 (2013-3-17)
@@ -25,7 +25,7 @@ the latest version of D3 correctly.
     <title>R2D3 101</title>
     <!--[if lte IE 8]><script src="r2d3.js" charset="utf-8"></script><![endif]-->
     <!--[if gte IE 9]><!-->
-    <script src="d3.v2.js"></script>
+    <script src="d3.js"></script>
     <!--<![endif]-->
   </head>
   <body>
@@ -72,7 +72,7 @@ Use is not supported.
 circles.transform('translate(20)');
 
 // GOOD
-circles.transform('transalte(20,0)');
+circles.transform('translate(20,0)');
 ```
 
 Who is using R2D3?
