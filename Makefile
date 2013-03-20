@@ -89,7 +89,7 @@ r2d3.core.js: \
 	lib/d3/src/core/selection-select.js \
 	lib/d3/src/core/selection-selectAll.js \
 	lib/d3/src/core/selection-attr.js \
-	lib/d3/src/core/selection-classed.js \
+	src/core/selection-classed.js \
 	src/core/selection-style.js \
 	lib/d3/src/core/selection-property.js \
 	src/core/selection-text.js \

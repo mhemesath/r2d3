@@ -1,3 +1,8 @@
+0.1.2 / 2013-??-??
+==================
+
+  * Add support ```selection.classed```.  [Bug 57](https://github.com/mhemesath/r2d3/issues/57)
+
 0.1.1 / 2013-03-18
 ==================
 
