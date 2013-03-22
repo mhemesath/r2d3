@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+html {
+  background-color: #2D353E;
+}
+
+body {
+  font: 10px sans-serif;
+}
+
+
+</style>
+<body>
+  <div id="chart"></div>
+<!--[if lte IE 8]><script src="/r2d3.js"></script><![endif]-->
+<!--[if gte IE 9]><!-->
+<script src="/lib/d3/d3.js"></script>
+<!--<![endif]-->
+
+<script>
+
+var width = 960,
+    height = 500,
+    radius = Math.min(width, height) / 2;
+
+    var color = d3.scale.linear()
+        .domain([100, 70, 60, 40, 30, 0])
+        .range(["red", "orange", "yellow", "green", "blue", "purple"]);
+
+var arc = d3.svg.arc()
+    .outerRadius(radius - 10)
+    .innerRadius(0);
+
+var pie = d3.layout.pie()
+    .sort(null)
+    .value(function(d) { return d.population; });
+
+var svg = d3.select("#chart").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+
+
+function drawPie() { 
+  
+  var data = [
+    { age: 13, population: Math.random() * 100 }, 
+    { age: 17, population: Math.random() * 100 }, 
+    { age: 18, population: Math.random() * 100 }, 
+    { age: 44, population: Math.random() * 100 }, 
+    { age: 64, population: Math.random() * 100 }, 
+    { age: '65+', population: Math.random() * 100 }]
+
+
+
+  data.forEach(function(d) {
+    d.population = +d.population;
+  });
+  
+  data = pie(data);
+
+  var arcs = svg.selectAll('.arc').data(data);
+  arcs.enter().append('path').attr('class', 'arc')
+  arcs
+    .transition()
+    .duration(500)
+    .attr("d", function(d, i){ return arc.outerRadius(radius-d.data.population)(d, i); })
+    .attr('stroke', '#FFF')
+    .attr('stroke-width', 2)
+    .style("fill", function(d) { return color(d.data.population); });
+      
+
+}
+
+drawPie();
+setInterval(drawPie, 1500);
+
+
+
+</script>
