@@ -3,6 +3,7 @@
 
   * Add support ```selection.classed```.  [Bug 57](https://github.com/mhemesath/r2d3/issues/57)
   * Don't attempt to initialize raphael node when events are attached.
+  * Return empty string when converting null SVG transforms to Raphael transforms.
 
 0.1.1 / 2013-03-18
 ==================
