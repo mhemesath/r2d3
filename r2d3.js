@@ -10729,9 +10729,6 @@ d3 = function() {
     }
   };
   R2D3Element.prototype.addEventListener = function(type, listener) {
-    if (!this.raphaelNode) {
-      this._initialize();
-    }
     var self = this;
     if (!listener._callback) {
       listener._callback = function(e) {

@@ -303,13 +303,7 @@ R2D3Element.prototype.removeChild = function(node) {
 
 
 R2D3Element.prototype.addEventListener = function(type, listener) {
-  
-  // If the raphael node isn't constructed yet, force it to initialize
-  // so we can attach the event to it
-  if (!this.raphaelNode) {
-    this._initialize();
-  }
-  
+
   var self = this;
   if (!listener._callback) {
     listener._callback = function(e) {
