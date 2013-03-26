@@ -361,12 +361,33 @@ R2D3Element.prototype.setAttribute = function(name, value) {
 
 
 R2D3Element.prototype.insertBefore = function(node, before) {
-  // Before will be the R2D3Element, if it exists
-  this.domNode.insertBefore(node, before ? before.domNode : before);
+  
+  var r2D3Element,
+      domNode, 
+      beforeDomNode = before ? before.domNode : before;
+
+  // Node is a R2D3 Element
+  if (node.paper) {
+    domNode = node.domNode;
+    
+  // Node is a DOM node
+  } else {
+    domNode = node;
+  }
+    
+  // Put the DOM in the correct order
+  this.domNode.insertBefore(domNode, beforeDomNode);
+  
+  // Create R2D3 element if it doesn't exist after node appended to DOM
+  r2D3Element = domNode.r2d3 || new R2D3Element(this.paper, domNode)
   
   
-  var el = node.r2d3 ? node : new R2D3Element(this.paper, node);
-  return el;
+  // Put the raphael objects in the correct order
+  if (before) {
+    r2D3Element.raphaelNode.insertBefore(before.raphaelNode);
+  }
+  
+  return r2D3Element;
 };
 
 

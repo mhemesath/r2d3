@@ -10768,9 +10768,18 @@ d3 = function() {
     this.updateProperty(name);
   };
   R2D3Element.prototype.insertBefore = function(node, before) {
-    this.domNode.insertBefore(node, before ? before.domNode : before);
-    var el = node.r2d3 ? node : new R2D3Element(this.paper, node);
-    return el;
+    var r2D3Element, domNode, beforeDomNode = before ? before.domNode : before;
+    if (node.paper) {
+      domNode = node.domNode;
+    } else {
+      domNode = node;
+    }
+    this.domNode.insertBefore(domNode, beforeDomNode);
+    r2D3Element = domNode.r2d3 || new R2D3Element(this.paper, domNode);
+    if (before) {
+      r2D3Element.raphaelNode.insertBefore(before.raphaelNode);
+    }
+    return r2D3Element;
   };
   R2D3Element.prototype.setAttributeNS = function(namespace, name, value) {
     this.setAttribute(name, value);
