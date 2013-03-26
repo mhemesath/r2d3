@@ -10708,6 +10708,9 @@ d3 = function() {
   };
   var _raphael_transform_map = {};
   function _map_svg_transform_to_raphael(transform) {
+    if (transform === null || transform === undefined || transform === "") {
+      return "";
+    }
     if (_raphael_transform_map[transform] === undefined) {
       _raphael_transform_map[transform] = transform.replace(/translate\(/gi, "t").replace(/rotate\(/gi, "r").replace(/scale\(/gi, "s").replace(/[)]/g, "");
     }
@@ -10729,9 +10732,6 @@ d3 = function() {
     }
   };
   R2D3Element.prototype.addEventListener = function(type, listener) {
-    if (!this.raphaelNode) {
-      this._initialize();
-    }
     var self = this;
     if (!listener._callback) {
       listener._callback = function(e) {
