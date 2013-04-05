@@ -1,8 +1,9 @@
-0.1.2 / 2013-??-??
+0.1.2 / 2013-04-??
 ==================
 
   * Add support ```selection.classed```.  [Bug 57](https://github.com/mhemesath/r2d3/issues/57)
   * Handle R2D3Elements in insertBefore. [Bug 84](https://github.com/mhemesath/r2d3/issues/84)
+  * Remove raphael elements from children dom nodes when removing a dom node. [Bug 89](https://github.com/mhemesath/r2d3/issues/89)
   * Don't attempt to initialize raphael node when events are attached.
   * Return empty string when converting null SVG transforms to Raphael transforms.
 

@@ -14,7 +14,7 @@ var createElementFromCache = (function() {
     // Special case for title, IE doesn't like it to be cloned
     // in the body
     if (name === 'title') {
-      return document.createElementNS(ns, name);;
+      return document.createElement(name);;
     }
        
     if (fragmentDiv.parentNode !== document.body) {
@@ -22,7 +22,7 @@ var createElementFromCache = (function() {
     }
      
     if (cache[name] === undefined) {
-      cache[name] = document.createElementNS(ns, name);
+      cache[name] = document.createElement(name);
     }
     
     fragmentDiv.innerHTML =  cache[name].outerHTML;

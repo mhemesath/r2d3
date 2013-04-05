@@ -8421,13 +8421,13 @@ d3 = function() {
     fragmentDiv.style.display = "none";
     return function(ns, name) {
       if (name === "title") {
-        return document.createElementNS(ns, name);
+        return document.createElement(name);
       }
       if (fragmentDiv.parentNode !== document.body) {
         document.body.appendChild(fragmentDiv);
       }
       if (cache[name] === undefined) {
-        cache[name] = document.createElementNS(ns, name);
+        cache[name] = document.createElement(name);
       }
       fragmentDiv.innerHTML = cache[name].outerHTML;
       var clone = fragmentDiv.firstChild;
@@ -10579,7 +10579,9 @@ d3 = function() {
       if (this.isGroup) {
         var childNodes = node.childNodes, length = childNodes.length, i = 0;
         for (i; i < length; i++) {
-          childNodes[i].r2d3.updateProperty("transform");
+          if (childNodes[i].r2d3) {
+            childNodes[i].r2d3.updateProperty("transform");
+          }
         }
       } else if (this.raphaelNode) {
         transform = node.getAttribute("transform");
@@ -10706,6 +10708,21 @@ d3 = function() {
   R2D3Element.prototype.getCurrentStyle = function() {
     return this.domNode.currentStyle;
   };
+  R2D3Element.prototype.removeRaphaelNode = function(removeChildren) {
+    if (removeChildren === true) {
+      var children = this.domNode.children, length = children.length, i = 0;
+      for (i; i < length; i++) {
+        var node = children[i];
+        if (node.r2d3) {
+          node.r2d3.removeRaphaelNode(removeChildren);
+        }
+      }
+    }
+    this.domNode.r2d3 = null;
+    if (this.raphaelNode) {
+      this.raphaelNode.remove();
+    }
+  };
   var _raphael_transform_map = {};
   function _map_svg_transform_to_raphael(transform) {
     if (transform === null || transform === undefined || transform === "") {
@@ -10725,11 +10742,12 @@ d3 = function() {
     return new R2D3Element(this.paper, node);
   };
   R2D3Element.prototype.removeChild = function(node) {
-    node.domNode.r2d3 = null;
+    node.removeRaphaelNode(true);
     this.domNode.removeChild(node.domNode);
-    if (node.raphaelNode) {
-      node.raphaelNode.remove();
+    if (!this.domNode) {
+      alert("oh shit");
     }
+    return node;
   };
   R2D3Element.prototype.addEventListener = function(type, listener) {
     var self = this;
