@@ -25,6 +25,8 @@ function R2D3Element(paper, node) {
   this.parentNode = node.parentNode.r2d3;
     
   switch(node.tagName) {
+    case 'polyline':
+    case 'polygon':
     case 'path':
       this.raphaelNode = paper.path('Z');
       break;
@@ -141,6 +143,16 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       
     case 'href':
       this.raphaelNode.attr('src', this.domNode.getAttribute('href'));
+      break;
+    
+    // Polylines/Polygons map points to raphael path attribute, with a little help
+    case 'points':
+      // see http://stackoverflow.com/a/9709153/433558
+      var path = ['M', this.domNode.getAttribute('points')];
+      if (this.domNode.tagName === 'polygon') {
+        path.push('Z');
+      }
+      this.raphaelNode.attr('path', path.join(''));
       break;
     
     // Paths map d to raphael path attribute
