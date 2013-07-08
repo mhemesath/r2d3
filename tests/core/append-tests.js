@@ -29,6 +29,18 @@ test('path', function() {
    ok(el.node().domNode.tagName, 'path');
 });
 
+test('polygon', function() {
+  var svg = d3.select('#append').append('svg');
+   var el = svg.append('polygon');
+   ok(el.node().domNode.tagName, 'polygon');
+});
+
+test('polyline', function() {
+  var svg = d3.select('#append').append('svg');
+   var el = svg.append('polyline');
+   ok(el.node().domNode.tagName, 'polyline');
+});
+
 test('rect', function() {
   var svg = d3.select('#append').append('svg');
    var el = svg.append('rect');
