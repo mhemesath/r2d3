@@ -57,12 +57,6 @@ Use is not supported.
 ###````<text>````###
 * The ```dx``` and ```dy```  attributes of text are not yet supported. In the meantime, adjust the ```x``` and ```y``` attributes.
 
-###```<polyline>```###
-* Not yet supported
-
-###```<polygon>```###
-* Not yet supported
-
 ###```Transforms```###
 * Ensure translations declare both the X and Y coordinates. Example:
 

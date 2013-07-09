@@ -24,6 +24,40 @@ test( "path.class", function() {
   equal(el.attr('class'), 'foo')
 });
 
+test( "polygon.points", function() {
+  var svg = d3.select('#attr').append('svg'),
+      polygon = "0,0 0,10 10,10 10,0",
+      el = svg.append('polygon');
+      
+  el.attr('points', polygon);
+  equal(el.attr('points'), polygon)
+});
+
+test( "polygon.class", function() {
+  var svg = d3.select('#attr').append('svg'),
+      el = svg.append('polygon');
+      
+  el.attr('class', 'foo');
+  equal(el.attr('class'), 'foo')
+});
+
+test( "polyline.points", function() {
+  var svg = d3.select('#attr').append('svg'),
+      polyline = "0,0 0,10 10,10",
+      el = svg.append('polyline');
+      
+  el.attr('points', polyline);
+  equal(el.attr('points'), polyline)
+});
+
+test( "polyline.class", function() {
+  var svg = d3.select('#attr').append('svg'),
+      el = svg.append('polyline');
+      
+  el.attr('class', 'foo');
+  equal(el.attr('class'), 'foo')
+});
+
 test( "rect.fill", function() {
   var svg = d3.select('#attr').append('svg'),
       el = svg.append('rect');
