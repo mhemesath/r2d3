@@ -23,12 +23,12 @@ d3_selectionPrototype.style = function(name, value, priority) {
 
     // For style(string), return the computed style value for the first node.
     if (n < 2) {
-      if (this.node().paper) {
+      if (this.node() && this.node().paper) {
         return this.node().raphaelNode.attr(name);
       } else {
         return window.getComputedStyle(this.node(), null)
                      .getPropertyValue(name);
-      } 
+      }
     }
 
     // For style(string, string) or style(string, function), use the default
@@ -69,7 +69,7 @@ function d3_selection_style(name, value, priority) {
     var x = value.apply(this, arguments);
     if (x == null) {
       if (this.paper) {
-        this.removeStyleProperty(name); 
+        this.removeStyleProperty(name);
       } else {
         this.style.removeProperty(name);
       }

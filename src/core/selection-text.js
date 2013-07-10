@@ -1,7 +1,7 @@
 d3_selectionPrototype.text = function(value) {
 
   // For raphael elements get/set text through paper.
-  if (this.node().paper) {
+  if (this.node() && this.node().paper) {
     return arguments.length < 1
         ? this.node().getAttribute('text') : this.each(typeof value === "function"
         ? function() { var v = value.apply(this, arguments); this.setAttribute('text', v == null ? "" : v); } : value == null
