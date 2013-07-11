@@ -1,4 +1,4 @@
-0.1.2 / 2013-04-??
+0.2.0 / 2013-04-??
 ==================
 
   * Add support ```selection.classed```.  [Bug 57](https://github.com/mhemesath/r2d3/issues/57)
@@ -6,6 +6,8 @@
   * Remove raphael elements from children dom nodes when removing a dom node. [Bug 89](https://github.com/mhemesath/r2d3/issues/89)
   * Don't attempt to initialize raphael node when events are attached.
   * Return empty string when converting null SVG transforms to Raphael transforms.
+  * Redrawing text elements throws an exception in IE8. [Bug 109](https://github.com/mhemesath/r2d3/pull/110). Thanks @sbshetty01!
+  * Added support for polygon/polyline. [Bug 108](https://github.com/mhemesath/r2d3/pull/108). Thanks @tianon!
 
 0.1.1 / 2013-03-18
 ==================

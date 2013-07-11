@@ -8322,7 +8322,7 @@ d3 = function() {
         return this;
       }
       if (n < 2) {
-        if (this.node().paper) {
+        if (this.node() && this.node().paper) {
           return this.node().raphaelNode.attr(name);
         } else {
           return window.getComputedStyle(this.node(), null).getPropertyValue(name);
@@ -8387,7 +8387,7 @@ d3 = function() {
     return value == null ? propertyNull : typeof value === "function" ? propertyFunction : propertyConstant;
   }
   d3_selectionPrototype.text = function(value) {
-    if (this.node().paper) {
+    if (this.node() && this.node().paper) {
       return arguments.length < 1 ? this.node().getAttribute("text") : this.each(typeof value === "function" ? function() {
         var v = value.apply(this, arguments);
         this.setAttribute("text", v == null ? "" : v);
@@ -10527,6 +10527,8 @@ d3 = function() {
     this.raphaelNode = null;
     this.parentNode = node.parentNode.r2d3;
     switch (node.tagName) {
+     case "polyline":
+     case "polygon":
      case "path":
       this.raphaelNode = paper.path("Z");
       break;
@@ -10623,6 +10625,14 @@ d3 = function() {
 
      case "href":
       this.raphaelNode.attr("src", this.domNode.getAttribute("href"));
+      break;
+
+     case "points":
+      var path = [ "M", this.domNode.getAttribute("points") ];
+      if (this.domNode.tagName === "polygon") {
+        path.push("Z");
+      }
+      this.raphaelNode.attr("path", path.join(""));
       break;
 
      case "d":
