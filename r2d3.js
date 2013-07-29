@@ -10809,7 +10809,7 @@ d3 = function() {
     }
     this.domNode.insertBefore(domNode, beforeDomNode);
     r2D3Element = domNode.r2d3 || new R2D3Element(this.paper, domNode);
-    if (before && r2D3Element.tagName !== 'g') {
+    if (before && r2D3Element.domNode.tagName !== 'g') {
       r2D3Element.raphaelNode.insertBefore(before.raphaelNode);
     }
     return r2D3Element;
