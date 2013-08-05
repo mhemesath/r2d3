@@ -58,7 +58,11 @@ function d3_selection_style(name, value, priority) {
     if (this.paper) {
       this.setStyleProperty(name, value);
     } else {
-      this.style.setProperty(name, value, priority);
+      if (this.style.setProperty) {
+        this.style.setProperty(name, value, priority);
+      } else {
+        this.style[name] = value;
+      }
     }
   }
 
@@ -77,7 +81,11 @@ function d3_selection_style(name, value, priority) {
       if (this.paper) {
         this.setStyleProperty(name, x);
       } else {
-        this.style.setProperty(name, x, priority);
+        if (this.style.setProperty) {
+          this.style.setProperty(name, x, priority);
+        } else {
+          this.style[name] = x;
+        }
       }
     }
   }
