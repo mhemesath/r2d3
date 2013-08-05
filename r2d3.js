@@ -8344,7 +8344,11 @@ d3 = function() {
       if (this.paper) {
         this.setStyleProperty(name, value);
       } else {
-        this.style.setProperty(name, value, priority);
+        if (this.style.setProperty) {
+          this.style.setProperty(name, value, priority);
+        } else {
+          this.style[name] = value;
+        }
       }
     }
     function styleFunction() {
@@ -8359,7 +8363,11 @@ d3 = function() {
         if (this.paper) {
           this.setStyleProperty(name, x);
         } else {
-          this.style.setProperty(name, x, priority);
+          if (this.style.setProperty) {
+            this.style.setProperty(name, x, priority);
+          } else {
+            this.style[name] = x;
+          }
         }
       }
     }
@@ -10664,7 +10672,7 @@ d3 = function() {
   };
   R2D3Element.prototype.updateCurrentStyle = function(name) {
     function undash(name) {
-      return name.replace(/-w/, function(match) {
+      return name.replace(/-\w/, function(match) {
         return match.charAt(1).toUpperCase();
       });
     }
