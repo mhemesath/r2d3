@@ -191,11 +191,18 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
  * are used for each property.
  */
 R2D3Element.prototype.updateCurrentStyle = function(name) {
-  
+  // convert a name from "css-style" to "cssStyle"
+  function undash(name) {
+    return name.replace(/-w/, function (match) {
+      return match.charAt(1).toUpperCase();
+    });
+  }
+
   function getValue(el, name, currentStyle) {
     return el.style.getAttribute(name)
         || currentStyle.getAttribute(name)
-        || el.getAttribute(name);
+        || el.getAttribute(name)
+        || currentStyle.getAttribute(undash(name));
   }
   
   var currentStyle = this.domNode.currentStyle,

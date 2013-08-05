@@ -10663,8 +10663,13 @@ d3 = function() {
     }
   };
   R2D3Element.prototype.updateCurrentStyle = function(name) {
+    function undash(name) {
+      return name.replace(/-w/, function(match) {
+        return match.charAt(1).toUpperCase();
+      });
+    }
     function getValue(el, name, currentStyle) {
-      return el.style.getAttribute(name) || currentStyle.getAttribute(name) || el.getAttribute(name);
+      return el.style.getAttribute(name) || currentStyle.getAttribute(name) || el.getAttribute(name) || currentStyle.getAttribute(undash(name));
     }
     var currentStyle = this.domNode.currentStyle, el = this.domNode;
     if (this.isSVG) {
