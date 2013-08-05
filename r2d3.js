@@ -2428,7 +2428,7 @@
       if (n == !!n) {
         return n;
       }
-      return pow(2, -10 * n) * math.sin((n - .075) * 2 * PI / .3) + 1;
+      return pow(2, -10 * n) * math.sin((n - .075) * (2 * PI) / .3) + 1;
     },
     bounce: function(n) {
       var s = 7.5625, p = 2.75, l;
@@ -6379,7 +6379,7 @@ if (!Object.create) {
           }).toJSON = d;
           try {
             c = q.stringify(0) === "0" && q.stringify(new Number()) === "0" && q.stringify(new String()) == '""' && q.stringify(l) === e && q.stringify(e) === e && q.stringify() === e && q.stringify(d) === "1" && q.stringify([ d ]) == "[1]" && q.stringify([ e ]) == "[null]" && q.stringify(k) == "null" && q.stringify([ e, l, k ]) == "[null,null,null]" && q.stringify({
-              A: [ d, i, false, k, "\0\b\n\f\r	" ]
+              A: [ d, i, false, k, "\x00\b\n\f\r	" ]
             }) == '{"A":[1,true,false,null,"\\u0000\\b\\n\\f\\r\\t"]}' && q.stringify(k, d) === "1" && q.stringify([ 1, 2 ], k, 1) == "[\n 1,\n 2\n]" && q.stringify(new Date(-864e13)) == '"-271821-04-20T00:00:00.000Z"' && q.stringify(new Date(864e13)) == '"+275760-09-13T00:00:00.000Z"' && q.stringify(new Date(-621987552e5)) == '"-000001-01-01T00:00:00.000Z"' && q.stringify(new Date(-1)) == '"1969-12-31T23:59:59.999Z"';
           } catch (f) {
             c = false;
@@ -6796,7 +6796,7 @@ d3 = function() {
       }
     }
   });
-  var d3_map_prefix = "\0", d3_map_prefixCode = d3_map_prefix.charCodeAt(0);
+  var d3_map_prefix = "\x00", d3_map_prefixCode = d3_map_prefix.charCodeAt(0);
   function d3_identity(d) {
     return d;
   }
@@ -10571,7 +10571,6 @@ d3 = function() {
       break;
 
      case "svg":
-      this.raphaelNode = null;
       this.isSVG = true;
     }
     this.updateProperty("transform");
@@ -10580,6 +10579,28 @@ d3 = function() {
   R2D3Element.prototype._linePath = function() {
     var x1 = this.domNode.getAttribute("x1") || 0, x2 = this.domNode.getAttribute("x2") || 0, y1 = this.domNode.getAttribute("y1") || 0, y2 = this.domNode.getAttribute("y2") || 0;
     return [ "M", x1, " ", y1, "L", x2, " ", y2, "Z" ].join("");
+  };
+  R2D3Element.prototype._strokeDashArray = function(dashValue) {
+    var dasharray = {
+      "3 1": "-",
+      "1 1": ".",
+      "3 1 1 1": "-.",
+      "3 1 1 1 1 1": "-..",
+      "1 3": ". ",
+      "4 3": "- ",
+      "8 3": "--",
+      "4 3 1 3": "- .",
+      "8 3 1 3": "--.",
+      "8 3 1 3 1 3": "--.."
+    };
+    if (dashValue === undefined) {
+      dashValue = this.domNode.getAttribute("stroke-dasharray");
+    }
+    dashValue = dashValue ? dashValue.match(/\d+/g) : "";
+    if (dashValue.length) {
+      dashValue = dashValue.join(" ");
+    }
+    return dasharray[dashValue] || "";
   };
   R2D3Element.prototype.updateProperty = function(propertyName) {
     switch (propertyName) {
@@ -10663,6 +10684,10 @@ d3 = function() {
       this.raphaelNode.attr("path", this._linePath());
       break;
 
+     case "stroke-dasharray":
+      this.raphaelNode.attr("stroke-dasharray", this._strokeDashArray());
+      break;
+
      default:
       if (this.raphaelNode) {
         var value = this.domNode.style.getAttribute(propertyName) || this.domNode.currentStyle.getAttribute(propertyName) || this.domNode.getAttribute(propertyName);
@@ -10695,7 +10720,7 @@ d3 = function() {
       "fill-opacity": getValue(el, "fill-opacity", currentStyle) || 1,
       opacity: getValue(el, "opacity", currentStyle) || 1,
       stroke: getValue(el, "stroke", currentStyle) || "none",
-      "stroke-dasharray": getValue(el, "stroke-dasharray", currentStyle),
+      "stroke-dasharray": this._strokeDashArray(getValue(el, "stroke-dasharray", currentStyle)),
       "stroke-linecap": getValue(el, "stroke-linecap", currentStyle) || "butt",
       "stroke-linejoin": getValue(el, "stroke-linejoin", currentStyle) || "miter",
       "stroke-miterlimit": getValue(el, "stroke-miterlimit", currentStyle) || 4,

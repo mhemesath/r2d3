@@ -3,3 +3,4 @@
 *.swp
 //vim Session files
 Session.vim
+node_modules/
