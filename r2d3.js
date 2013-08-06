@@ -8344,7 +8344,11 @@ d3 = function() {
       if (this.paper) {
         this.setStyleProperty(name, value);
       } else {
-        this.style.setProperty(name, value, priority);
+        if (this.style.setProperty) {
+          this.style.setProperty(name, value, priority);
+        } else {
+          this.style[name] = value;
+        }
       }
     }
     function styleFunction() {
@@ -8359,7 +8363,11 @@ d3 = function() {
         if (this.paper) {
           this.setStyleProperty(name, x);
         } else {
-          this.style.setProperty(name, x, priority);
+          if (this.style.setProperty) {
+            this.style.setProperty(name, x, priority);
+          } else {
+            this.style[name] = x;
+          }
         }
       }
     }
@@ -10809,7 +10817,7 @@ d3 = function() {
     }
     this.domNode.insertBefore(domNode, beforeDomNode);
     r2D3Element = domNode.r2d3 || new R2D3Element(this.paper, domNode);
-    if (before) {
+    if (before && r2D3Element.domNode.tagName !== "g") {
       r2D3Element.raphaelNode.insertBefore(before.raphaelNode);
     }
     return r2D3Element;
