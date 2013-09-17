@@ -4390,7 +4390,7 @@ window.Raphael.vml && function(R) {
     l: "r",
     c: "v",
     z: "x"
-  }, bites = /([clmz]),?([^clmz]*)/gi, blurregexp = / progid:\S+Blur\([^\)]+\)/g, val = /-?[^,\s-]+/g, cssDot = "position:absolute;left:0;top:0;width:1px;height:1px", zoom = 21600, pathTypes = {
+  }, bites = /([clmz]),?([^clmz]*)/gi, blurregexp = / progid:\S+Blur\([^\)]+\)/g, val = /-?[^,\s]+/g, cssDot = "position:absolute;left:0;top:0;width:1px;height:1px", zoom = 21600, pathTypes = {
     path: 1,
     rect: 1,
     image: 1
