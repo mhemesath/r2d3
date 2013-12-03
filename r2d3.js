@@ -2428,7 +2428,7 @@
       if (n == !!n) {
         return n;
       }
-      return pow(2, -10 * n) * math.sin((n - .075) * 2 * PI / .3) + 1;
+      return pow(2, -10 * n) * math.sin((n - .075) * (2 * PI) / .3) + 1;
     },
     bounce: function(n) {
       var s = 7.5625, p = 2.75, l;
@@ -6379,7 +6379,7 @@ if (!Object.create) {
           }).toJSON = d;
           try {
             c = q.stringify(0) === "0" && q.stringify(new Number()) === "0" && q.stringify(new String()) == '""' && q.stringify(l) === e && q.stringify(e) === e && q.stringify() === e && q.stringify(d) === "1" && q.stringify([ d ]) == "[1]" && q.stringify([ e ]) == "[null]" && q.stringify(k) == "null" && q.stringify([ e, l, k ]) == "[null,null,null]" && q.stringify({
-              A: [ d, i, false, k, "\0\b\n\f\r	" ]
+              A: [ d, i, false, k, "\x00\b\n\f\r	" ]
             }) == '{"A":[1,true,false,null,"\\u0000\\b\\n\\f\\r\\t"]}' && q.stringify(k, d) === "1" && q.stringify([ 1, 2 ], k, 1) == "[\n 1,\n 2\n]" && q.stringify(new Date(-864e13)) == '"-271821-04-20T00:00:00.000Z"' && q.stringify(new Date(864e13)) == '"+275760-09-13T00:00:00.000Z"' && q.stringify(new Date(-621987552e5)) == '"-000001-01-01T00:00:00.000Z"' && q.stringify(new Date(-1)) == '"1969-12-31T23:59:59.999Z"';
           } catch (f) {
             c = false;
@@ -6796,7 +6796,7 @@ d3 = function() {
       }
     }
   });
-  var d3_map_prefix = "\0", d3_map_prefixCode = d3_map_prefix.charCodeAt(0);
+  var d3_map_prefix = "\x00", d3_map_prefixCode = d3_map_prefix.charCodeAt(0);
   function d3_identity(d) {
     return d;
   }
@@ -10571,7 +10571,6 @@ d3 = function() {
       break;
 
      case "svg":
-      this.raphaelNode = null;
       this.isSVG = true;
     }
     this.updateProperty("transform");
@@ -10661,6 +10660,23 @@ d3 = function() {
 
      case "y2":
       this.raphaelNode.attr("path", this._linePath());
+      break;
+
+     case "stroke-dasharray":
+      var dasharray = {
+        "3 1": "-",
+        "1 1": ".",
+        "3 1 1 1": "-.",
+        "3 1 1 1 1 1": "-..",
+        "1 3": ". ",
+        "4 3": "- ",
+        "8 3": "--",
+        "4 3 1 3": "- .",
+        "8 3 1 3": "--.",
+        "8 3 1 3 1 3": "--.."
+      }, dashValue = this.domNode.getAttribute("stroke-dasharray") || "";
+      dashValue = dasharray[dashValue.match(/(\d+)/g).join(" ")] || "";
+      this.raphaelNode.attr("stroke-dasharray", dashValue);
       break;
 
      default:

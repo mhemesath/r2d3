@@ -53,12 +53,11 @@ function R2D3Element(paper, node) {
       this.raphaelNode = paper.ellipse(0, 0, 0, 0);
       break;
     case 'svg':
-      this.raphaelNode = null;
       this.isSVG = true;
   }
 
   this.updateProperty('transform');
-  this.updateCurrentStyle()
+  this.updateCurrentStyle();
 }
 
 
@@ -172,6 +171,24 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       break;
     case 'y2':
       this.raphaelNode.attr('path', this._linePath());
+      break;
+    case 'stroke-dasharray':
+      var dasharray = {
+        '3 1': '-',
+        '1 1': '.',
+        '3 1 1 1': '-.',
+        '3 1 1 1 1 1': '-..',
+        '1 3': '. ',
+        '4 3': '- ',
+        '8 3': '--',
+        '4 3 1 3': '- .',
+        '8 3 1 3': '--.',
+        '8 3 1 3 1 3': '--..'
+      },
+      dashValue = this.domNode.getAttribute('stroke-dasharray') || '';
+      dashValue = dasharray[dashValue.match(/(\d+)/g).join(' ')] || '';
+
+      this.raphaelNode.attr('stroke-dasharray', dashValue);
       break;
 
     // Just apply the attribute
