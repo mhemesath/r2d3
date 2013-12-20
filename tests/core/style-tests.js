@@ -18,4 +18,5 @@ test("text styling", function () {
 
   // 400 == font-weight: normal
   equal(el.style('font-weight'), 400);
+  equal(el.style('font-size'), '12pt');
 });

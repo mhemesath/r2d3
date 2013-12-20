@@ -10672,7 +10672,7 @@ d3 = function() {
   };
   R2D3Element.prototype.updateCurrentStyle = function(name) {
     function undash(name) {
-      return name.replace(/-w/, function(match) {
+      return name.replace(/-\w/, function(match) {
         return match.charAt(1).toUpperCase();
       });
     }

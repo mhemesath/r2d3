@@ -193,7 +193,7 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
 R2D3Element.prototype.updateCurrentStyle = function(name) {
   // convert a name from "css-style" to "cssStyle"
   function undash(name) {
-    return name.replace(/-w/, function (match) {
+    return name.replace(/-\w/, function (match) {
       return match.charAt(1).toUpperCase();
     });
   }
