@@ -68,7 +68,38 @@ R2D3Element.prototype._linePath = function() {
       y2 = this.domNode.getAttribute('y2') || 0;
 
   return ['M', x1, ' ', y1, 'L', x2, ' ', y2, 'Z'].join('');
-}
+};
+
+
+R2D3Element.prototype._strokeDashArray = function(dashValue) {
+  // There values were derived from raphael's source
+  // https://github.com/DmitryBaranovskiy/raphael/blob/master/dev/raphael.svg.js#L282
+  var dasharray = {
+    '3 1': '-',
+    '1 1': '.',
+    '3 1 1 1': '-.',
+    '3 1 1 1 1 1': '-..',
+    '1 3': '. ',
+    '4 3': '- ',
+    '8 3': '--',
+    '4 3 1 3': '- .',
+    '8 3 1 3': '--.',
+    '8 3 1 3 1 3': '--..'
+  };
+
+  // Get dashValue from domNode if it was not passed in
+  if (dashValue === undefined) {
+    dashValue = this.domNode.getAttribute('stroke-dasharray');
+  }
+
+  dashValue = (dashValue) ? dashValue.match(/\d+/g) : '';
+
+  if (dashValue.length) {
+    dashValue = dashValue.join(' ');
+  }
+
+  return dasharray[dashValue] || '';
+};
 
 
 /**
@@ -99,19 +130,19 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       } else if (this.raphaelNode) {
         transform = node.getAttribute('transform');
         if (transform) {
-          transforms.push(_map_svg_transform_to_raphael(transform))
+          transforms.push(_map_svg_transform_to_raphael(transform));
         }
 
         while(node.parentNode && node.parentNode.r2d3) {
           node = node.parentNode;
           transform = node.getAttribute('transform');
           if (transform) {
-            transforms.push(_map_svg_transform_to_raphael(transform))
+            transforms.push(_map_svg_transform_to_raphael(transform));
           }
         }
-        this.raphaelNode.transform(transforms.reverse().join(''))
+        this.raphaelNode.transform(transforms.reverse().join(''));
       }
-      break
+      break;
 
     // Class change, update all the styles
     case 'class':
@@ -173,22 +204,7 @@ R2D3Element.prototype.updateProperty = function(propertyName) {
       this.raphaelNode.attr('path', this._linePath());
       break;
     case 'stroke-dasharray':
-      var dasharray = {
-        '3 1': '-',
-        '1 1': '.',
-        '3 1 1 1': '-.',
-        '3 1 1 1 1 1': '-..',
-        '1 3': '. ',
-        '4 3': '- ',
-        '8 3': '--',
-        '4 3 1 3': '- .',
-        '8 3 1 3': '--.',
-        '8 3 1 3 1 3': '--..'
-      },
-      dashValue = this.domNode.getAttribute('stroke-dasharray') || '';
-      dashValue = dasharray[dashValue.match(/(\d+)/g).join(' ')] || '';
-
-      this.raphaelNode.attr('stroke-dasharray', dashValue);
+      this.raphaelNode.attr('stroke-dasharray', this._strokeDashArray());
       break;
 
     // Just apply the attribute
@@ -248,7 +264,7 @@ R2D3Element.prototype.updateCurrentStyle = function(name) {
     'fill-opacity': getValue(el, 'fill-opacity', currentStyle) || 1,
     'opacity': getValue(el, 'opacity', currentStyle) || 1,
     'stroke': getValue(el, 'stroke', currentStyle) || 'none',
-    'stroke-dasharray': getValue(el, 'stroke-dasharray', currentStyle),
+    'stroke-dasharray': this._strokeDashArray(getValue(el, 'stroke-dasharray', currentStyle)),
     'stroke-linecap': getValue(el, 'stroke-linecap', currentStyle)|| 'butt',
     'stroke-linejoin': getValue(el, 'stroke-linejoin', currentStyle) || 'miter',
     'stroke-miterlimit': getValue(el, 'stroke-miterlimit', currentStyle) || 4,
@@ -288,11 +304,11 @@ R2D3Element.prototype.getStyleProperty = function(name) {
 R2D3Element.prototype.removeStyleProperty = function(name) {
   this.domNode.style.removeAttribute(name);
   this.updateProperty(name);
-}
+};
 
 R2D3Element.prototype.getCurrentStyle = function() {
   return this.domNode.currentStyle;
-}
+};
 
 R2D3Element.prototype.removeRaphaelNode = function(removeChildren) {
 
@@ -313,7 +329,7 @@ R2D3Element.prototype.removeRaphaelNode = function(removeChildren) {
   if (this.raphaelNode) {
     this.raphaelNode.remove();
   }
-}
+};
 
 
 var _raphael_transform_map = {};
@@ -348,7 +364,7 @@ R2D3Element.prototype.appendChild = function(node) {
   }
   this.domNode.appendChild(node);
   return new R2D3Element(this.paper, node);
-}
+};
 
 
 R2D3Element.prototype.removeChild = function(node) {
@@ -356,7 +372,7 @@ R2D3Element.prototype.removeChild = function(node) {
   this.domNode.removeChild(node.domNode);
   if (!this.domNode){ alert('oh shit'); }
   return node;
-}
+};
 
 
 R2D3Element.prototype.addEventListener = function(type, listener) {
@@ -367,7 +383,7 @@ R2D3Element.prototype.addEventListener = function(type, listener) {
       // Ensure the listener is invoked with 'this'
       // as the raphael node and not the window
       listener.apply(self, [e]);
-    }
+    };
   }
 
   // Groups don't exist, bind the events to the children directly
@@ -379,7 +395,7 @@ R2D3Element.prototype.addEventListener = function(type, listener) {
   // Bind directly to the raphael node
   } else {
     if (this.isSVG) {
-      this.domNode.parentNode.attachEvent("on" + type, listener._callback)
+      this.domNode.parentNode.attachEvent("on" + type, listener._callback);
     } else {
       this.raphaelNode.node.attachEvent("on" + type, listener._callback);
     }
@@ -397,7 +413,7 @@ R2D3Element.prototype.removeEventListener = function(type, listener) {
   // Bind directly to the raphael node
   } else {
     if (this.isSVG) {
-      this.domNode.parentNode.detachEvent("on" + type, listener._callback || listener)
+      this.domNode.parentNode.detachEvent("on" + type, listener._callback || listener);
     } else {
       this.raphaelNode.node.detachEvent("on" + type, listener._callback || listener);
     }
@@ -430,7 +446,7 @@ R2D3Element.prototype.insertBefore = function(node, before) {
   this.domNode.insertBefore(domNode, beforeDomNode);
 
   // Create R2D3 element if it doesn't exist after node appended to DOM
-  r2D3Element = domNode.r2d3 || new R2D3Element(this.paper, domNode)
+  r2D3Element = domNode.r2d3 || new R2D3Element(this.paper, domNode);
 
 
   // Put the raphael objects in the correct order
@@ -462,5 +478,5 @@ R2D3Element.prototype.getBBox = function() {
     return this.raphaelNode.getBBox();
   }
 
-  return { x: 0, y: 0, width: 0, height: 0 }
+  return { x: 0, y: 0, width: 0, height: 0 };
 };

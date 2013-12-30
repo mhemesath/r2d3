@@ -10580,6 +10580,28 @@ d3 = function() {
     var x1 = this.domNode.getAttribute("x1") || 0, x2 = this.domNode.getAttribute("x2") || 0, y1 = this.domNode.getAttribute("y1") || 0, y2 = this.domNode.getAttribute("y2") || 0;
     return [ "M", x1, " ", y1, "L", x2, " ", y2, "Z" ].join("");
   };
+  R2D3Element.prototype._strokeDashArray = function(dashValue) {
+    var dasharray = {
+      "3 1": "-",
+      "1 1": ".",
+      "3 1 1 1": "-.",
+      "3 1 1 1 1 1": "-..",
+      "1 3": ". ",
+      "4 3": "- ",
+      "8 3": "--",
+      "4 3 1 3": "- .",
+      "8 3 1 3": "--.",
+      "8 3 1 3 1 3": "--.."
+    };
+    if (dashValue === undefined) {
+      dashValue = this.domNode.getAttribute("stroke-dasharray");
+    }
+    dashValue = dashValue ? dashValue.match(/\d+/g) : "";
+    if (dashValue.length) {
+      dashValue = dashValue.join(" ");
+    }
+    return dasharray[dashValue] || "";
+  };
   R2D3Element.prototype.updateProperty = function(propertyName) {
     switch (propertyName) {
      case "transform":
@@ -10663,20 +10685,7 @@ d3 = function() {
       break;
 
      case "stroke-dasharray":
-      var dasharray = {
-        "3 1": "-",
-        "1 1": ".",
-        "3 1 1 1": "-.",
-        "3 1 1 1 1 1": "-..",
-        "1 3": ". ",
-        "4 3": "- ",
-        "8 3": "--",
-        "4 3 1 3": "- .",
-        "8 3 1 3": "--.",
-        "8 3 1 3 1 3": "--.."
-      }, dashValue = this.domNode.getAttribute("stroke-dasharray") || "";
-      dashValue = dasharray[dashValue.match(/(\d+)/g).join(" ")] || "";
-      this.raphaelNode.attr("stroke-dasharray", dashValue);
+      this.raphaelNode.attr("stroke-dasharray", this._strokeDashArray());
       break;
 
      default:
@@ -10711,7 +10720,7 @@ d3 = function() {
       "fill-opacity": getValue(el, "fill-opacity", currentStyle) || 1,
       opacity: getValue(el, "opacity", currentStyle) || 1,
       stroke: getValue(el, "stroke", currentStyle) || "none",
-      "stroke-dasharray": getValue(el, "stroke-dasharray", currentStyle),
+      "stroke-dasharray": this._strokeDashArray(getValue(el, "stroke-dasharray", currentStyle)),
       "stroke-linecap": getValue(el, "stroke-linecap", currentStyle) || "butt",
       "stroke-linejoin": getValue(el, "stroke-linejoin", currentStyle) || "miter",
       "stroke-miterlimit": getValue(el, "stroke-miterlimit", currentStyle) || 4,
