@@ -10557,7 +10557,8 @@ d3 = function() {
       this.raphaelNode = paper.path("Z");
       break;
 
-     case "IMG":
+     case "img":
+     case "image":
       this.raphaelNode = paper.image("#", 0, 0, 0, 0);
       break;
 
