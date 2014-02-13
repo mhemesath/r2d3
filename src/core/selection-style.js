@@ -26,8 +26,7 @@ d3_selectionPrototype.style = function(name, value, priority) {
       if (this.node() && this.node().paper) {
         return this.node().raphaelNode.attr(name);
       } else {
-        return window.getComputedStyle(this.node(), null)
-                     .getPropertyValue(name);
+        return window.getComputedStylePropertyValue(this.node(), name);
       }
     }
 
@@ -48,7 +47,11 @@ function d3_selection_style(name, value, priority) {
     if (this.paper) {
       this.removeStyleProperty(name);
     } else {
-      this.style.removeProperty(name);
+      if (this.style.removeProperty) {
+        this.style.removeProperty(name);
+      } else {
+        this.style.removeAttribute(name);
+      }
     }
   }
 
@@ -75,7 +78,11 @@ function d3_selection_style(name, value, priority) {
       if (this.paper) {
         this.removeStyleProperty(name);
       } else {
-        this.style.removeProperty(name);
+        if (this.style.removeProperty) {
+          this.style.removeProperty(name);
+        } else {
+          this.style.removeAttribute(name);
+        }
       }
     } else {
       if (this.paper) {

@@ -2428,7 +2428,7 @@
       if (n == !!n) {
         return n;
       }
-      return pow(2, -10 * n) * math.sin((n - .075) * (2 * PI) / .3) + 1;
+      return pow(2, -10 * n) * math.sin((n - .075) * 2 * PI / .3) + 1;
     },
     bounce: function(n) {
       var s = 7.5625, p = 2.75, l;
@@ -6379,7 +6379,7 @@ if (!Object.create) {
           }).toJSON = d;
           try {
             c = q.stringify(0) === "0" && q.stringify(new Number()) === "0" && q.stringify(new String()) == '""' && q.stringify(l) === e && q.stringify(e) === e && q.stringify() === e && q.stringify(d) === "1" && q.stringify([ d ]) == "[1]" && q.stringify([ e ]) == "[null]" && q.stringify(k) == "null" && q.stringify([ e, l, k ]) == "[null,null,null]" && q.stringify({
-              A: [ d, i, false, k, "\x00\b\n\f\r	" ]
+              A: [ d, i, false, k, "\0\b\n\f\r	" ]
             }) == '{"A":[1,true,false,null,"\\u0000\\b\\n\\f\\r\\t"]}' && q.stringify(k, d) === "1" && q.stringify([ 1, 2 ], k, 1) == "[\n 1,\n 2\n]" && q.stringify(new Date(-864e13)) == '"-271821-04-20T00:00:00.000Z"' && q.stringify(new Date(864e13)) == '"+275760-09-13T00:00:00.000Z"' && q.stringify(new Date(-621987552e5)) == '"-000001-01-01T00:00:00.000Z"' && q.stringify(new Date(-1)) == '"1969-12-31T23:59:59.999Z"';
           } catch (f) {
             c = false;
@@ -6796,7 +6796,7 @@ d3 = function() {
       }
     }
   });
-  var d3_map_prefix = "\x00", d3_map_prefixCode = d3_map_prefix.charCodeAt(0);
+  var d3_map_prefix = "\0", d3_map_prefixCode = d3_map_prefix.charCodeAt(0);
   function d3_identity(d) {
     return d;
   }
@@ -8325,7 +8325,7 @@ d3 = function() {
         if (this.node() && this.node().paper) {
           return this.node().raphaelNode.attr(name);
         } else {
-          return window.getComputedStyle(this.node(), null).getPropertyValue(name);
+          return window.getComputedStylePropertyValue(this.node(), name);
         }
       }
       priority = "";
@@ -8337,7 +8337,11 @@ d3 = function() {
       if (this.paper) {
         this.removeStyleProperty(name);
       } else {
-        this.style.removeProperty(name);
+        if (this.style.removeProperty) {
+          this.style.removeProperty(name);
+        } else {
+          this.style.removeAttribute(name);
+        }
       }
     }
     function styleConstant() {
@@ -8357,7 +8361,11 @@ d3 = function() {
         if (this.paper) {
           this.removeStyleProperty(name);
         } else {
-          this.style.removeProperty(name);
+          if (this.style.removeProperty) {
+            this.style.removeProperty(name);
+          } else {
+            this.style.removeAttribute(name);
+          }
         }
       } else {
         if (this.paper) {
@@ -8405,13 +8413,13 @@ d3 = function() {
         this.setAttribute("text", value);
       });
     }
-    return arguments.length < 1 ? this.node().textContent : this.each(typeof value === "function" ? function() {
+    return arguments.length < 1 ? this.node().innerText : this.each(typeof value === "function" ? function() {
       var v = value.apply(this, arguments);
-      this.textContent = v == null ? "" : v;
+      this.innerText = v == null ? "" : v;
     } : value == null ? function() {
-      this.textContent = "";
+      this.innerText = "";
     } : function() {
-      this.textContent = value;
+      this.innerText = value;
     });
   };
   d3_selectionPrototype.html = function(value) {
@@ -8904,7 +8912,11 @@ d3 = function() {
       if (this.raphaelNode) {
         this.removeStyleProperty(name);
       } else {
-        this.style.removeProperty(name);
+        if (this.style.removeProperty) {
+          this.style.removeProperty(name);
+        } else {
+          this.style.removeAttribute(name);
+        }
       }
     }
     return d3_transition_tween(this, "style." + name, value, function(b) {
@@ -8915,9 +8927,13 @@ d3 = function() {
             this.setStyleProperty(name, i(t), priority);
           });
         }
-        var a = d3_window.getComputedStyle(this, null).getPropertyValue(name), i;
+        var a = d3_window.getComputedStylePropertyValue(this, name), i;
         return a !== b && (i = interpolate(a, b), function(t) {
-          this.style.setProperty(name, i(t), priority);
+          if (this.style.setProperty) {
+            this.style.setProperty(name, i(t), priority);
+          } else {
+            this.style[name] = i(t);
+          }
         });
       }
       return b == null ? styleNull : (b += "", styleString);
@@ -8934,9 +8950,13 @@ d3 = function() {
       });
     }
     return this.tween("style." + name, function(d, i) {
-      var f = tween.call(this, d, i, d3_window.getComputedStyle(this, null).getPropertyValue(name));
+      var f = tween.call(this, d, i, d3_window.getComputedStylePropertyValue(this, name));
       return f && function(t) {
-        this.style.setProperty(name, f(t), priority);
+        if (this.style.setProperty) {
+          this.style.setProperty(name, f(t), priority);
+        } else {
+          this.style[name] = f(t);
+        }
       };
     });
   };
@@ -10878,7 +10898,7 @@ d3 = function() {
         } else {
           var camelCasedCssProperty = getCamelCasedCssProperty(cssProperty);
           if (el.currentStyle) {
-            return el.currentStyle(camelCasedCssProperty);
+            return el.currentStyle[camelCasedCssProperty];
           } else {
             return el.style[camelCasedCssProperty];
           }
@@ -10889,7 +10909,7 @@ d3 = function() {
     };
     function getCamelCasedCssProperty(cssProperty) {
       return cssProperty.replace(/-([a-z])/g, function(g) {
-        return g[1].toUpperCase();
+        return g.charAt(1).toUpperCase();
       });
     }
   })(this);

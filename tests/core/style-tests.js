@@ -20,3 +20,17 @@ test("text styling", function () {
   equal(el.style('font-weight'), 400);
   equal(el.style('font-size'), '12pt');
 });
+
+asyncTest("div style and transition", function() {
+  var div = d3.select('#style').append('div');
+
+  div.style('width', '100px');
+  equal(div.style('width'), '100px');
+
+  div.transition().style('width', '1000px');
+
+  setTimeout(function() {
+    start();
+    equal(div.style('width'), '1000px');
+  }, 500);
+});

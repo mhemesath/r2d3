@@ -26,7 +26,11 @@ d3_transitionPrototype.style = function(name, value, priority) {
     if (this.raphaelNode) {
       this.removeStyleProperty(name);
     } else {
-      this.style.removeProperty(name);
+      if (this.style.removeProperty) {
+        this.style.removeProperty(name);
+      } else {
+        this.style.removeAttribute(name);
+      }
     }
   }
 
@@ -36,15 +40,21 @@ d3_transitionPrototype.style = function(name, value, priority) {
     // For style(name, string) or style(name, string, priority), set the style
     // property with the specified name, using the specified priority.
     function styleString() {
-      
+
       // R2D3 OVERRIDE
       if (this.raphaelNode) {
         var a =  this.getCurrentStyle()[name], i;
         return a !== b && (i = interpolate(a, b), function(t) { this.setStyleProperty(name, i(t), priority); });
       }
-      
-      var a = d3_window.getComputedStyle(this, null).getPropertyValue(name), i;
-      return a !== b && (i = interpolate(a, b), function(t) { this.style.setProperty(name, i(t), priority); });
+
+      var a = d3_window.getComputedStylePropertyValue(this, name), i;
+      return a !== b && (i = interpolate(a, b), function(t) {
+        if (this.style.setProperty) {
+          this.style.setProperty(name, i(t), priority);
+        } else {
+          this.style[name] = i(t);
+        }
+      });
     }
 
     return b == null ? styleNull
@@ -54,7 +64,7 @@ d3_transitionPrototype.style = function(name, value, priority) {
 
 d3_transitionPrototype.styleTween = function(name, tween, priority) {
   if (arguments.length < 3) priority = "";
-  
+
   if (this.raphaelNode) {
     // R2D3 OVERRIDE
     return this.tween("style." + name, function(d, i) {
@@ -62,9 +72,15 @@ d3_transitionPrototype.styleTween = function(name, tween, priority) {
       return f && function(t) { this.setStyleProperty(name, f(t), priority); };
     });
   }
-  
+
   return this.tween("style." + name, function(d, i) {
-    var f = tween.call(this, d, i, d3_window.getComputedStyle(this, null).getPropertyValue(name));
-    return f && function(t) { this.style.setProperty(name, f(t), priority); };
+    var f = tween.call(this, d, i, d3_window.getComputedStylePropertyValue(this, name));
+    return f && function(t) {
+      if (this.style.setProperty) {
+        this.style.setProperty(name, f(t), priority);
+      } else {
+        this.style[name] = f(t);
+      }
+    };
   });
 };
