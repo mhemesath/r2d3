@@ -72,7 +72,7 @@ r2d3.core.js: \
 	lib/d3/src/core/xml.js \
 	lib/d3/src/core/ns.js \
 	lib/d3/src/core/dispatch.js \
-	lib/d3/src/core/format.js \
+	src/core/format.js \
 	lib/d3/src/core/formatPrefix.js \
 	lib/d3/src/core/ease.js \
 	lib/d3/src/core/event.js \
