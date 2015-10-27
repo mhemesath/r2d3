@@ -1,4 +1,19 @@
 r2d3
+==============
+This is a dead project.
+
+Getting Started
+Don't.
+
+Should I use R2D3?
+No.
+
+Developers
+Stop supporting IE < 9
+
+
+
+About r2d3
 ==========
 
 R2D3 is a customized build of D3 powered by [RaphaelJS](http://raphaeljs.com/).  The combination of D3 and Raphael enable developers to easily
