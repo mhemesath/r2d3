@@ -1,9 +1,6 @@
 r2d3
 ==============
 
-About r2d3
-==========
-
 This is a dead project.
 
 Getting Started
