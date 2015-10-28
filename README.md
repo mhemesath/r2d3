@@ -17,12 +17,6 @@ Should I use R2D3?
 No.
 
 
-Who is using R2D3?
-------------------
-
-People who shouldn't be ಠ_ಠ
-
-
 Developers
 ----------
 Stop supporting IE < 9
