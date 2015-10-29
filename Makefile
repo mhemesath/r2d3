@@ -3,7 +3,9 @@ LOCALE ?= en_US
 
 all: \
 	r2d3.js \
-	r2d3.min.js
+	r2d3.min.js \
+	r2d3.amd.js \
+	r2d3.amd.min.js
 
 # Modify this rule to build your own custom release.
 .INTERMEDIATE r2d3.js: \
@@ -23,6 +25,22 @@ all: \
 	r2d3.geom.js \
 	r2d3.time.js \
 	lib/d3/src/end.js
+
+# Modify this rule to build your own custom release.
+.INTERMEDIATE r2d3.amd.js: \
+	lib/compat/compat.js \
+	src/start.js \
+	r2d3.core.js \
+	r2d3.scale.js \
+	r2d3.svg.js \
+	r2d3.raphael.js \
+	r2d3.behavior.js \
+	r2d3.layout.js \
+	r2d3.dsv.js \
+	r2d3.geo.js \
+	r2d3.geom.js \
+	r2d3.time.js \
+	src/end.js
 
 r2d3.raphael.js: \
 	src/raphael/element.js \
@@ -252,6 +270,13 @@ r2d3.geom.js: \
 	@uglifyjs $< -c -m -o $@
 
 r2d3%js: Makefile
+	@rm -f $@
+	@cat $(filter %.js,$^) > $@.tmp
+	@uglifyjs $@.tmp -b indent-level=2 -o $@
+	@rm $@.tmp
+	@chmod a-w $@
+
+r2d3%amd%js: Makefile
 	@rm -f $@
 	@cat $(filter %.js,$^) > $@.tmp
 	@uglifyjs $@.tmp -b indent-level=2 -o $@
